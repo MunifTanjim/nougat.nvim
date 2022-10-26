@@ -7,7 +7,29 @@ Hyperextensible plugin for Neovim's `'statusline'`, `'tabline'` and `'winbar'`.
 
 ## Requirements
 
+- [`MunifTanjim/nui.nvim`](https://github.com/MunifTanjim/nui.nvim)
+
 ## Installation
+
+Install the plugins with your preferred plugin manager. For example:
+
+**With [`vim-plug`](https://github.com/junegunn/vim-plug)**
+
+```vim
+Plug 'MunifTanjim/nougat.nvim'
+Plug 'MunifTanjim/nui.nvim'
+```
+
+**With [`packer.nvim`](https://github.com/wbthomason/packer.nvim)**
+
+```lua
+use({
+  'MunifTanjim/nougat.nvim',
+  requires = {
+    "MunifTanjim/nui.nvim",
+  },
+})
+```
 
 ## Setup
 
