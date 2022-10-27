@@ -5,9 +5,10 @@ local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
 
----@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: table): integer|string|table)
 ---@alias nougat_item_content string|(fun(self: NougatItem, ctx: table):string)
---
+---@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: table): integer|string|table)
+---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: table):boolean)
+
 ---@class NougatItem
 ---@field id integer
 ---@field hl? nougat_item_hl
@@ -17,7 +18,7 @@ local Item = Object("NougatItem")
 
 --luacheck: push no max line length
 
----@alias nougat_item { id: integer, content: nougat_item_content, hl?: nougat_item_hl, sep_left?: nougat_separator, prefix?: string, suffix?: string, sep_right?: nougat_separator }
+---@alias nougat_item { id: integer, content: nougat_item_content, hl?: nougat_item_hl, sep_left?: nougat_separator, prefix?: string, suffix?: string, sep_right?: nougat_separator, hidden?: nougat_item_hidden }
 
 --luacheck: pop
 
@@ -43,7 +44,7 @@ function Item:init(config)
   self.suffix = config.suffix
   self.sep_right = separator.adjust_hl(1, config.sep_right)
 
-  self._condition = config.condition
+  self.hidden = config.hidden
 
   if config.type == "code" then
     self.content = core.code(config.content, {
@@ -117,7 +118,7 @@ end
 
 ---@return nil|nougat_item
 function Item:generate(ctx)
-  if self._condition and not self:_condition(ctx) then
+  if self.hidden and (self.hidden == true or self:hidden(ctx)) then
     return nil
   end
 
