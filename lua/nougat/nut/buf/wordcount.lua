@@ -14,10 +14,6 @@ local function get_wordcount(format)
   return format(count)
 end
 
-local function default_format(count)
-  return string.format("%d %s", count, count > 1 and " Words" or " Word")
-end
-
 local in_visual_mode = {
   ["v"] = true,
   ["vs"] = true,
@@ -58,7 +54,7 @@ function mod.create(opts)
   item.cache = cache_store
 
   item.config = vim.tbl_extend("force", {
-    format = default_format,
+    format = tostring,
   }, opts.config or {})
 
   item.content = get_content
