@@ -151,6 +151,7 @@ function mod.create(opts)
   opts = opts or {}
 
   local item = Item({
+    hidden = opts.hidden,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
     suffix = opts.suffix,
