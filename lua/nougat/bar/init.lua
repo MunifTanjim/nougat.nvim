@@ -1,4 +1,5 @@
 local Object = require("nui.object")
+local Item = require("nougat.item")
 local core = require("nui.bar.core")
 local u = require("nougat.util")
 
@@ -32,9 +33,17 @@ function Bar:init(type)
   self._hl_name = fallback_hl_name_by_type[self.type]
 end
 
----@param item NougatItem
+---@param item string|table|NougatItem
+---@return NougatItem
 function Bar:add_item(item)
-  self._items[#self._items + 1] = item
+  if type(item) == "string" then
+    self._items[#self._items + 1] = Item({ content = item })
+  elseif not item.id then
+    self._items[#self._items + 1] = Item(item)
+  else
+    self._items[#self._items + 1] = item
+  end
+  return self._items[#self._items]
 end
 
 -- re-used table
