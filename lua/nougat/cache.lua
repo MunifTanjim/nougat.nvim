@@ -2,18 +2,27 @@ local mod = {}
 
 local registry = { buf = {}, win = {} }
 
----@param type 'buf'|'win'
+---@param cache_type 'buf'|'win'
 ---@param name string
----@param default_value? any
-function mod.create_store(type, name, default_value)
+---@param default_value? table
+function mod.create_store(cache_type, name, default_value)
   local storage = setmetatable({}, {
     __index = function(storage, id)
-      rawset(storage, id, default_value == nil and {} or vim.deepcopy(default_value))
-      return storage[id]
+      return rawset(
+        storage,
+        id,
+        setmetatable(vim.deepcopy(default_value or {}), {
+          __index = function(cache, breakpoint)
+            if type(breakpoint) == "number" then
+              return rawset(cache, breakpoint, {})[breakpoint]
+            end
+          end,
+        })
+      )[id]
     end,
   })
 
-  registry[type][name] = storage
+  registry[cache_type][name] = storage
 
   return storage
 end

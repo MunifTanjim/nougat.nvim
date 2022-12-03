@@ -7,6 +7,8 @@ local config = {
 local statusline = config.statusline
 
 local statusline_generator = core.generator(function(ctx)
+  ctx.width = vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(ctx.winid)
+
   local select = statusline.select
 
   return vim.api.nvim_win_call(ctx.winid, function()
@@ -19,6 +21,8 @@ end, {
 })
 
 local statusline_by_filetype_generator = core.generator(function(ctx)
+  ctx.width = vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(ctx.winid)
+
   local select = statusline.by_filetype[vim.bo[ctx.bufnr].filetype]
 
   return vim.api.nvim_win_call(ctx.winid, function()

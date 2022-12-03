@@ -17,7 +17,8 @@ local cache_store = create_cache_store("buf", "nut_buf_diagnostic_count", {
 })
 
 local function get_count_content(item, ctx)
-  local count = item.cache[ctx.bufnr][item.config.severity]
+  local config = item:config(ctx)
+  local count = item.cache[ctx.bufnr][config.severity]
   return count > 0 and tostring(count) or ""
 end
 
@@ -28,7 +29,7 @@ local function get_combined_content(item, ctx)
     return cache.cc
   end
 
-  local config = item.config
+  local config = item:config(ctx)
 
   cache.cc = ""
 
@@ -143,21 +144,11 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 local mod = {}
 
 function mod.create(opts)
-  local item = Item({
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-  })
-
-  item.cache = cache_store
-
+  local config
   if opts.config and opts.config.severity then
-    item.config = { severity = opts.config.severity }
+    config = { severity = opts.config.severity }
   else
-    item.config = vim.tbl_deep_extend("force", {
+    config = vim.tbl_deep_extend("force", {
       error = { prefix = "E:", suffix = "", fg = "red" },
       warn = { prefix = "W:", suffix = "", fg = "yellow" },
       info = { prefix = "I:", suffix = "", fg = "lightblue" },
@@ -166,12 +157,24 @@ function mod.create(opts)
       severity = severity.COMBINED,
     }, opts.config or {})
 
-    if item.config.sep and #item.config.sep == 0 then
-      item.config.sep = nil
+    if config.sep and #config.sep == 0 then
+      config.sep = nil
     end
   end
 
-  item.content = item.config.severity == severity.COMBINED and get_combined_content or get_count_content
+  local item = Item({
+    hidden = opts.hidden,
+    hl = opts.hl,
+    sep_left = opts.sep_left,
+    prefix = opts.prefix,
+    suffix = opts.suffix,
+    sep_right = opts.sep_right,
+    config = config,
+  })
+
+  item.cache = cache_store
+
+  item.content = config.severity == severity.COMBINED and get_combined_content or get_count_content
 
   return item
 end

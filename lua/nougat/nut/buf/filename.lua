@@ -13,10 +13,13 @@ vim.api.nvim_create_autocmd("BufFilePost", {
 })
 
 local function get_content(item, ctx)
-  local cache = item.cache[ctx.bufnr]
+  local cache = item.cache[ctx.bufnr][ctx.ctx.breakpoint]
+
   if not cache.v then
-    cache.v = vim.fn.expand("%" .. item.config.modifier)
+    local config = item:config(ctx)
+    cache.v = vim.fn.expand("%" .. config.modifier)
   end
+
   return cache.v
 end
 
@@ -30,13 +33,12 @@ function mod.create(opts)
     prefix = opts.prefix,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
+    config = vim.tbl_extend("force", {
+      modifier = ":.",
+    }, opts.config or {}),
   })
 
   item.cache = cache_store
-
-  item.config = vim.tbl_extend("force", {
-    modifier = ":.",
-  }, opts.config or {})
 
   item.content = get_content
 

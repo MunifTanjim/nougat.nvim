@@ -20,30 +20,107 @@ local fallback_hl_name_by_type = {
   },
 }
 
+---@type table<'statusline'|'tabline'|'winbar', fun(winid: integer): integer>
+local get_width = {
+  statusline = function(winid)
+    return vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(winid)
+  end,
+  tabline = function()
+    return vim.go.columns
+  end,
+  winbar = function(winid)
+    return vim.api.nvim_win_get_width(winid)
+  end,
+}
+
+---@type table<'min'|'max', fun(width: integer, breakpoints: integer[]): integer>
+local get_breakpoint_index = {
+  min = function(width, breakpoints)
+    for idx = #breakpoints, 1, -1 do
+      if width >= breakpoints[idx] then
+        return idx
+      end
+    end
+    return 0
+  end,
+  max = function(width, breakpoints)
+    for idx = #breakpoints, 1, -1 do
+      if width <= breakpoints[idx] then
+        return idx
+      end
+    end
+    return 0
+  end,
+}
+
+---@param breakpoints integer[]
+---@returns 'min'|'max'
+local function get_breakpoint_type(breakpoints)
+  if breakpoints[1] ~= 0 and breakpoints[1] ~= math.huge then
+    error("breakpoints[1] must be 0 or math.huge")
+  end
+
+  if #breakpoints == 1 then
+    return breakpoints[1] == 0 and "min" or "max"
+  end
+
+  return breakpoints[1] < breakpoints[2] and "min" or "max"
+end
+
+local function normalize_item(item, breakpoints)
+  for i = 1, #breakpoints do
+    local base_config = item._config[i - 1] or item._config
+    item._config[i] = vim.tbl_deep_extend("keep", item._config[i] or {}, base_config)
+  end
+
+  for _, key in ipairs({ "sep_left", "prefix", "suffix", "sep_right" }) do
+    local val = item[key]
+
+    if val then
+      for i = 1, #breakpoints do
+        if not val[i] then
+          val[i] = val[i - 1]
+        end
+      end
+    end
+  end
+
+  return item
+end
+
 ---@class NougatBar
 local Bar = Object("NougatBar")
 
 ---@param type 'statusline'|'tabline'|'winbar'
-function Bar:init(type)
+---@param opts? { breakpoints?: integer[] }
+function Bar:init(type, opts)
   self.id = next_id()
   self.type = type
 
   ---@type NougatItem[]
   self._items = {}
   self._hl_name = fallback_hl_name_by_type[self.type]
+
+  self._breakpoints = opts and opts.breakpoints or { 0 }
+  self._get_breakpoint_index = get_breakpoint_index[get_breakpoint_type(self._breakpoints)]
+
+  self._get_width = get_width[type]
 end
 
 ---@param item string|table|NougatItem
 ---@return NougatItem
 function Bar:add_item(item)
+  local idx = #self._items + 1
+
   if type(item) == "string" then
-    self._items[#self._items + 1] = Item({ content = item })
+    self._items[idx] = Item({ content = item })
   elseif not item.id then
-    self._items[#self._items + 1] = Item(item)
+    self._items[idx] = Item(item)
   else
-    self._items[#self._items + 1] = item
+    self._items[idx] = item
   end
-  return self._items[#self._items]
+
+  return normalize_item(self._items[idx], self._breakpoints)
 end
 
 -- re-used table
@@ -70,6 +147,11 @@ end
 
 ---@param ctx nui_bar_core_expression_context
 function Bar:generate(ctx)
+  ctx.width = self._get_width(ctx.winid)
+
+  local breakpoint = self._get_breakpoint_index(ctx.width, self._breakpoints)
+  ctx.ctx.breakpoint = breakpoint
+
   local bar_hl = u.get_hl(self._hl_name[ctx.is_focused])
   ctx.ctx.bar_hl = bar_hl
 
@@ -92,9 +174,11 @@ function Bar:generate(ctx)
       local item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
 
       if item.sep_left then
-        if item.sep_left.hl then
+        local sep = item.sep_left[breakpoint]
+
+        if sep.hl then
           part_idx = part_idx + 1
-          item_hl.sl = item.sep_left.hl
+          item_hl.sl = sep.hl
           item_hl.sl_idx = part_idx
         elseif item.hl then
           part_idx = part_idx + 1
@@ -102,7 +186,7 @@ function Bar:generate(ctx)
         end
 
         part_idx = part_idx + 1
-        parts[part_idx] = item.sep_left.content
+        parts[part_idx] = sep.content
       end
 
       if item.hl then
@@ -135,26 +219,28 @@ function Bar:generate(ctx)
         if #content > 0 then
           if item.prefix then
             part_idx = part_idx + 1
-            parts[part_idx] = item.prefix
+            parts[part_idx] = item.prefix[breakpoint]
           end
           part_idx = part_idx + 1
           parts[part_idx] = content
           if item.suffix then
             part_idx = part_idx + 1
-            parts[part_idx] = item.suffix
+            parts[part_idx] = item.suffix[breakpoint]
           end
         end
       end
 
       if item.sep_right then
-        if item.sep_right.hl then
+        local sep = item.sep_right[breakpoint]
+
+        if sep.hl then
           part_idx = part_idx + 1
-          item_hl.sr = item.sep_right.hl
+          item_hl.sr = sep.hl
           item_hl.sr_idx = part_idx
         end
 
         part_idx = part_idx + 1
-        parts[part_idx] = item.sep_right.content
+        parts[part_idx] = sep.content
       end
 
       if item_hl.c or item_hl.sl or item_hl.sr then
@@ -187,8 +273,12 @@ function Bar:generate(ctx)
   return table.concat(parts)
 end
 
----@alias NougatBar.constructor fun(type: 'statusline'|'tabline'|'winbar'): NougatBar
+--luacheck: push no max line length
+
+---@alias NougatBar.constructor fun(type: 'statusline'|'tabline'|'winbar', opts?: { breakpoints?: integer[] }): NougatBar
 ---@type NougatBar|NougatBar.constructor
 local NougatBar = Bar
+
+--luacheck: pop
 
 return NougatBar

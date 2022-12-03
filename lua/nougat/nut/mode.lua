@@ -133,16 +133,16 @@ local function refresh(item, ctx)
   local cache = item.cache[ctx.winid]
   if cache.mode ~= mode then
     cache.mode, cache.group = mode, mode_group[mode]
-    vim.w[ctx.winid].nougat_nut_mode_text = item.config.text[mode] or mode
   end
 end
 
 local function get_content(item, ctx)
-  return item.config.text[item.cache[ctx.winid].mode]
+  local mode = item.cache[ctx.winid].mode
+  return item:config(ctx).text[mode] or mode
 end
 
 local function get_hl(item, ctx)
-  return item.config.highlight[item.cache[ctx.winid].group]
+  return item:config(ctx).highlight[item.cache[ctx.winid].group]
 end
 
 local mod = {}
@@ -156,14 +156,13 @@ function mod.create(opts)
     prefix = opts.prefix,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
+    config = vim.tbl_deep_extend("keep", opts.config or {}, {
+      text = default_text,
+      highlight = default_highlight,
+    }),
   })
 
   item.cache = cache_store
-
-  item.config = vim.tbl_deep_extend("keep", opts.config or {}, {
-    text = default_text,
-    highlight = default_highlight,
-  })
 
   item.content = get_content
 

@@ -1,7 +1,7 @@
 local Item = require("nougat.item")
 
 local function get_content(item, ctx)
-  local text = item.config.text
+  local text = item:config(ctx).text
   return table.concat({
     vim.bo[ctx.bufnr].fileencoding,
     vim.bo[ctx.bufnr].bomb and text.bomb or "",
@@ -19,14 +19,13 @@ function mod.create(opts)
     prefix = opts.prefix,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
+    config = vim.tbl_extend("force", {
+      text = {
+        bomb = "[BOM]",
+        noendofline = "[!EOL]",
+      },
+    }, opts.config or {}),
   })
-
-  item.config = vim.tbl_extend("force", {
-    text = {
-      bomb = "[BOM]",
-      noendofline = "[!EOL]",
-    },
-  }, opts.config or {})
 
   item.content = get_content
 
