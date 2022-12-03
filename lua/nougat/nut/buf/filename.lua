@@ -18,6 +18,9 @@ local function get_content(item, ctx)
   if not cache.v then
     local config = item:config(ctx)
     cache.v = vim.fn.expand("%" .. config.modifier)
+    if config.format then
+      cache.v = config.format(cache.v, ctx)
+    end
   end
 
   return cache.v
@@ -35,6 +38,7 @@ function mod.create(opts)
     sep_right = opts.sep_right,
     config = vim.tbl_extend("force", {
       modifier = ":.",
+      format = nil,
     }, opts.config or {}),
   })
 
