@@ -24,8 +24,10 @@ local in_visual_mode = {
 }
 
 local function get_content(item, ctx)
+  local config = item:config(ctx)
+
   if in_visual_mode[vim.fn.mode()] then
-    return get_wordcount(item.config.format)
+    return get_wordcount(config.format)
   end
 
   local cache = item.cache[ctx.bufnr]
@@ -33,7 +35,7 @@ local function get_content(item, ctx)
   local changedtick = vim.b[ctx.bufnr].changedtick
   if cache.ct ~= changedtick then
     cache.ct = changedtick
-    cache.v = get_wordcount(item.config.format)
+    cache.v = get_wordcount(config.format)
   end
 
   return cache.v
@@ -49,13 +51,12 @@ function mod.create(opts)
     prefix = opts.prefix,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
+    config = vim.tbl_extend("force", {
+      format = tostring,
+    }, opts.config or {}),
   })
 
   item.cache = cache_store
-
-  item.config = vim.tbl_extend("force", {
-    format = tostring,
-  }, opts.config or {})
 
   item.content = get_content
 

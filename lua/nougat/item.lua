@@ -34,15 +34,34 @@ local function hl_item_processor(item, ctx)
   return type(item._hl_item.hl) == "function" and item._hl_item:hl(ctx) or item._hl_item.hl
 end
 
+---@param side -1|1
+---@param sep nougat_separator|nil
+---@returns nougat_separator[]|nil
+local function normalize_sep(side, sep)
+  if not sep then
+    return sep
+  end
+
+  if sep.content then
+    sep = { sep }
+  end
+
+  for i = 1, #sep do
+    sep[i] = separator.adjust_hl(side, sep[i])
+  end
+
+  return sep
+end
+
 function Item:init(config)
   self.id = next_id()
 
   self.hl = config.hl
 
-  self.sep_left = separator.adjust_hl(-1, config.sep_left)
-  self.prefix = config.prefix
-  self.suffix = config.suffix
-  self.sep_right = separator.adjust_hl(1, config.sep_right)
+  self.sep_left = normalize_sep(-1, config.sep_left)
+  self.prefix = type(config.prefix) == "string" and { config.prefix } or config.prefix
+  self.suffix = type(config.suffix) == "string" and { config.suffix } or config.suffix
+  self.sep_right = normalize_sep(1, config.sep_right)
 
   self.hidden = config.hidden
 
@@ -114,6 +133,12 @@ function Item:init(config)
     self._hl_item = self.hl
     self.hl = hl_item_processor
   end
+
+  self._config = config.config or {}
+end
+
+function Item:config(ctx)
+  return self._config[ctx.ctx.breakpoint] or self._config
 end
 
 ---@return nil|nougat_item

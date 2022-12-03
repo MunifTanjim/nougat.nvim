@@ -13,6 +13,10 @@ local get_content = {
 local mod = {}
 
 function mod.create(opts)
+  local config = vim.tbl_deep_extend("force", {
+    provider = "auto",
+  }, opts.config or {})
+
   local item = Item({
     hidden = opts.hidden,
     hl = opts.hl,
@@ -22,21 +26,17 @@ function mod.create(opts)
     sep_right = opts.sep_right,
   })
 
-  item.config = vim.tbl_deep_extend("force", {
-    provider = "auto",
-  }, opts.config or {})
-
-  if item.config.provider == "auto" then
+  if config.provider == "auto" then
     if pcall(require, "gitsigns") then
-      item.config.provider = "gitsigns"
+      config.provider = "gitsigns"
     elseif vim.api.nvim_get_runtime_file("plugin/fugitive.vim", false)[1] then
-      item.config.provider = "fugitive"
+      config.provider = "fugitive"
     else
-      item.config.provider = ""
+      config.provider = ""
     end
   end
 
-  item.content = get_content[item.config.provider]
+  item.content = get_content[config.provider]
 
   return item
 end
