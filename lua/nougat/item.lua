@@ -141,15 +141,6 @@ function Item:config(ctx)
   return self._config[ctx.ctx.breakpoint] or self._config
 end
 
----@return nil|nougat_item
-function Item:generate(ctx)
-  if self.hidden and (self.hidden == true or self:hidden(ctx)) then
-    return nil
-  end
-
-  return self
-end
-
 ---@alias NougatItem.constructor fun(config: table): NougatItem
 ---@type NougatItem|NougatItem.constructor
 local NougatItem = Item

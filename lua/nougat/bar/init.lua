@@ -162,15 +162,15 @@ function Bar:generate(ctx)
   local item_hls = {}
 
   for item_idx = 1, #self._items do
-    local _item = self._items[item_idx]
+    local item = self._items[item_idx]
 
-    if _item.refresh then
-      _item:refresh(ctx)
+    if item.refresh then
+      item:refresh(ctx)
     end
 
-    local item = _item:generate(ctx)
+    local hidden = item.hidden and (item.hidden == true or item:hidden(ctx))
 
-    if item then
+    if not hidden then
       local item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
 
       if item.sep_left then
