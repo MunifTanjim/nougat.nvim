@@ -101,8 +101,6 @@ function Item:init(config)
     } or nil)
   elseif config.type == "spacer" then
     self.content = core.spacer()
-  elseif config.type == "ruler" then
-    self.content = core.ruler()
   elseif config.type == "tab_label" then
     self.content = core.label(config.content, {
       close = config.close,

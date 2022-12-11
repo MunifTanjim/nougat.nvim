@@ -1,10 +1,11 @@
+local core = require("nui.bar.core")
 local Item = require("nougat.item")
 
 local mod = {}
 
 function mod.create(opts)
   return Item({
-    type = "ruler",
+    content = core.ruler(),
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
