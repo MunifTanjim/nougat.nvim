@@ -99,8 +99,6 @@ function Item:init(config)
       min_width = config.min_width,
       max_width = config.max_width,
     } or nil)
-  elseif config.type == "spacer" then
-    self.content = core.spacer()
   elseif config.type == "tab_label" then
     self.content = core.label(config.content, {
       close = config.close,
