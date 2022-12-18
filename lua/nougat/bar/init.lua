@@ -123,28 +123,6 @@ function Bar:add_item(item)
   return normalize_item(self._items[idx], self._breakpoints)
 end
 
--- re-used table
----@type { bg?: string, fg?: string }
-local o_sep_hl_def = {}
-
-local function prepare_o_sep_hl_def(hl_s, prev_hl_c, hl_c, next_hl_c)
-  o_sep_hl_def.bg, o_sep_hl_def.fg = hl_s.bg, hl_s.fg or hl_c and hl_c.bg or "bg"
-
-  if o_sep_hl_def.bg == -1 then
-    o_sep_hl_def.bg = prev_hl_c and prev_hl_c.bg or nil
-  elseif o_sep_hl_def.bg == 1 then
-    o_sep_hl_def.bg = next_hl_c and next_hl_c.bg or nil
-  end
-
-  if o_sep_hl_def.fg == -1 then
-    o_sep_hl_def.fg = prev_hl_c and prev_hl_c.fg or nil
-  elseif o_sep_hl_def.fg == 1 then
-    o_sep_hl_def.fg = next_hl_c and next_hl_c.fg or nil
-  end
-
-  return o_sep_hl_def
-end
-
 ---@param ctx nui_bar_core_expression_context
 function Bar:generate(ctx)
   ctx.width = self._get_width(ctx.winid)
@@ -258,7 +236,7 @@ function Bar:generate(ctx)
       idx > 1 and item_hls[idx - 1].c, item_hls[idx], idx < item_hl_idx and item_hls[idx + 1].c
 
     if hl.sl then
-      parts[hl.sl_idx] = core.highlight(u.set_hl(prepare_o_sep_hl_def(hl.sl, prev_hl_c, hl.c, next_hl_c), bar_hl))
+      parts[hl.sl_idx] = core.highlight(u.set_hl(u.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), bar_hl))
     end
 
     if hl.c then
@@ -266,7 +244,7 @@ function Bar:generate(ctx)
     end
 
     if hl.sr then
-      parts[hl.sr_idx] = core.highlight(u.set_hl(prepare_o_sep_hl_def(hl.sr, prev_hl_c, hl.c, next_hl_c), bar_hl))
+      parts[hl.sr_idx] = core.highlight(u.set_hl(u.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), bar_hl))
     end
   end
 

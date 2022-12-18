@@ -135,4 +135,31 @@ function mod.set_hl(hl, fallback_hl)
   return hl_name
 end
 
+-- re-used table
+---@type nougat_hl_def
+local o_transitional_hl = {}
+
+---@param hl nougat_hl_def
+---@param prev_hl nougat_hl_def
+---@param curr_hl nougat_hl_def
+---@param next_hl nougat_hl_def
+---@return nougat_hl_def transitional_hl
+function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
+  o_transitional_hl.bg, o_transitional_hl.fg = hl.bg, hl.fg or curr_hl and curr_hl.bg or "bg"
+
+  if o_transitional_hl.bg == -1 then
+    o_transitional_hl.bg = prev_hl and prev_hl.bg or nil
+  elseif o_transitional_hl.bg == 1 then
+    o_transitional_hl.bg = next_hl and next_hl.bg or nil
+  end
+
+  if o_transitional_hl.fg == -1 then
+    o_transitional_hl.fg = prev_hl and prev_hl.fg or nil
+  elseif o_transitional_hl.fg == 1 then
+    o_transitional_hl.fg = next_hl and next_hl.fg or nil
+  end
+
+  return o_transitional_hl
+end
+
 return mod
