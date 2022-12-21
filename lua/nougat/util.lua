@@ -1,3 +1,5 @@
+local separator = require("nougat.separator")
+
 local mod = {}
 
 mod.code = {
@@ -160,6 +162,25 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
   end
 
   return o_transitional_hl
+end
+
+---@param side -1|1
+---@param sep nougat_separator|nil
+---@return nougat_separator[]|nil
+function mod.normalize_sep(side, sep)
+  if not sep then
+    return sep
+  end
+
+  if sep.content then
+    sep = { sep }
+  end
+
+  for i = 1, #sep do
+    sep[i] = separator.adjust_hl(side, sep[i])
+  end
+
+  return sep
 end
 
 return mod
