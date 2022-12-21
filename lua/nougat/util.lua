@@ -1,3 +1,4 @@
+local core = require("nui.bar.core")
 local separator = require("nougat.separator")
 
 local mod = {}
@@ -181,6 +182,136 @@ function mod.normalize_sep(side, sep)
   end
 
   return sep
+end
+
+---@param items NougatItem[]|{ len?: integer }
+---@param ctx nui_bar_core_expression_context
+---@param fallback_hl nougat_hl_def
+---@return string[]
+function mod.prepare_parts(items, ctx, fallback_hl)
+  local breakpoint = ctx.ctx.breakpoint
+
+  local part_idx = 0
+  ---@type string[]
+  local parts = {}
+
+  local item_hl_idx = 0
+  local item_hls = {}
+
+  for item_idx = 1, (items.len or #items) do
+    local item = items[item_idx]
+
+    if item.refresh then
+      item:refresh(ctx)
+    end
+
+    local hidden = item.hidden and (item.hidden == true or item:hidden(ctx))
+
+    if not hidden then
+      local item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
+
+      if item.sep_left then
+        local sep = item.sep_left[breakpoint]
+
+        if sep.hl then
+          part_idx = part_idx + 1
+          item_hl.sl = sep.hl
+          item_hl.sl_idx = part_idx
+        elseif item.hl then
+          part_idx = part_idx + 1
+          item_hl.c_idx = part_idx
+        end
+
+        part_idx = part_idx + 1
+        parts[part_idx] = sep.content
+      end
+
+      if item.hl then
+        local hl_c = type(item.hl) == "function" and item:hl(ctx) or item.hl
+        if type(hl_c) == "table" then
+          item_hl.c = hl_c
+        elseif type(hl_c) == "string" then
+          item_hl.c = mod.get_hl(hl_c)
+        elseif type(hl_c) == "number" then
+          item_hl.c = mod.get_hl("User" .. hl_c)
+        else
+          item_hl.c = nil
+        end
+
+        if not item_hl.c_idx then
+          part_idx = part_idx + 1
+          item_hl.c_idx = part_idx
+        end
+      elseif item_hl.sl then
+        part_idx = part_idx + 1
+        parts[part_idx] = core.highlight()
+      end
+
+      if item.content then
+        local content = item.content
+        if type(content) == "function" then
+          content = item:content(ctx) or ""
+        end
+
+        if #content > 0 then
+          if item.prefix then
+            part_idx = part_idx + 1
+            parts[part_idx] = item.prefix[breakpoint]
+          end
+          part_idx = part_idx + 1
+          parts[part_idx] = content
+          if item.suffix then
+            part_idx = part_idx + 1
+            parts[part_idx] = item.suffix[breakpoint]
+          end
+        end
+      end
+
+      if item.sep_right then
+        local sep = item.sep_right[breakpoint]
+
+        if sep.hl then
+          part_idx = part_idx + 1
+          item_hl.sr = sep.hl
+          item_hl.sr_idx = part_idx
+        end
+
+        part_idx = part_idx + 1
+        parts[part_idx] = sep.content
+      end
+
+      if item_hl.c or item_hl.sl or item_hl.sr then
+        part_idx = part_idx + 1
+        parts[part_idx] = core.highlight()
+      end
+
+      item_hl_idx = item_hl_idx + 1
+      item_hls[item_hl_idx] = item_hl
+    end
+  end
+
+  for idx = 1, item_hl_idx do
+    local prev_hl_c, hl, next_hl_c =
+      idx > 1 and item_hls[idx - 1].c, item_hls[idx], idx < item_hl_idx and item_hls[idx + 1].c
+
+    if hl.sl then
+      parts[hl.sl_idx] = core.highlight(
+        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), fallback_hl)
+      )
+    end
+
+    if hl.c then
+      parts[hl.c_idx] = core.highlight(mod.set_hl(hl.c, fallback_hl))
+    end
+
+    if hl.sr then
+      parts[hl.sr_idx] = core.highlight(
+        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), fallback_hl)
+      )
+    end
+  end
+
+  return parts
 end
 
 return mod
