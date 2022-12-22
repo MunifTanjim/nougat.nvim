@@ -258,8 +258,17 @@ function mod.prepare_parts(items, ctx, fallback_hl)
             part_idx = part_idx + 1
             parts[part_idx] = item.prefix[breakpoint]
           end
-          part_idx = part_idx + 1
-          parts[part_idx] = content
+
+          if type(content) == "table" then
+            for idx = 1, (content.len or #content) do
+              part_idx = part_idx + 1
+              parts[part_idx] = content[idx]
+            end
+          else
+            part_idx = part_idx + 1
+            parts[part_idx] = content
+          end
+
           if item.suffix then
             part_idx = part_idx + 1
             parts[part_idx] = item.suffix[breakpoint]
