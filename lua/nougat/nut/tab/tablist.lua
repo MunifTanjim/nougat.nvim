@@ -56,6 +56,11 @@ local function get_content(item, ctx)
   return u.prepare_parts(item.processor, ctx, hl)
 end
 
+local function on_init_breakpoints(item, breakpoints)
+  item.processor.active_item:_init_breakpoints(breakpoints)
+  item.processor.inactive_item:_init_breakpoints(breakpoints)
+end
+
 local processor_metatable = {
   __index = function(processor, idx)
     local ctx = processor.ctx
@@ -116,6 +121,8 @@ function mod.create(opts)
     suffix = opts.suffix,
     sep_right = opts.sep_right,
     config = config,
+
+    on_init_breakpoints = on_init_breakpoints,
   })
 
   item.processor = setmetatable(processor, processor_metatable)

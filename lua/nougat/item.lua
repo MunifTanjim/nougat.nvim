@@ -112,6 +112,21 @@ function Item:init(config)
   end
 
   self._config = config.config or {}
+
+  self._on_init_breakpoints = config.on_init_breakpoints
+end
+
+---@param breakpoints integer[]
+function Item:_init_breakpoints(breakpoints)
+  iu.prepare_config_breakpoints(self, breakpoints)
+  iu.prepare_property_breakpoints(self, "sep_left", breakpoints)
+  iu.prepare_property_breakpoints(self, "prefix", breakpoints)
+  iu.prepare_property_breakpoints(self, "suffix", breakpoints)
+  iu.prepare_property_breakpoints(self, "sep_right", breakpoints)
+
+  if self._on_init_breakpoints then
+    self:_on_init_breakpoints(breakpoints)
+  end
 end
 
 function Item:config(ctx)

@@ -21,4 +21,28 @@ function mod.normalize_sep(side, sep)
   return sep
 end
 
+---@param item NougatItem
+---@param breakpoints integer[]
+function mod.prepare_config_breakpoints(item, breakpoints)
+  for i = 1, #breakpoints do
+    local base_config = item._config[i - 1] or item._config
+    item._config[i] = vim.tbl_deep_extend("keep", item._config[i] or {}, base_config)
+  end
+end
+
+---@param item NougatItem
+---@param name string
+---@param breakpoints integer[]
+function mod.prepare_property_breakpoints(item, name, breakpoints)
+  local val = item[name]
+
+  if val then
+    for i = 1, #breakpoints do
+      if not val[i] then
+        val[i] = val[i - 1]
+      end
+    end
+  end
+end
+
 return mod
