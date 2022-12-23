@@ -187,7 +187,7 @@ end
 ---@param items NougatItem[]|{ len?: integer }
 ---@param ctx nui_bar_core_expression_context
 ---@param fallback_hl nougat_hl_def
----@return string[]
+---@return string[]|{ len: integer }
 function mod.prepare_parts(items, ctx, fallback_hl)
   local breakpoint = ctx.ctx.breakpoint
 
@@ -319,6 +319,8 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       )
     end
   end
+
+  parts.len = part_idx
 
   return parts
 end
