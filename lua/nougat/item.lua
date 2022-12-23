@@ -1,5 +1,6 @@
 local Object = require("nui.object")
 local core = require("nui.bar.core")
+local iu = require("nougat.item.util")
 local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
@@ -38,10 +39,10 @@ function Item:init(config)
 
   self.hl = config.hl
 
-  self.sep_left = u.normalize_sep(-1, config.sep_left)
+  self.sep_left = iu.normalize_sep(-1, config.sep_left)
   self.prefix = type(config.prefix) == "string" and { config.prefix } or config.prefix
   self.suffix = type(config.suffix) == "string" and { config.suffix } or config.suffix
-  self.sep_right = u.normalize_sep(1, config.sep_right)
+  self.sep_right = iu.normalize_sep(1, config.sep_right)
 
   self.hidden = config.hidden
 
