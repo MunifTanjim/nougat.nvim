@@ -94,14 +94,14 @@ function mod.set_statusline(bar, opts)
   end
 end
 
----@param focused_only? boolean
-function mod.refresh_statusline(focused_only)
-  if focused_only then
-    vim.cmd("redrawstatus")
+---@param force_all? boolean
+function mod.refresh_statusline(force_all)
+  if force_all then
+    vim.cmd("redrawstatus!")
     return
   end
 
-  vim.cmd("redrawstatus!")
+  vim.cmd("redrawstatus")
 end
 
 function mod.set_tabline(bar)
