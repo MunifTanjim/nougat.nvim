@@ -13,20 +13,22 @@ local function get_tab_item_content(item, ctx)
 
   local part_idx = 0
 
-  part_idx = part_idx + 1
-  o_tab_item_parts[part_idx] = core.label(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"), {
-    tabnr = tabnr,
-  })
+  local label_opts = { tabnr = tabnr, close = false }
+
+  part_idx = core.add_label(
+    vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"),
+    label_opts,
+    o_tab_item_parts,
+    part_idx
+  )
 
   if config.close then
+    label_opts.close = true
+
     part_idx = part_idx + 1
     o_tab_item_parts[part_idx] = " "
 
-    part_idx = part_idx + 1
-    o_tab_item_parts[part_idx] = core.label(config.close, {
-      tabnr = tabnr,
-      close = true,
-    })
+    part_idx = core.add_label(config.close, label_opts, o_tab_item_parts, part_idx)
   end
 
   o_tab_item_parts.len = part_idx
