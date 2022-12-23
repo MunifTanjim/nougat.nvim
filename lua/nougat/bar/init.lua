@@ -66,27 +66,6 @@ local function get_breakpoint_type(breakpoints)
   return breakpoints[1] < breakpoints[2] and "min" or "max"
 end
 
-local function normalize_item(item, breakpoints)
-  for i = 1, #breakpoints do
-    local base_config = item._config[i - 1] or item._config
-    item._config[i] = vim.tbl_deep_extend("keep", item._config[i] or {}, base_config)
-  end
-
-  for _, key in ipairs({ "sep_left", "prefix", "suffix", "sep_right" }) do
-    local val = item[key]
-
-    if val then
-      for i = 1, #breakpoints do
-        if not val[i] then
-          val[i] = val[i - 1]
-        end
-      end
-    end
-  end
-
-  return item
-end
-
 ---@class NougatBar
 local Bar = Object("NougatBar")
 
@@ -119,7 +98,11 @@ function Bar:add_item(item)
     self._items[idx] = item
   end
 
-  return normalize_item(self._items[idx], self._breakpoints)
+  local new_item = self._items[idx]
+
+  new_item:_init_breakpoints(self._breakpoints)
+
+  return new_item
 end
 
 ---@param ctx nui_bar_core_expression_context
