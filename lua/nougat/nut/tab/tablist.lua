@@ -51,9 +51,7 @@ local function get_content(item, ctx)
   item.processor.len = #tabids
   item.processor.tabids = tabids
 
-  local parts = u.prepare_parts(item.processor, ctx, hl)
-
-  return core.group(parts, item.group)
+  return u.prepare_parts(item.processor, ctx, hl)
 end
 
 local processor_metatable = {
@@ -93,11 +91,7 @@ function mod.TabItem(opts)
 end
 
 function mod.create(opts)
-  local config = vim.tbl_deep_extend("force", {
-    align = opts.align,
-    min_width = opts.min_width,
-    max_width = opts.max_width,
-  }, opts.config or {})
+  local config = vim.tbl_deep_extend("force", {}, opts.config or {})
 
   local processor = {
     ctx = nil,
