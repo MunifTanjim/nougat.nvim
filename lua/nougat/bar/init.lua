@@ -105,7 +105,8 @@ function Bar:add_item(item)
   return new_item
 end
 
--- re-used table
+-- re-used tables
+local o_hls = { len = 0 }
 local o_parts = { len = 0 }
 
 ---@param ctx nui_bar_core_expression_context
@@ -117,10 +118,11 @@ function Bar:generate(ctx)
   local bar_hl = u.get_hl(self._hl_name[ctx.is_focused])
   ctx.ctx.bar_hl = bar_hl
 
-  o_parts.len = 0
-  ctx.parts = o_parts
+  o_hls.len, o_parts.len = 0, 0
+  ctx.hls, ctx.parts = o_hls, o_parts
 
-  u.prepare_parts(self._items, ctx, bar_hl)
+  u.prepare_parts(self._items, ctx)
+  u.process_bar_highlights(ctx, bar_hl)
 
   return table.concat(o_parts, nil, 1, o_parts.len)
 end

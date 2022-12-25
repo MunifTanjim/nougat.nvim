@@ -165,17 +165,15 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
 end
 
 ---@param items NougatItem[]|{ len?: integer }
----@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer } }
----@param fallback_hl nougat_hl_def
-function mod.prepare_parts(items, ctx, fallback_hl)
+---@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer }, hls: table }
+function mod.prepare_parts(items, ctx)
   local breakpoint = ctx.ctx.breakpoint
 
-  ---@type string[]
+  local hls = ctx.hls
+  local hl_idx = hls.len
+
   local parts = ctx.parts
   local part_idx = parts.len
-
-  local item_hl_idx = 0
-  local item_hls = {}
 
   for item_idx = 1, (items.len or #items) do
     local item = items[item_idx]
@@ -188,6 +186,9 @@ function mod.prepare_parts(items, ctx, fallback_hl)
 
     if not hidden then
       local item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
+
+      hl_idx = hl_idx + 1
+      hls[hl_idx] = item_hl
 
       if item.sep_left then
         local sep = item.sep_left[breakpoint]
@@ -234,9 +235,13 @@ function mod.prepare_parts(items, ctx, fallback_hl)
         local content = item.content
         local content_type = type(content)
         if content_type == "function" then
+          hls.len = hl_idx
           parts.len = part_idx
+
           content = item:content(ctx) or ""
           content_type = type(content)
+
+          hl_idx = hls.len
         end
 
         if (content_type == "table" and content.len or #content) > 0 then
@@ -281,15 +286,23 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       if item_hl.c or item_hl.sl or item_hl.sr then
         part_idx = core.add_highlight(0, nil, parts, part_idx)
       end
-
-      item_hl_idx = item_hl_idx + 1
-      item_hls[item_hl_idx] = item_hl
     end
   end
 
-  for idx = 1, item_hl_idx do
-    local prev_hl_c, hl, next_hl_c =
-      idx > 1 and item_hls[idx - 1].c, item_hls[idx], idx < item_hl_idx and item_hls[idx + 1].c
+  hls.len = hl_idx
+  parts.len = part_idx
+end
+
+---@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer }, hls: table }
+---@param fallback_hl nougat_hl_def
+function mod.process_bar_highlights(ctx, fallback_hl)
+  local hls = ctx.hls
+  local hl_idx = hls.len
+
+  local parts = ctx.parts
+
+  for idx = 1, hl_idx do
+    local prev_hl_c, hl, next_hl_c = idx > 1 and hls[idx - 1].c, hls[idx], idx < hl_idx and hls[idx + 1].c
 
     if hl.sl then
       core.add_highlight(
@@ -313,8 +326,6 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       )
     end
   end
-
-  parts.len = part_idx
 end
 
 return mod
