@@ -41,7 +41,8 @@ local hl_transition_by_char = {
   [char.right_half_circle_solid] = { bg = 1 },
 }
 
----@alias nougat_separator { content: string, hl?: { bg?: string|-1|1, fg?: string|-1|1 } }
+---@alias nougat_separator_hl_def { bg?: string|-1|1, fg?: string|-1|1 }
+---@alias nougat_separator { content: string, hl?: nougat_separator_hl_def }
 
 ---@param separator nougat_separator
 ---@param use_transition? boolean

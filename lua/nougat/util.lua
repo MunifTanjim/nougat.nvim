@@ -117,13 +117,14 @@ local o_hl_def = {}
 ---@param fallback_hl nougat_hl_def
 ---@return string hl_name
 function mod.set_hl(hl, fallback_hl)
-  o_hl_def.bg, o_hl_def.fg, o_hl_def.bold, o_hl_def.italic = hl.bg, hl.fg, hl.bold, hl.italic
+  o_hl_def.bg, o_hl_def.fg, o_hl_def.bold, o_hl_def.italic =
+    hl.bg or fallback_hl.bg, hl.fg or fallback_hl.fg, hl.bold, hl.italic
 
-  if not o_hl_def.bg or needs_fallback[o_hl_def.bg] then
+  if needs_fallback[o_hl_def.bg] then
     o_hl_def.bg = fallback_hl[o_hl_def.bg or "bg"]
   end
 
-  if not o_hl_def.fg or needs_fallback[o_hl_def.fg] then
+  if needs_fallback[o_hl_def.fg] then
     o_hl_def.fg = fallback_hl[o_hl_def.fg or "fg"]
   end
 
@@ -141,12 +142,13 @@ end
 ---@type nougat_hl_def
 local o_transitional_hl = {}
 
----@param hl nougat_hl_def
----@param prev_hl nougat_hl_def
+---@param hl nougat_hl_def|nougat_separator_hl_def
+---@param prev_hl? nougat_hl_def
 ---@param curr_hl nougat_hl_def
----@param next_hl nougat_hl_def
+---@param next_hl? nougat_hl_def
 ---@return nougat_hl_def transitional_hl
 function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
+  ---@diagnostic disable-next-line: assign-type-mismatch
   o_transitional_hl.bg, o_transitional_hl.fg = hl.bg, hl.fg or curr_hl and curr_hl.bg or "bg"
 
   if o_transitional_hl.bg == -1 then
@@ -164,8 +166,36 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
   return o_transitional_hl
 end
 
+---@class nougat_lazy_item_hl
+---@field c? nougat_hl_def content
+---@field c_idx? integer content index
+---@field sl? nougat_separator_hl_def sep left
+---@field sl_idx? integer sep left index
+---@field sr? nougat_separator_hl_def sep right
+---@field sr_idx? integer sep right index
+
+---@param hls nougat_lazy_item_hl[]
+---@param hl_idx integer
+---@return nougat_lazy_item_hl
+local function get_item_hl_table(hls, hl_idx)
+  local item_hl = hls[hl_idx]
+  if item_hl then
+    item_hl.c = nil
+    item_hl.c_idx = nil
+    item_hl.sl = nil
+    item_hl.sl_idx = nil
+    item_hl.sr = nil
+    item_hl.sr_idx = nil
+    return item_hl
+  end
+
+  item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
+  hls[hl_idx] = item_hl
+  return item_hl
+end
+
 ---@param items NougatItem[]|{ len?: integer }
----@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer }, hls: table }
+---@param ctx nougat_ctx
 function mod.prepare_parts(items, ctx)
   local breakpoint = ctx.ctx.breakpoint
 
@@ -185,10 +215,9 @@ function mod.prepare_parts(items, ctx)
     local hidden = item.hidden and (item.hidden == true or item:hidden(ctx))
 
     if not hidden then
-      local item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
-
       hl_idx = hl_idx + 1
-      hls[hl_idx] = item_hl
+
+      local item_hl = get_item_hl_table(hls, hl_idx)
 
       if item.sep_left then
         local sep = item.sep_left[breakpoint]
@@ -293,7 +322,7 @@ function mod.prepare_parts(items, ctx)
   parts.len = part_idx
 end
 
----@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer }, hls: table }
+---@param ctx nougat_ctx
 ---@param fallback_hl nougat_hl_def
 function mod.process_bar_highlights(ctx, fallback_hl)
   local hls = ctx.hls

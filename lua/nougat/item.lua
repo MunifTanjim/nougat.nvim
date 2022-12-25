@@ -16,12 +16,6 @@ local next_id = u.create_id_generator()
 ---@field refresh? fun(self: NougatItem, ctx: table):nil
 local Item = Object("NougatItem")
 
---luacheck: push no max line length
-
----@alias nougat_item { id: integer, content: nougat_item_content, hl?: nougat_item_hl, sep_left?: nougat_separator, prefix?: string, suffix?: string, sep_right?: nougat_separator, hidden?: nougat_item_hidden }
-
---luacheck: pop
-
 local function content_function_processor(item, ctx)
   return core.clickable(item._content(item, ctx), {
     id = item._on_click_id,

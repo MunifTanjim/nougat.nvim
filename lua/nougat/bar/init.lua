@@ -109,7 +109,11 @@ end
 local o_hls = { len = 0 }
 local o_parts = { len = 0 }
 
----@param ctx nui_bar_core_expression_context
+--luacheck: push no max line length
+---@alias nougat_ctx nui_bar_core_expression_context|{ hls: nougat_lazy_item_hl[]|{ len: integer }, parts: string[]|{ len: integer }, width: integer }
+--luacheck: pop
+
+---@param ctx nougat_ctx
 function Bar:generate(ctx)
   ctx.width = self._get_width(ctx.winid)
 
