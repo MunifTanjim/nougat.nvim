@@ -173,11 +173,17 @@ end
 ---@field sl_idx? integer sep left index
 ---@field sr? nougat_separator_hl_def sep right
 ---@field sr_idx? integer sep right index
+---@field r? nougat_hl_def reset
+---@field r_idx? integer reset index
+---@field pio? integer prev index offset
+---@field nio? integer next index offset
+---@field fb? nougat_hl_def fallback
 
 ---@param hls nougat_lazy_item_hl[]
 ---@param hl_idx integer
 ---@return nougat_lazy_item_hl
 local function get_item_hl_table(hls, hl_idx)
+  ---@type nougat_lazy_item_hl
   local item_hl = hls[hl_idx]
   if item_hl then
     item_hl.c = nil
@@ -186,27 +192,44 @@ local function get_item_hl_table(hls, hl_idx)
     item_hl.sl_idx = nil
     item_hl.sr = nil
     item_hl.sr_idx = nil
+    item_hl.r = nil
+    item_hl.r_idx = nil
+    item_hl.pio = -1
+    item_hl.nio = 1
+    item_hl.fb = nil
     return item_hl
   end
 
-  item_hl = { c = nil, c_idx = nil, sl = nil, sl_idx = nil, sr = nil, sr_idx = nil }
+  item_hl = {
+    c = nil,
+    c_idx = nil,
+    sl = nil,
+    sl_idx = nil,
+    sr = nil,
+    sr_idx = nil,
+    r = nil,
+    r_idx = nil,
+    pio = -1,
+    nio = 1,
+    fb = nil,
+  }
   hls[hl_idx] = item_hl
   return item_hl
 end
 
 ---@param items NougatItem[]|{ len?: integer }
 ---@param ctx nougat_ctx
-function mod.prepare_parts(items, ctx)
+---@param item_fallback_hl? nougat_hl_def
+function mod.prepare_parts(items, ctx, item_fallback_hl)
   local breakpoint = ctx.ctx.breakpoint
 
-  local hls = ctx.hls
-  local hl_idx = hls.len
-
-  local parts = ctx.parts
-  local part_idx = parts.len
+  local hls, parts = ctx.hls, ctx.parts
+  local hl_idx, part_idx
 
   for item_idx = 1, (items.len or #items) do
     local item = items[item_idx]
+
+    hl_idx, part_idx = hls.len, parts.len
 
     if item.refresh then
       item:refresh(ctx)
@@ -218,6 +241,7 @@ function mod.prepare_parts(items, ctx)
       hl_idx = hl_idx + 1
 
       local item_hl = get_item_hl_table(hls, hl_idx)
+      item_hl.fb = item_fallback_hl
 
       if item.sep_left then
         local sep = item.sep_left[breakpoint]
@@ -275,9 +299,24 @@ function mod.prepare_parts(items, ctx)
 
         if (content_type == "table" and content.len or #content) > 0 then
           if content_type == "table" then
-            for idx = 1, (content.len or #content) do
-              part_idx = part_idx + 1
-              parts[part_idx] = content[idx]
+            if type(content[1]) == "string" then
+              ---@cast content string[]
+              for idx = 1, (content.len or #content) do
+                part_idx = part_idx + 1
+                parts[part_idx] = content[idx]
+              end
+            else
+              hls.len = hl_idx
+              parts.len = part_idx
+
+              ---@cast content NougatItem[]
+              mod.prepare_parts(content, ctx, item_hl.c)
+
+              if hl_idx ~= hls.len then
+                item_hl.nio = item_hl.nio + hls.len - hl_idx
+                hl_idx = hls.len
+              end
+              part_idx = parts.len
             end
           else
             part_idx = part_idx + 1
@@ -313,13 +352,19 @@ function mod.prepare_parts(items, ctx)
       end
 
       if item_hl.c or item_hl.sl or item_hl.sr then
-        part_idx = core.add_highlight(0, nil, parts, part_idx)
+        if item_fallback_hl then
+          item_hl.r = item_fallback_hl
+          item_hl.r_idx = part_idx
+          part_idx = part_idx + 3
+        else
+          part_idx = core.add_highlight(0, nil, parts, part_idx)
+        end
       end
     end
-  end
 
-  hls.len = hl_idx
-  parts.len = part_idx
+    hls.len = hl_idx
+    parts.len = part_idx
+  end
 end
 
 ---@param ctx nougat_ctx
@@ -331,11 +376,13 @@ function mod.process_bar_highlights(ctx, fallback_hl)
   local parts = ctx.parts
 
   for idx = 1, hl_idx do
-    local prev_hl_c, hl, next_hl_c = idx > 1 and hls[idx - 1].c, hls[idx], idx < hl_idx and hls[idx + 1].c
+    local hl = hls[idx]
+    local prev_hl_c = idx + hl.pio > 1 and hls[idx + hl.pio].c or nil
+    local next_hl_c = idx + hl.nio <= hl_idx and hls[idx + hl.nio].c or nil
 
     if hl.sl then
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), fallback_hl),
+        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sl_idx
@@ -343,16 +390,20 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.c then
-      core.add_highlight(mod.set_hl(hl.c, fallback_hl), nil, parts, hl.c_idx)
+      core.add_highlight(mod.set_hl(hl.c, hl.fb or fallback_hl), nil, parts, hl.c_idx)
     end
 
     if hl.sr then
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), fallback_hl),
+        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sr_idx
       )
+    end
+
+    if hl.r then
+      core.add_highlight(mod.set_hl(hl.r, fallback_hl), nil, parts, hl.r_idx)
     end
   end
 end
