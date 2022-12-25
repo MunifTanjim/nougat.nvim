@@ -105,6 +105,9 @@ function Bar:add_item(item)
   return new_item
 end
 
+-- re-used table
+local o_parts = { len = 0 }
+
 ---@param ctx nui_bar_core_expression_context
 function Bar:generate(ctx)
   ctx.width = self._get_width(ctx.winid)
@@ -114,9 +117,12 @@ function Bar:generate(ctx)
   local bar_hl = u.get_hl(self._hl_name[ctx.is_focused])
   ctx.ctx.bar_hl = bar_hl
 
-  local parts = u.prepare_parts(self._items, ctx, bar_hl)
+  o_parts.len = 0
+  ctx.parts = o_parts
 
-  return table.concat(parts)
+  u.prepare_parts(self._items, ctx, bar_hl)
+
+  return table.concat(o_parts, nil, 1, o_parts.len)
 end
 
 --luacheck: push no max line length

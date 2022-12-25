@@ -165,15 +165,14 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
 end
 
 ---@param items NougatItem[]|{ len?: integer }
----@param ctx nui_bar_core_expression_context
+---@param ctx nui_bar_core_expression_context|{ parts: string[]|{ len: integer } }
 ---@param fallback_hl nougat_hl_def
----@return string[]|{ len: integer }
 function mod.prepare_parts(items, ctx, fallback_hl)
   local breakpoint = ctx.ctx.breakpoint
 
-  local part_idx = 0
   ---@type string[]
-  local parts = {}
+  local parts = ctx.parts
+  local part_idx = parts.len
 
   local item_hl_idx = 0
   local item_hls = {}
@@ -228,18 +227,21 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       end
 
       if item.content then
-        local content = item.content
-        if type(content) == "function" then
-          content = item:content(ctx) or ""
+        if item.prefix then
+          part_idx = part_idx + 1
+          parts[part_idx] = item.prefix[breakpoint]
         end
 
-        if #content > 0 then
-          if item.prefix then
-            part_idx = part_idx + 1
-            parts[part_idx] = item.prefix[breakpoint]
-          end
+        local content = item.content
+        local content_type = type(content)
+        if content_type == "function" then
+          parts.len = part_idx
+          content = item:content(ctx) or ""
+          content_type = type(content)
+        end
 
-          if type(content) == "table" then
+        if (content_type == "table" and content.len or #content) > 0 then
+          if content_type == "table" then
             for idx = 1, (content.len or #content) do
               part_idx = part_idx + 1
               parts[part_idx] = content[idx]
@@ -252,6 +254,14 @@ function mod.prepare_parts(items, ctx, fallback_hl)
           if item.suffix then
             part_idx = part_idx + 1
             parts[part_idx] = item.suffix[breakpoint]
+          end
+        else -- no content returned
+          if part_idx == parts.len then -- no parts added
+            -- discard prefix
+            part_idx = part_idx - 1
+            parts.len = part_idx
+          else
+            part_idx = parts.len
           end
         end
       end
@@ -301,8 +311,6 @@ function mod.prepare_parts(items, ctx, fallback_hl)
   end
 
   parts.len = part_idx
-
-  return parts
 end
 
 return mod
