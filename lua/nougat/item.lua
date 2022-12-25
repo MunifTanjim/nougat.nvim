@@ -5,7 +5,7 @@ local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
 
----@alias nougat_item_content string|(fun(self: NougatItem, ctx: table):string)
+---@alias nougat_item_content string|(fun(self: NougatItem, ctx: table):nil|string|string[])
 ---@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: table): integer|string|table)
 ---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: table):boolean)
 
