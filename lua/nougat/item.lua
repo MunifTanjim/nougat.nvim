@@ -5,15 +5,15 @@ local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
 
----@alias nougat_item_content string|(fun(self: NougatItem, ctx: table):nil|string|string[])
----@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: table): integer|string|table)
----@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: table):boolean)
+---@alias nougat_item_content string|(fun(self: NougatItem, ctx: nougat_ctx):nil|string|string[])
+---@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: nougat_ctx): integer|string|table)
+---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: nougat_ctx):boolean)
 
 ---@class NougatItem
 ---@field id integer
 ---@field hl? nougat_item_hl
----@field content nougat_item_content
----@field refresh? fun(self: NougatItem, ctx: table):nil
+---@field content nougat_item_content|NougatItem[]
+---@field refresh? fun(self: NougatItem, ctx: nougat_ctx):nil
 local Item = Object("NougatItem")
 
 local function content_function_processor(item, ctx)
