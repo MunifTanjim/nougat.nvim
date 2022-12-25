@@ -193,12 +193,12 @@ function mod.prepare_parts(items, ctx, fallback_hl)
         local sep = item.sep_left[breakpoint]
 
         if sep.hl then
-          part_idx = part_idx + 1
           item_hl.sl = sep.hl
           item_hl.sl_idx = part_idx
+          part_idx = part_idx + 3
         elseif item.hl then
-          part_idx = part_idx + 1
           item_hl.c_idx = part_idx
+          part_idx = part_idx + 3
         end
 
         part_idx = part_idx + 1
@@ -218,12 +218,11 @@ function mod.prepare_parts(items, ctx, fallback_hl)
         end
 
         if not item_hl.c_idx then
-          part_idx = part_idx + 1
           item_hl.c_idx = part_idx
+          part_idx = part_idx + 3
         end
       elseif item_hl.sl then
-        part_idx = part_idx + 1
-        parts[part_idx] = core.highlight()
+        part_idx = core.add_highlight(0, nil, parts, part_idx)
       end
 
       if item.content then
@@ -270,9 +269,9 @@ function mod.prepare_parts(items, ctx, fallback_hl)
         local sep = item.sep_right[breakpoint]
 
         if sep.hl then
-          part_idx = part_idx + 1
           item_hl.sr = sep.hl
           item_hl.sr_idx = part_idx
+          part_idx = part_idx + 3
         end
 
         part_idx = part_idx + 1
@@ -280,8 +279,7 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       end
 
       if item_hl.c or item_hl.sl or item_hl.sr then
-        part_idx = part_idx + 1
-        parts[part_idx] = core.highlight()
+        part_idx = core.add_highlight(0, nil, parts, part_idx)
       end
 
       item_hl_idx = item_hl_idx + 1
@@ -294,18 +292,24 @@ function mod.prepare_parts(items, ctx, fallback_hl)
       idx > 1 and item_hls[idx - 1].c, item_hls[idx], idx < item_hl_idx and item_hls[idx + 1].c
 
     if hl.sl then
-      parts[hl.sl_idx] = core.highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), fallback_hl)
+      core.add_highlight(
+        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), fallback_hl),
+        nil,
+        parts,
+        hl.sl_idx
       )
     end
 
     if hl.c then
-      parts[hl.c_idx] = core.highlight(mod.set_hl(hl.c, fallback_hl))
+      core.add_highlight(mod.set_hl(hl.c, fallback_hl), nil, parts, hl.c_idx)
     end
 
     if hl.sr then
-      parts[hl.sr_idx] = core.highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), fallback_hl)
+      core.add_highlight(
+        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), fallback_hl),
+        nil,
+        parts,
+        hl.sr_idx
       )
     end
   end
