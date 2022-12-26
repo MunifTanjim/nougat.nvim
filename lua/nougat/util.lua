@@ -246,17 +246,19 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
       if item.sep_left then
         local sep = item.sep_left[breakpoint]
 
-        if sep.hl then
-          item_hl.sl = sep.hl
-          item_hl.sl_idx = part_idx
-          part_idx = part_idx + 3
-        elseif item.hl then
-          item_hl.c_idx = part_idx
-          part_idx = part_idx + 3
-        end
+        if sep.content then
+          if sep.hl then
+            item_hl.sl = sep.hl
+            item_hl.sl_idx = part_idx
+            part_idx = part_idx + 3
+          elseif item.hl then
+            item_hl.c_idx = part_idx
+            part_idx = part_idx + 3
+          end
 
-        part_idx = part_idx + 1
-        parts[part_idx] = sep.content
+          part_idx = part_idx + 1
+          parts[part_idx] = sep.content
+        end
       end
 
       if item.hl then
@@ -341,14 +343,16 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
       if item.sep_right then
         local sep = item.sep_right[breakpoint]
 
-        if sep.hl then
-          item_hl.sr = sep.hl
-          item_hl.sr_idx = part_idx
-          part_idx = part_idx + 3
-        end
+        if sep.content then
+          if sep.hl then
+            item_hl.sr = sep.hl
+            item_hl.sr_idx = part_idx
+            part_idx = part_idx + 3
+          end
 
-        part_idx = part_idx + 1
-        parts[part_idx] = sep.content
+          part_idx = part_idx + 1
+          parts[part_idx] = sep.content
+        end
       end
 
       if item_hl.c or item_hl.sl or item_hl.sr then

@@ -1,6 +1,8 @@
 local mod = {}
 
 local char = {
+  none = nil,
+
   space = " ",
 
   vertical = "│",
@@ -92,6 +94,14 @@ function mod.adjust_hl(side, separator)
   end
 
   return separator
+end
+
+-- ''
+---@return nougat_separator
+function mod.none()
+  return {
+    content = char.none,
+  }
 end
 
 -- '` `'
