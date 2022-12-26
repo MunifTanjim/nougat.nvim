@@ -151,24 +151,23 @@ function mod.create(opts)
   opts = opts or {}
 
   local item = Item({
+    refresh = refresh,
     hidden = opts.hidden,
+    hl = get_hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
+    content = get_content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
     config = vim.tbl_deep_extend("keep", opts.config or {}, {
       text = default_text,
       highlight = default_highlight,
     }),
+    on_click = opts.on_click,
+    context = opts.context,
   })
 
   item.cache = cache_store
-
-  item.content = get_content
-
-  item.hl = get_hl
-
-  item.refresh = refresh
 
   return item
 end

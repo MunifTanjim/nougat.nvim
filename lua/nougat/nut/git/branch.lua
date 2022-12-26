@@ -17,15 +17,6 @@ function mod.create(opts)
     provider = "auto",
   }, opts.config or {})
 
-  local item = Item({
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-  })
-
   if config.provider == "auto" then
     if pcall(require, "gitsigns") then
       config.provider = "gitsigns"
@@ -36,7 +27,17 @@ function mod.create(opts)
     end
   end
 
-  item.content = get_content[config.provider]
+  local item = Item({
+    hidden = opts.hidden,
+    hl = opts.hl,
+    sep_left = opts.sep_left,
+    prefix = opts.prefix,
+    content = get_content[config.provider],
+    suffix = opts.suffix,
+    sep_right = opts.sep_right,
+    on_click = opts.on_click,
+    context = opts.context,
+  })
 
   return item
 end

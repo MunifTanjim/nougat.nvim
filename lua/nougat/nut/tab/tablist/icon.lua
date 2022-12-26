@@ -30,20 +30,21 @@ local mod = {}
 
 function mod.create(opts)
   local item = Item({
+    refresh = refresh,
     hidden = opts.hidden,
+    hl = get_hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
+    content = get_content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
+    on_click = opts.on_click,
+    context = opts.context,
   })
 
   if not has_devicons then
     item.hidden = true
   end
-
-  item.hl = get_hl
-  item.content = get_content
-  item.refresh = refresh
 
   return item
 end

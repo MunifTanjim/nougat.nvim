@@ -99,13 +99,12 @@ function mod.create(opts)
     hidden = opts.hidden,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
+    content = get_content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
 
     on_init_breakpoints = on_init_breakpoints,
   })
-
-  item.content = get_content
 
   item.active_tab = active_tab
   item.inactive_tab = inactive_tab

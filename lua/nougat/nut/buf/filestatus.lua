@@ -40,6 +40,7 @@ function mod.create(opts)
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
+    content = get_content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
     config = vim.tbl_extend("force", {
@@ -48,9 +49,9 @@ function mod.create(opts)
       readonly = "RO",
       sep = ",",
     }, opts.config or {}),
+    on_click = opts.on_click,
+    context = opts.context,
   })
-
-  item.content = get_content
 
   return item
 end

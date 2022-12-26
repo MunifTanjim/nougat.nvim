@@ -167,14 +167,15 @@ function mod.create(opts)
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
+    content = config.severity == severity.COMBINED and get_combined_content or get_count_content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
     config = config,
+    on_click = opts.on_click,
+    context = opts.context,
   })
 
   item.cache = cache_store
-
-  item.content = config.severity == severity.COMBINED and get_combined_content or get_count_content
 
   return item
 end
