@@ -5,14 +5,19 @@ local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
 
----@alias nougat_item_content string|(fun(self: NougatItem, ctx: nougat_ctx):nil|string|string[])
----@alias nougat_item_hl integer|string|table|(fun(self: NougatItem, ctx: nougat_ctx): integer|string|table)
+--luacheck: push no max line length
+
+---@alias nougat_item_content string|string[]|NougatItem[]|(fun(self: NougatItem, ctx: nougat_ctx):nil|string|string[]|NougatItem[])
+---@alias nougat_item_hl integer|string|nougat_hl_def|(fun(self: NougatItem, ctx: nougat_ctx): integer|string|nougat_hl_def)
 ---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: nougat_ctx):boolean)
+
+--luacheck: pop
 
 ---@class NougatItem
 ---@field id integer
 ---@field hl? nougat_item_hl
----@field content nougat_item_content|NougatItem[]
+---@field content nougat_item_content
+---@field hidden? nougat_item_hidden
 ---@field refresh? fun(self: NougatItem, ctx: nougat_ctx):nil
 local Item = Object("NougatItem")
 
@@ -39,6 +44,7 @@ function Item:init(config)
   self.sep_right = iu.normalize_sep(1, config.sep_right)
 
   self.hidden = config.hidden
+  self.refresh = config.refresh
 
   if config.type == "code" then
     self.content = core.code(config.content, {
