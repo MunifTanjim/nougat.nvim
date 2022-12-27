@@ -100,8 +100,8 @@ local attr_none = ""
 local function make_nougat_hl_name(hl)
   return string.format(
     nougat_hl_name_format,
-    hl.bg:gsub("^#", "", 1),
-    hl.fg:gsub("^#", "", 1),
+    (hl.bg or ""):gsub("^#", "", 1),
+    (hl.fg or ""):gsub("^#", "", 1),
     (hl.bold and hl.italic) and attr_bold_italic or hl.bold and attr_bold or hl.italic and attr_italic or attr_none
   )
 end
