@@ -103,6 +103,24 @@ local function set_statusline_for_filetype(filetype, bar)
   statusline.by_filetype[filetype] = bar
 end
 
+---@param bar NougatBar|(fun(ctx:nui_bar_core_expression_context):NougatBar)
+local function set_winbar_local(bar)
+  winbar.select = bar
+
+  local augroup = vim.api.nvim_create_augroup("nougat.wo.winbar", { clear = true })
+
+  vim.api.nvim_create_autocmd("BufWinEnter", {
+    group = augroup,
+    callback = function()
+      if vim.fn.win_gettype(0) == "popup" then
+        return
+      end
+
+      vim.wo.winbar = winbar_generator
+    end,
+  })
+end
+
 ---@param filetype string
 ---@param bar NougatBar|(fun(ctx:nui_bar_core_expression_context):NougatBar)
 local function set_winbar_for_filetype(filetype, bar)
@@ -168,16 +186,17 @@ function mod.refresh_tabline()
 end
 
 ---@param bar NougatBar|(fun(ctx:nui_bar_core_expression_context):NougatBar)
----@param opts? { filetype?: string }
+---@param opts? { filetype?: string, global?: boolean }
 function mod.set_winbar(bar, opts)
   opts = opts or {}
 
   if opts.filetype then
     set_winbar_for_filetype(opts.filetype, bar)
-  else
+  elseif opts.global then
     winbar.select = bar
-
     vim.go.winbar = winbar_generator
+  else
+    set_winbar_local(bar)
   end
 end
 
