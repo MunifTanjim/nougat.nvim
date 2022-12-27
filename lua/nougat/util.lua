@@ -369,6 +369,10 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
     hls.len = hl_idx
     parts.len = part_idx
   end
+
+  -- if ctx.is_focused then
+  --   print(vim.inspect(parts))
+  -- end
 end
 
 ---@param ctx nougat_ctx

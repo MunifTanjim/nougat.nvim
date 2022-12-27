@@ -12,7 +12,7 @@ vim.api.nvim_create_autocmd("BufFilePost", {
   end,
 })
 
-local function get_content(item, ctx)
+local function content(item, ctx)
   local cache = item.cache[ctx.bufnr][ctx.ctx.breakpoint]
 
   if not cache.v then
@@ -28,7 +28,10 @@ local function get_content(item, ctx)
   return cache.v
 end
 
-local mod = {}
+local mod = {
+  content = content,
+  cache = cache_store,
+}
 
 function mod.create(opts)
   local item = Item({
@@ -36,7 +39,7 @@ function mod.create(opts)
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
-    content = get_content,
+    content = content,
     suffix = opts.suffix,
     sep_right = opts.sep_right,
     config = vim.tbl_extend("force", {
