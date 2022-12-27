@@ -331,9 +331,11 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
           end
         else -- no content returned
           if part_idx == parts.len then -- no parts added
-            -- discard prefix
-            part_idx = part_idx - 1
-            parts.len = part_idx
+            if item.prefix then
+              -- discard prefix
+              part_idx = part_idx - 1
+              parts.len = part_idx
+            end
           else
             part_idx = parts.len
           end
