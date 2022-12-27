@@ -231,8 +231,8 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
 
     hl_idx, part_idx = hls.len, parts.len
 
-    if item.refresh then
-      item:refresh(ctx)
+    if item.prepare then
+      item:prepare(ctx)
     end
 
     local hidden = item.hidden and (item.hidden == true or item:hidden(ctx))

@@ -128,7 +128,7 @@ local default_highlight = {
   },
 }
 
-local function refresh(item, ctx)
+local function prepare(item, ctx)
   local mode = ctx.is_focused and vim.api.nvim_get_mode().mode or "-"
   local cache = item.cache[ctx.winid]
   if cache.mode ~= mode then
@@ -151,7 +151,7 @@ function mod.create(opts)
   opts = opts or {}
 
   local item = Item({
-    refresh = refresh,
+    prepare = prepare,
     hidden = opts.hidden,
     hl = get_hl,
     sep_left = opts.sep_left,

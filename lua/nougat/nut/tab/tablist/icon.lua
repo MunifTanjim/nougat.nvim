@@ -14,7 +14,7 @@ local function get_hl(_, ctx)
   return vim.b[ctx.ctx.tab.bufnr].ft_icon[2]
 end
 
-local function refresh(_, ctx)
+local function prepare(_, ctx)
   local tab_ctx = ctx.ctx.tab
 
   local filetype = vim.bo[tab_ctx.bufnr].filetype
@@ -30,7 +30,7 @@ local mod = {}
 
 function mod.create(opts)
   local item = Item({
-    refresh = refresh,
+    prepare = prepare,
     hidden = opts.hidden,
     hl = get_hl,
     sep_left = opts.sep_left,

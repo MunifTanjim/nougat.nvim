@@ -133,12 +133,12 @@ local Item = require("nougat.item")
 
 > **Note** > **Common Options**
 
-#### `refresh`
+#### `prepare`
 
 **Type:** `(self: NougatItem, ctx: nougat_ctx) -> nil`
 
 If provided, the function is called before each item is evaluated. It can be used to
-collect data for the functions called later in the item evaluation cycle.
+prepare data for the functions called later in the item evaluation cycle.
 
 #### `hidden`
 
@@ -433,7 +433,7 @@ The complex calculations can be done in multiple places:
 
 - Outside the bar evaluation process, e.g. using an autocommand. Evaluation time won't
   be affected by this.
-- Inside the bar evaluation process, e.g. inside item's `refresh` or `content` callback
+- Inside the bar evaluation process, e.g. inside item's `prepare` or `content` callback
   function. Evaluation time will be affected only when cached value is missing or if
   cache value is invalidated.
 

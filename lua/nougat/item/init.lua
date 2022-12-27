@@ -18,7 +18,7 @@ local next_id = u.create_id_generator()
 ---@field hl? nougat_item_hl
 ---@field content nougat_item_content
 ---@field hidden? nougat_item_hidden
----@field refresh? fun(self: NougatItem, ctx: nougat_ctx):nil
+---@field prepare? fun(self: NougatItem, ctx: nougat_ctx):nil
 local Item = Object("NougatItem")
 
 local function content_function_processor(item, ctx)
@@ -44,7 +44,7 @@ function Item:init(config)
   self.sep_right = iu.normalize_sep(1, config.sep_right)
 
   self.hidden = config.hidden
-  self.refresh = config.refresh
+  self.prepare = config.prepare
 
   if config.type == "code" then
     self.content = core.code(config.content, {
