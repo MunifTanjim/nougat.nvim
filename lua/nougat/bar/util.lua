@@ -1,14 +1,9 @@
 local core = require("nui.bar.core")
+local store = require("nougat.bar.store")
 
-local config = {
-  statusline = {},
-  tabline = {},
-  winbar = {},
-}
-
-local statusline = config.statusline
-local tabline = config.tabline
-local winbar = config.winbar
+local statusline = store.statusline
+local tabline = store.tabline
+local winbar = store.winbar
 
 local statusline_generator = core.generator(function(ctx)
   ctx.width = vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(ctx.winid)
