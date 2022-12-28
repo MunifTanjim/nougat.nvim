@@ -32,20 +32,26 @@ local char = {
 
 mod.char = char
 
+mod.hl = {
+  prev_bg = -1,
+  child_bg = 0,
+  next_bg = 1,
+}
+
 local hl_transition_by_char = {
-  [char.left_chevron_solid] = { bg = -1 },
-  [char.right_chevron_solid] = { bg = 1 },
-  [char.left_lower_triangle_solid] = { bg = -1 },
-  [char.left_upper_triangle_solid] = { bg = -1 },
-  [char.right_lower_triangle_solid] = { bg = 1 },
-  [char.right_upper_triangle_solid] = { bg = 1 },
-  [char.left_half_circle_solid] = { bg = -1 },
-  [char.right_half_circle_solid] = { bg = 1 },
+  [char.left_chevron_solid] = { bg = mod.hl.prev_bg },
+  [char.right_chevron_solid] = { bg = mod.hl.next_bg },
+  [char.left_lower_triangle_solid] = { bg = mod.hl.prev_bg },
+  [char.left_upper_triangle_solid] = { bg = mod.hl.prev_bg },
+  [char.right_lower_triangle_solid] = { bg = mod.hl.next_bg },
+  [char.right_upper_triangle_solid] = { bg = mod.hl.next_bg },
+  [char.left_half_circle_solid] = { bg = mod.hl.prev_bg },
+  [char.right_half_circle_solid] = { bg = mod.hl.next_bg },
 }
 
 --luacheck: push no max line length
 
----@alias nougat_separator_hl_def { bg?: string|-1|1, fg?: string|-1|1 }
+---@alias nougat_separator_hl_def { bg?: string|number, fg?: string|number }
 ---@alias nougat_separator_hl nougat_separator_hl_def|(fun(item: NougatItem, ctx: nougat_ctx):nougat_separator_hl_def)
 ---@alias nougat_separator { content: string, hl?: nougat_separator_hl }
 

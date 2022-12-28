@@ -146,8 +146,9 @@ local o_transitional_hl = {}
 ---@param prev_hl? nougat_hl_def
 ---@param curr_hl nougat_hl_def
 ---@param next_hl? nougat_hl_def
+---@param child_hl? nougat_hl_def
 ---@return nougat_hl_def transitional_hl
-function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
+function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl, child_hl)
   ---@diagnostic disable-next-line: assign-type-mismatch
   o_transitional_hl.bg, o_transitional_hl.fg = hl.bg, hl.fg or curr_hl and curr_hl.bg or "bg"
 
@@ -155,12 +156,16 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
     o_transitional_hl.bg = prev_hl and prev_hl.bg or nil
   elseif o_transitional_hl.bg == 1 then
     o_transitional_hl.bg = next_hl and next_hl.bg or nil
+  elseif o_transitional_hl.bg == 0 then
+    o_transitional_hl.bg = child_hl and child_hl.bg or nil
   end
 
   if o_transitional_hl.fg == -1 then
-    o_transitional_hl.fg = prev_hl and prev_hl.fg or nil
+    o_transitional_hl.fg = prev_hl and prev_hl.bg or nil
   elseif o_transitional_hl.fg == 1 then
-    o_transitional_hl.fg = next_hl and next_hl.fg or nil
+    o_transitional_hl.fg = next_hl and next_hl.bg or nil
+  elseif o_transitional_hl.fg == 0 then
+    o_transitional_hl.fg = child_hl and child_hl.bg or nil
   end
 
   return o_transitional_hl
@@ -175,6 +180,8 @@ end
 ---@field sr_idx? integer sep right index
 ---@field r? nougat_hl_def reset
 ---@field r_idx? integer reset index
+---@field fc_idx? integer first child index
+---@field lc_idx? integer last child index
 ---@field pio? integer prev index offset
 ---@field nio? integer next index offset
 ---@field fb? nougat_hl_def fallback
@@ -194,6 +201,8 @@ local function get_item_hl_table(hls, hl_idx)
     item_hl.sr_idx = nil
     item_hl.r = nil
     item_hl.r_idx = nil
+    item_hl.fc_idx = nil
+    item_hl.lc_idx = nil
     item_hl.pio = -1
     item_hl.nio = 1
     item_hl.fb = nil
@@ -209,6 +218,8 @@ local function get_item_hl_table(hls, hl_idx)
     sr_idx = nil,
     r = nil,
     r_idx = nil,
+    fc_idx = nil,
+    lc_idx = nil,
     pio = -1,
     nio = 1,
     fb = nil,
@@ -353,8 +364,11 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
               mod.prepare_parts(content, ctx, item_hl.c)
 
               if hl_idx ~= hls.len then
-                item_hl.nio = item_hl.nio + hls.len - hl_idx
+                local total_child_hls = hls.len - hl_idx
+                item_hl.nio = item_hl.nio + total_child_hls
                 hl_idx = hls.len
+                item_hl.fc_idx = total_child_hls == 1 and hl_idx or hl_idx - total_child_hls + 1
+                item_hl.lc_idx = hl_idx
               end
               part_idx = parts.len
             end
@@ -426,8 +440,9 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     local next_hl_c = idx + hl.nio <= hl_idx and hls[idx + hl.nio].c or nil
 
     if hl.sl then
+      local child_hl_c = hl.fc_idx and hls[hl.fc_idx].c or nil
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c), hl.fb or fallback_hl),
+        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sl_idx
@@ -439,8 +454,9 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.sr then
+      local child_hl_c = hl.lc_idx and hls[hl.lc_idx].c or nil
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c), hl.fb or fallback_hl),
+        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sr_idx

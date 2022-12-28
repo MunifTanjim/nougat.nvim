@@ -190,18 +190,17 @@ Left and right separator for the item.
 
 `nougat_separtor` is a `table`:
 
-| Key       | Type                  | Description         |
-| --------- | --------------------- | ------------------- |
-| `content` | `string`              | separator character |
-| `hl`      | `table`               | separator highlight |
-| `hl.bg`   | `string` / `-1` / `1` | background color    |
-| `hl.fg`   | `string` / `-1` / `1` | foreground color    |
+| Key       | Type                      | Description         |
+| --------- | ------------------------- | ------------------- |
+| `content` | `string`                  | separator character |
+| `hl`      | `nougat_separator_hl_def` | separator highlight |
+| `hl.bg`   | `string` / `number`       | background color    |
+| `hl.fg`   | `string` / `number`       | foreground color    |
 
 For `hl.bg` and `hl.fg`:
 
 - `string` can be a named color (e.g. `rebeccapurple`) or hex code (e.g. `#663399`)
-- `-1` means highlight color from the previous item.
-- `1` means highlight color from the next item.
+- `number` can be one of the values from `require("nougat.separator").hl`
 
 If a list of `nougat_separator` is passed, they will be used for appropriate breakpoints.
 
