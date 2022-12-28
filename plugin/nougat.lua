@@ -1,6 +1,6 @@
 local completion_store = {
   [""] = { "profile" },
-  profile = { "start", "result", "stop" },
+  profile = { "bench", "start", "result", "stop" },
 }
 
 vim.api.nvim_create_user_command("Nougat", function(opts)
