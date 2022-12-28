@@ -167,11 +167,11 @@ function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl)
 end
 
 ---@class nougat_lazy_item_hl
----@field c? nougat_hl_def content
+---@field c? false|nougat_hl_def content (`false` means `content` w/o hl)
 ---@field c_idx? integer content index
----@field sl? nougat_separator_hl_def sep left
+---@field sl? false|nougat_separator_hl_def sep left (`false` means `sep_left` w/o hl)
 ---@field sl_idx? integer sep left index
----@field sr? nougat_separator_hl_def sep right
+---@field sr? false|nougat_separator_hl_def sep right (`false` means `sep_right` w/o hl)
 ---@field sr_idx? integer sep right index
 ---@field r? nougat_hl_def reset
 ---@field r_idx? integer reset index
@@ -217,6 +217,31 @@ local function get_item_hl_table(hls, hl_idx)
   return item_hl
 end
 
+---@param hl? nougat_item_hl
+---@param item NougatItem
+---@param ctx nougat_ctx
+local function resolve_highlight(hl, item, ctx)
+  local highlight = hl
+
+  if type(highlight) == "function" then
+    highlight = highlight(item, ctx)
+  end
+
+  if not highlight or type(highlight) == "table" then
+    return highlight or false
+  end
+
+  if type(highlight) == "string" then
+    return mod.get_hl(highlight)
+  end
+
+  if type(highlight) == "number" then
+    return mod.get_hl("User" .. highlight)
+  end
+
+  return false
+end
+
 ---@param items NougatItem[]|{ len?: integer }
 ---@param ctx nougat_ctx
 ---@param item_fallback_hl? nougat_hl_def
@@ -247,13 +272,18 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
         local sep = item.sep_left[breakpoint]
 
         if sep.content then
-          if sep.hl then
-            item_hl.sl = sep.hl
+          item_hl.sl = resolve_highlight(sep.hl, item, ctx)
+
+          if item_hl.sl then
             item_hl.sl_idx = part_idx
             part_idx = part_idx + 3
           elseif item.hl then
-            item_hl.c_idx = part_idx
-            part_idx = part_idx + 3
+            item_hl.c = resolve_highlight(item.hl, item, ctx)
+
+            if item_hl.c then
+              item_hl.c_idx = part_idx
+              part_idx = part_idx + 3
+            end
           end
 
           part_idx = part_idx + 1
@@ -261,24 +291,20 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
         end
       end
 
-      if item.hl then
-        local hl_c = type(item.hl) == "function" and item:hl(ctx) or item.hl
-        if type(hl_c) == "table" then
-          item_hl.c = hl_c
-        elseif type(hl_c) == "string" then
-          item_hl.c = mod.get_hl(hl_c)
-        elseif type(hl_c) == "number" then
-          item_hl.c = mod.get_hl("User" .. hl_c)
-        else
-          item_hl.c = nil
+      -- content hl is not added yet
+      if not item_hl.c_idx then
+        -- content hl is not resolved yet
+        if item_hl.c ~= false then
+          item_hl.c = resolve_highlight(item.hl, item, ctx)
         end
 
-        if not item_hl.c_idx then
+        if item_hl.c then
           item_hl.c_idx = part_idx
           part_idx = part_idx + 3
+        elseif item_hl.sl_idx then -- sep_left hl was added
+          -- separator's highlight should not bleed into content
+          part_idx = core.add_highlight(0, nil, parts, part_idx)
         end
-      elseif item_hl.sl then
-        part_idx = core.add_highlight(0, nil, parts, part_idx)
       end
 
       if item.content then
@@ -346,8 +372,9 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
         local sep = item.sep_right[breakpoint]
 
         if sep.content then
-          if sep.hl then
-            item_hl.sr = sep.hl
+          item_hl.sr = resolve_highlight(sep.hl, item, ctx)
+
+          if item_hl.sr then
             item_hl.sr_idx = part_idx
             part_idx = part_idx + 3
           end

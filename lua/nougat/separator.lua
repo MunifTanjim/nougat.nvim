@@ -43,19 +43,29 @@ local hl_transition_by_char = {
   [char.right_half_circle_solid] = { bg = 1 },
 }
 
+--luacheck: push no max line length
+
 ---@alias nougat_separator_hl_def { bg?: string|-1|1, fg?: string|-1|1 }
----@alias nougat_separator { content: string, hl?: nougat_separator_hl_def }
+---@alias nougat_separator_hl nougat_separator_hl_def|(fun(item: NougatItem, ctx: nougat_ctx):nougat_separator_hl_def)
+---@alias nougat_separator { content: string, hl?: nougat_separator_hl }
+
+--luacheck: pop
 
 ---@param separator nougat_separator
----@param use_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-local function with_hl(separator, use_transition)
-  if use_transition then
-    local hl = hl_transition_by_char[separator.content]
-    separator.hl = hl and { bg = hl.bg, fg = hl.fg } or {}
-  else
-    separator.hl = {}
+local function with_hl(separator, hl)
+  if not hl then
+    return separator
   end
+
+  if hl == true then
+    local default_hl = hl_transition_by_char[separator.content]
+    separator.hl = default_hl and { bg = default_hl.bg, fg = default_hl.fg } or {}
+  else
+    separator.hl = hl
+  end
+
   return separator
 end
 
@@ -105,163 +115,174 @@ function mod.none()
 end
 
 -- '` `'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.space()
-  return {
+function mod.space(hl)
+  return with_hl({
     content = char.space,
-  }
+  }, hl)
 end
 
 -- '`│`'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.vertical()
-  return {
+function mod.vertical(hl)
+  return with_hl({
     content = char.vertical,
-  }
+  }, hl)
 end
 
 -- '`┃`'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.heavy_veritcal()
-  return {
+function mod.heavy_veritcal(hl)
+  return with_hl({
     content = char.heavy_veritcal,
-  }
+  }, hl)
 end
 
 -- '`║`'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.double_vertical()
-  return {
+function mod.double_vertical(hl)
+  return with_hl({
     content = char.double_vertical,
-  }
+  }, hl)
 end
 
 -- '`█`'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.full_block()
-  return {
+function mod.full_block(hl)
+  return with_hl({
     content = char.full_block,
-  }
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_chevron()
-  return {
+function mod.left_chevron(hl)
+  return with_hl({
     content = char.left_chevron,
-  }
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_chevron_solid(use_hl_transition)
+function mod.left_chevron_solid(hl)
   return with_hl({
     content = char.left_chevron_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_chevron()
-  return {
+function mod.right_chevron(hl)
+  return with_hl({
     content = char.right_chevron,
-  }
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_chevron_solid(use_hl_transition)
+function mod.right_chevron_solid(hl)
   return with_hl({
     content = char.right_chevron_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.falling_diagonal()
-  return {
+function mod.falling_diagonal(hl)
+  return with_hl({
     content = char.falling_diagonal,
-  }
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.rising_diagonal()
-  return {
+function mod.rising_diagonal(hl)
+  return with_hl({
     content = char.rising_diagonal,
-  }
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_lower_triangle_solid(use_hl_transition)
+function mod.left_lower_triangle_solid(hl)
   return with_hl({
     content = char.left_lower_triangle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_upper_triangle_solid(use_hl_transition)
+function mod.left_upper_triangle_solid(hl)
   return with_hl({
     content = char.left_upper_triangle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_lower_triangle_solid(use_hl_transition)
+function mod.right_lower_triangle_solid(hl)
   return with_hl({
     content = char.right_lower_triangle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_upper_triangle_solid(use_hl_transition)
+function mod.right_upper_triangle_solid(hl)
   return with_hl({
     content = char.right_upper_triangle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_half_circle()
-  return {
+function mod.left_half_circle(hl)
+  return with_hl({
     content = char.left_half_circle,
-  }
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.left_half_circle_solid(use_hl_transition)
+function mod.left_half_circle_solid(hl)
   return with_hl({
     content = char.left_half_circle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 -- '``'
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_half_circle()
-  return {
+function mod.right_half_circle(hl)
+  return with_hl({
     content = char.right_half_circle,
-  }
+  }, hl)
 end
 
 -- '``'
----@param use_hl_transition? boolean
+---@param hl? nougat_separator_hl|boolean
 ---@return nougat_separator
-function mod.right_half_circle_solid(use_hl_transition)
+function mod.right_half_circle_solid(hl)
   return with_hl({
     content = char.right_half_circle_solid,
-  }, use_hl_transition)
+  }, hl)
 end
 
 return mod

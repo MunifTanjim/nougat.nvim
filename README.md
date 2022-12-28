@@ -412,7 +412,18 @@ These are the built-in separators:
 - `right_half_circle`
 - `right_half_circle_solid`
 
-Each of them is a function and returns `nougat_separator`.
+Each of them is a function.
+
+_Signature:_ `(hl?: boolean|nougat_separator_hl_def|(fun(item: NougatItem, ctx: nougat_ctx) -> nougat_separator_hl_def)) -> nougat_separator`
+
+If `hl` is `nil` or `false`, highlight will be same as the content.
+
+If `hl` is `true`, highlight will automagically blend in seamlessly with the
+previous/next item's highlight.
+
+If `hl` is `nougat_separator_hl_def`, that `table` will be used as highlight.
+
+If `hl` is `function`, the return value will be used as highlight.
 
 **Example**
 
@@ -420,9 +431,6 @@ Each of them is a function and returns `nougat_separator`.
 sep.left_chevron()
 sep.right_lower_triangle_solid(true)
 ```
-
-If the first parameter `use_hl_transition` is `true`, that separator's highlight will
-automagically blend in seamlessly with the previous/next item's highlight.
 
 ## :gear: Module: Cache
 

@@ -16,7 +16,9 @@ local next_id = u.create_id_generator()
 ---@class NougatItem
 ---@field id integer
 ---@field hl? nougat_item_hl
+---@field sep_left? nougat_separator[]
 ---@field content nougat_item_content
+---@field sep_right? nougat_separator[]
 ---@field hidden? nougat_item_hidden
 ---@field prepare? fun(self: NougatItem, ctx: nougat_ctx):nil
 local Item = Object("NougatItem")
