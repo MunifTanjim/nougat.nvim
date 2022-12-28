@@ -36,7 +36,7 @@ end
 function mod.prepare_property_breakpoints(item, name, breakpoints)
   local val = item[name]
 
-  if val then
+  if type(val) == "table" then
     for i = 1, #breakpoints do
       if not val[i] then
         val[i] = val[i - 1]

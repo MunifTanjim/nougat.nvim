@@ -9,6 +9,7 @@ local next_id = u.create_id_generator()
 
 ---@alias nougat_item_content string|string[]|NougatItem[]|(fun(self: NougatItem, ctx: nougat_ctx):nil|string|string[]|NougatItem[])
 ---@alias nougat_item_hl integer|string|nougat_hl_def|(fun(self: NougatItem, ctx: nougat_ctx): integer|string|nougat_hl_def)
+---@alias nougat_item_affix string[]|(fun(item: NougatItem, ctx: nougat_ctx):string)
 ---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: nougat_ctx):boolean)
 
 --luacheck: pop
@@ -17,7 +18,9 @@ local next_id = u.create_id_generator()
 ---@field id integer
 ---@field hl? nougat_item_hl
 ---@field sep_left? nougat_separator[]
+---@field prefix? nougat_item_affix
 ---@field content nougat_item_content
+---@field suffix? nougat_item_affix
 ---@field sep_right? nougat_separator[]
 ---@field hidden? nougat_item_hidden
 ---@field prepare? fun(self: NougatItem, ctx: nougat_ctx):nil

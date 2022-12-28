@@ -242,6 +242,18 @@ local function resolve_highlight(hl, item, ctx)
   return false
 end
 
+---@param affix nougat_item_affix
+---@param item NougatItem
+---@param ctx nougat_ctx
+---@param breakpoint integer
+local function resolve_affix(affix, item, ctx, breakpoint)
+  if type(affix) == "function" then
+    return affix(item, ctx) or ""
+  end
+
+  return affix[breakpoint]
+end
+
 ---@param items NougatItem[]|{ len?: integer }
 ---@param ctx nougat_ctx
 ---@param item_fallback_hl? nougat_hl_def
@@ -310,7 +322,7 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
       if item.content then
         if item.prefix then
           part_idx = part_idx + 1
-          parts[part_idx] = item.prefix[breakpoint]
+          parts[part_idx] = resolve_affix(item.prefix, item, ctx, breakpoint)
         end
 
         local content = item.content
@@ -353,7 +365,7 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
 
           if item.suffix then
             part_idx = part_idx + 1
-            parts[part_idx] = item.suffix[breakpoint]
+            parts[part_idx] = resolve_affix(item.suffix, item, ctx, breakpoint)
           end
         else -- no content returned
           if part_idx == parts.len then -- no parts added
