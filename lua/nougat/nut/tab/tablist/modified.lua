@@ -11,7 +11,7 @@ local function get_content(item, ctx)
 end
 
 local function hidden(_, ctx)
-  return not buffer_cache_store[ctx.ctx.tab.bufnr].modified
+  return not buffer_cache_store[ctx.tab.bufnr].modified
 end
 
 local mod = {}

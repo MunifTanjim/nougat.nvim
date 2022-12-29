@@ -6,8 +6,7 @@ local o_label_opts = { tabnr = nil, close = true }
 
 local function get_content(item, ctx)
   local config = item:config(ctx)
-  local tab_ctx = ctx.ctx.tab
-  o_label_opts.tabnr = tab_ctx.tabnr
+  o_label_opts.tabnr = ctx.tab.tabnr
   return core.label(config.text, o_label_opts)
 end
 

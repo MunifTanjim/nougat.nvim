@@ -5,7 +5,7 @@ local Item = require("nougat.item")
 local o_label_opts = { tabnr = nil, close = false }
 
 local function get_content(_, ctx)
-  local tab_ctx = ctx.ctx.tab
+  local tab_ctx = ctx.tab
   o_label_opts.tabnr = tab_ctx.tabnr
   return core.label(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"), o_label_opts)
 end
@@ -15,7 +15,7 @@ local hl = {}
 local diagnostic_cache, diagnostic_severity, diagnostic_hl_group_by_severity
 
 local function hl_diagnostic(_, ctx)
-  return diagnostic_hl_group_by_severity[diagnostic_cache[ctx.ctx.tab.bufnr].max]
+  return diagnostic_hl_group_by_severity[diagnostic_cache[ctx.tab.bufnr].max]
 end
 
 function hl.diagnostic()

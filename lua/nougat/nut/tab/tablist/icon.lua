@@ -16,15 +16,15 @@ local icon_char_by_ft = {}
 local icon_hl_by_ft = {}
 
 local function get_content(item, ctx)
-  return icon_char_by_ft[item.buf_cache[ctx.ctx.tab.bufnr].filetype]
+  return icon_char_by_ft[item.buf_cache[ctx.tab.bufnr].filetype]
 end
 
 local function get_hl(item, ctx)
-  return icon_hl_by_ft[item.buf_cache[ctx.ctx.tab.bufnr].filetype]
+  return icon_hl_by_ft[item.buf_cache[ctx.tab.bufnr].filetype]
 end
 
 local function prepare(item, ctx)
-  local bufnr = ctx.ctx.tab.bufnr
+  local bufnr = ctx.tab.bufnr
   local cache = item.buf_cache[bufnr]
 
   local filetype = cache.filetype

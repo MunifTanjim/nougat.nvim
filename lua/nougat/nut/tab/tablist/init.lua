@@ -24,7 +24,7 @@ local function get_content(item, ctx)
 
   u.prepare_parts(item.tabs, ctx)
 
-  ctx.ctx.tab = nil
+  ctx.tab = nil
 end
 
 local function on_init_breakpoints(item, breakpoints)
@@ -51,7 +51,7 @@ local tabs_metatable = {
     tab_ctx.bufnr = vim.api.nvim_win_get_buf(tab_ctx.winid)
     tab_ctx.is_focused = ctx.tabid == tabid
 
-    ctx.ctx.tab = tab_ctx
+    ctx.tab = tab_ctx
 
     return tabs.items[idx]
   end,
