@@ -8,19 +8,21 @@ local function get_content(item, ctx)
 
   local part_idx = 0
 
-  if config.readonly and vim.bo[ctx.bufnr].readonly then
+  local bufnr = ctx.bufnr
+
+  if config.readonly and vim.api.nvim_buf_get_option(bufnr, "readonly") then
     part_idx = part_idx + 1
     o_parts[part_idx] = config.readonly
     part_idx = part_idx + 1
     o_parts[part_idx] = config.sep
   end
-  if config.modified and vim.bo[ctx.bufnr].modified then
+  if config.modified and vim.api.nvim_buf_get_option(bufnr, "modified") then
     part_idx = part_idx + 1
     o_parts[part_idx] = config.modified
     part_idx = part_idx + 1
     o_parts[part_idx] = config.sep
   end
-  if config.nomodifiable and not vim.bo[ctx.bufnr].modifiable then
+  if config.nomodifiable and not vim.api.nvim_buf_get_option(bufnr, "modifiable") then
     part_idx = part_idx + 1
     o_parts[part_idx] = config.nomodifiable
     part_idx = part_idx + 1

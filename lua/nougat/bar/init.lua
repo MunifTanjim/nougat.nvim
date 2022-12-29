@@ -19,13 +19,17 @@ local fallback_hl_name_by_type = {
   },
 }
 
+local option_value_global_opts = { scope = "global" }
+
 ---@type table<'statusline'|'tabline'|'winbar', fun(winid: integer): integer>
 local get_width = {
   statusline = function(winid)
-    return vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(winid)
+    return vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
+        and vim.api.nvim_get_option_value("columns", option_value_global_opts)
+      or vim.api.nvim_win_get_width(winid)
   end,
   tabline = function()
-    return vim.go.columns
+    return vim.api.nvim_get_option_value("columns", option_value_global_opts)
   end,
   winbar = function(winid)
     return vim.api.nvim_win_get_width(winid)

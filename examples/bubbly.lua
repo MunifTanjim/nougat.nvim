@@ -94,10 +94,10 @@ local mode = nut.mode({
 local filename = (function()
   local item = Item({
     prepare = function(_, ctx)
-      local data = ctx.ctx
-      data.readonly = vim.bo[ctx.bufnr].readonly
-      data.modifiable = vim.bo[ctx.bufnr].modifiable
-      data.modified = vim.bo[ctx.bufnr].modified
+      local bufnr, data = ctx.bufnr, ctx.ctx
+      data.readonly = vim.api.nvim_buf_get_option(bufnr, "readonly")
+      data.modifiable = vim.api.nvim_buf_get_option(bufnr, "modifiable")
+      data.modified = vim.api.nvim_buf_get_option(bufnr, "modified")
     end,
     hl = { bg = "fg", fg = color.bg },
     sep_left = sep.left_half_circle_solid({ fg = sep.hl.child_bg }),
@@ -163,7 +163,7 @@ vim.api.nvim_create_autocmd("User", {
   callback = function(params)
     local bufnr = params.buf
     vim.schedule(function()
-      local status = vim.b[bufnr].gitsigns_status_dict
+      local status = vim.fn.getbufvar(bufnr, "gitsigns_status_dict", false)
       local cache = gitstatus_cache[bufnr]
       if status and status.added then
         cache.added = status.added > 0 and tostring(status.added) or nil

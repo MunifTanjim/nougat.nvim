@@ -1,7 +1,7 @@
 local Item = require("nougat.item")
 
 local function get_content(item, ctx)
-  local fileformat = vim.bo[ctx.bufnr].fileformat
+  local fileformat = vim.api.nvim_buf_get_option(ctx.bufnr, "fileformat")
   return item:config(ctx).text[fileformat] or fileformat
 end
 

@@ -5,8 +5,12 @@ local statusline = store.statusline
 local tabline = store.tabline
 local winbar = store.winbar
 
+local option_value_global_opts = { scope = "global" }
+
 local statusline_generator = core.generator(function(ctx)
-  ctx.width = vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(ctx.winid)
+  ctx.width = vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
+      and vim.api.nvim_get_option_value("columns", option_value_global_opts)
+    or vim.api.nvim_win_get_width(ctx.winid)
 
   local select = statusline.select
 
@@ -20,9 +24,11 @@ end, {
 })
 
 local statusline_by_filetype_generator = core.generator(function(ctx)
-  ctx.width = vim.go.laststatus == 3 and vim.go.columns or vim.api.nvim_win_get_width(ctx.winid)
+  ctx.width = vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
+      and vim.api.nvim_get_option_value("columns", option_value_global_opts)
+    or vim.api.nvim_win_get_width(ctx.winid)
 
-  local select = statusline.by_filetype[vim.bo[ctx.bufnr].filetype]
+  local select = statusline.by_filetype[vim.api.nvim_buf_get_option(ctx.bufnr, "filetype")]
 
   return vim.api.nvim_win_call(ctx.winid, function()
     local stl = type(select) == "function" and select(ctx) or select
@@ -34,7 +40,7 @@ end, {
 })
 
 local tabline_generator = core.generator(function(ctx)
-  ctx.width = vim.go.columns
+  ctx.width = vim.api.nvim_get_option_value("columns", option_value_global_opts)
 
   local select = tabline.select
 
@@ -64,7 +70,7 @@ end, {
 local winbar_by_filetype_generator = core.generator(function(ctx)
   ctx.width = vim.api.nvim_win_get_width(ctx.winid)
 
-  local select = winbar.by_filetype[vim.bo[ctx.bufnr].filetype]
+  local select = winbar.by_filetype[vim.api.nvim_buf_get_option(ctx.bufnr, "filetype")]
 
   return vim.api.nvim_win_call(ctx.winid, function()
     local wbr = type(select) == "function" and select(ctx) or select
@@ -91,7 +97,7 @@ local function set_statusline_for_filetype(filetype, bar)
           vim.schedule(function()
             if vim.api.nvim_buf_is_valid(bufnr) then
               vim.api.nvim_buf_call(bufnr, function()
-                vim.wo.statusline = statusline_by_filetype_generator
+                vim.api.nvim_win_set_option(0, "statusline", statusline_by_filetype_generator)
               end)
             end
           end)
@@ -116,7 +122,7 @@ local function set_winbar_local(bar)
         return
       end
 
-      vim.wo.winbar = winbar_generator
+      vim.api.nvim_win_set_option(0, "winbar", winbar_generator)
     end,
   })
 end
@@ -137,7 +143,7 @@ local function set_winbar_for_filetype(filetype, bar)
           vim.schedule(function()
             if vim.api.nvim_buf_is_valid(bufnr) then
               vim.api.nvim_buf_call(bufnr, function()
-                vim.wo.winbar = winbar_by_filetype_generator
+                vim.api.nvim_win_set_option(0, "winbar", winbar_by_filetype_generator)
               end)
             end
           end)
@@ -161,7 +167,7 @@ function mod.set_statusline(bar, opts)
   else
     statusline.select = bar
 
-    vim.go.statusline = statusline_generator
+    vim.api.nvim_set_option_value("statusline", statusline_generator, option_value_global_opts)
   end
 end
 
@@ -178,7 +184,7 @@ end
 function mod.set_tabline(bar)
   tabline.select = bar
 
-  vim.go.tabline = tabline_generator
+  vim.api.nvim_set_option_value("tabline", tabline_generator, option_value_global_opts)
 end
 
 function mod.refresh_tabline()
@@ -194,7 +200,7 @@ function mod.set_winbar(bar, opts)
     set_winbar_for_filetype(opts.filetype, bar)
   elseif opts.global then
     winbar.select = bar
-    vim.go.winbar = winbar_generator
+    vim.api.nvim_set_option_value("winbar", winbar_generator, option_value_global_opts)
   else
     set_winbar_local(bar)
   end

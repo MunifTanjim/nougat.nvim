@@ -3,9 +3,9 @@ local Item = require("nougat.item")
 local function get_content(item, ctx)
   local text = item:config(ctx).text
   return table.concat({
-    vim.bo[ctx.bufnr].fileencoding,
-    vim.bo[ctx.bufnr].bomb and text.bomb or "",
-    vim.bo[ctx.bufnr].endofline and "" or text.noendofline,
+    vim.api.nvim_buf_get_option(ctx.bufnr, "fileencoding"),
+    vim.api.nvim_buf_get_option(ctx.bufnr, "bomb") and text.bomb or "",
+    vim.api.nvim_buf_get_option(ctx.bufnr, "endofline") and "" or text.noendofline,
   })
 end
 

@@ -470,10 +470,12 @@ vim.api.nvim_create_autocmd("BufModifiedSet", {
   group = vim.api.nvim_create_augroup("nougat.nut.dummy", { clear = true }),
   callback = function(params)
     local bufnr = params.buf
-    -- calculate the value (this is just an example)
-    local modified = vim.bo[bufnr].modified
-    -- cache the calculated value
-    cache_store[bufnr].modified = modified
+    vim.schedule(function ()
+      -- calculate the value (this is just an example)
+      local modified = vim.api.nvim_buf_get_option(bufnr, 'modified')
+      -- cache the calculated value
+      cache_store[bufnr].modified = modified
+    end)
   end,
 })
 

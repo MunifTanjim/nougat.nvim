@@ -32,7 +32,7 @@ local function get_content(item, ctx)
 
   local cache = item.cache[ctx.bufnr]
 
-  local changedtick = vim.b[ctx.bufnr].changedtick
+  local changedtick = vim.api.nvim_buf_get_var(ctx.bufnr, "changedtick")
   if cache.ct ~= changedtick then
     cache.ct = changedtick
     cache.v = get_wordcount(config.format)

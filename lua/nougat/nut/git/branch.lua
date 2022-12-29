@@ -5,7 +5,7 @@ local get_content = {
     return vim.fn.FugitiveHead()
   end,
   gitsigns = function(_, ctx)
-    return vim.b[ctx.bufnr].gitsigns_head
+    return vim.fn.getbufvar(ctx.bufnr, "gitsigns_head")
   end,
   [""] = function() end,
 }

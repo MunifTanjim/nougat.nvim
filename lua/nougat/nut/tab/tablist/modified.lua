@@ -5,7 +5,7 @@ local function get_content(item, ctx)
 end
 
 local function hidden(_, ctx)
-  return not vim.bo[ctx.ctx.tab.bufnr].modified
+  return not vim.api.nvim_buf_get_option(ctx.ctx.tab.bufnr, "modified")
 end
 
 local mod = {}

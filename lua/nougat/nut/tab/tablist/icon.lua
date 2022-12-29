@@ -7,22 +7,22 @@ local filetype_overide = {
 }
 
 local function get_content(_, ctx)
-  return vim.b[ctx.ctx.tab.bufnr].ft_icon[1]
+  return vim.api.nvim_buf_get_var(ctx.ctx.tab.bufnr, "ft_icon")[1]
 end
 
 local function get_hl(_, ctx)
-  return vim.b[ctx.ctx.tab.bufnr].ft_icon[2]
+  return vim.api.nvim_buf_get_var(ctx.ctx.tab.bufnr, "ft_icon")[2]
 end
 
 local function prepare(_, ctx)
-  local tab_ctx = ctx.ctx.tab
+  local bufnr = ctx.ctx.tab.bufnr
 
-  local filetype = vim.bo[tab_ctx.bufnr].filetype
+  local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
   filetype = filetype_overide[filetype] or filetype
 
-  if not vim.b[tab_ctx.bufnr].ft_icon then
+  if not vim.fn.getbufvar(bufnr, "ft_icon", false) then
     local icon_char, icon_fg = devicons.get_icon_color_by_filetype(filetype, { default = true })
-    vim.b[tab_ctx.bufnr].ft_icon = { icon_char, { fg = icon_fg } }
+    vim.api.nvim_buf_set_var(bufnr, "ft_icon", { icon_char, { fg = icon_fg } })
   end
 end
 
