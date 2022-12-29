@@ -7,6 +7,7 @@ local sep = require("nougat.separator")
 
 local nut = {
   buf = {
+    diagnostic_count = require("nougat.nut.buf.diagnostic_count").create,
     filename = require("nougat.nut.buf.filename").create,
     filetype = require("nougat.nut.buf.filetype").create,
   },
@@ -269,12 +270,20 @@ local ruler = (function()
   return item
 end)()
 
--- renders space if `condition` evaluates to `true`
----@param condition nougat_item_hidden
-local function space_cond(condition)
-  local hidden = type(condition) == "function" and function(item, ctx)
-    return not condition(item, ctx)
-  end or condition
+-- renders space only when item is rendered
+---@param item NougatItem
+local function paired_space(item)
+  local hidden = item.hidden
+  if type(hidden) == "boolean" then
+    hidden = function(_, _)
+      return item.hidden
+    end
+  end
+  if type(hidden) == "function" then
+    hidden = function(_, ctx)
+      return item:hidden(ctx)
+    end
+  end
 
   return {
     content = sep.space().content,
@@ -293,9 +302,7 @@ stl:add_item(nut.git.branch({
 }))
 stl:add_item(sep.space())
 stl:add_item(gitstatus)
-stl:add_item(space_cond(function(_, ctx)
-  return ctx.gitstatus.total > 0
-end))
+stl:add_item(paired_space(gitstatus))
 stl:add_item(filename)
 stl:add_item(sep.space())
 stl:add_item(nut.spacer())
@@ -305,6 +312,18 @@ stl:add_item(nut.buf.filetype({
   sep_right = sep.right_half_circle_solid(true),
 }))
 stl:add_item(sep.space())
+local diagnostic_count = stl:add_item(nut.buf.diagnostic_count({
+  hl = { bg = color.bg4 },
+  sep_left = sep.left_half_circle_solid(true),
+  sep_right = sep.right_half_circle_solid(true),
+  config = {
+    error = { prefix = " ", fg = color.red },
+    warn = { prefix = " ", fg = color.yellow },
+    info = { prefix = " ", fg = color.blue },
+    hint = { prefix = " ", fg = color.green },
+  },
+}))
+stl:add_item(paired_space(diagnostic_count))
 stl:add_item(ruler)
 stl:add_item(sep.space())
 
