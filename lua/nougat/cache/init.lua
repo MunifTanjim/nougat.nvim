@@ -15,7 +15,7 @@ function mod.create_store(cache_type, name, default_value)
         setmetatable(vim.deepcopy(default_value), {
           __index = function(cache, key)
             if type(key) == "number" then
-              return rawset(cache, key, default_value)[key]
+              return rawset(cache, key, vim.deepcopy(default_value))[key]
             end
             if default_value[key] ~= nil then
               return rawset(cache, key, default_value[key])[key]
