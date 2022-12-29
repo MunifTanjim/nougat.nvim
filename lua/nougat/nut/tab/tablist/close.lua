@@ -5,9 +5,9 @@ local Item = require("nougat.item")
 local o_label_opts = { tabnr = nil, close = true }
 
 local function get_content(item, ctx)
-  local config = item:config(ctx)
+  local config, parts = item:config(ctx), ctx.parts
   o_label_opts.tabnr = ctx.tab.tabnr
-  return core.label(config.text, o_label_opts)
+  parts.len = core.add_label(config.text, o_label_opts, parts, parts.len)
 end
 
 local mod = {}

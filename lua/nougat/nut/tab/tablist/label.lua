@@ -5,9 +5,14 @@ local Item = require("nougat.item")
 local o_label_opts = { tabnr = nil, close = false }
 
 local function get_content(_, ctx)
-  local tab_ctx = ctx.tab
+  local tab_ctx, parts = ctx.tab, ctx.parts
   o_label_opts.tabnr = tab_ctx.tabnr
-  return core.label(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"), o_label_opts)
+  parts.len = core.add_label(
+    vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"),
+    o_label_opts,
+    parts,
+    parts.len
+  )
 end
 
 local hl = {}
