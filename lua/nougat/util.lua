@@ -50,7 +50,7 @@ local get_hl_cache = {}
 
 ---@param name string
 ---@return nougat_hl_def
-function mod.get_hl(name)
+local function get_hl(name)
   if get_hl_cache[name] then
     return get_hl_cache[name]
   end
@@ -116,7 +116,7 @@ local o_hl_def = {}
 ---@param hl nougat_hl_def
 ---@param fallback_hl nougat_hl_def
 ---@return string hl_name
-function mod.set_hl(hl, fallback_hl)
+local function set_hl(hl, fallback_hl)
   o_hl_def.bg, o_hl_def.fg, o_hl_def.bold, o_hl_def.italic =
     hl.bg or fallback_hl.bg, hl.fg or fallback_hl.fg, hl.bold, hl.italic
 
@@ -148,7 +148,7 @@ local o_transitional_hl = {}
 ---@param next_hl? nougat_hl_def
 ---@param child_hl? nougat_hl_def
 ---@return nougat_hl_def transitional_hl
-function mod.prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl, child_hl)
+local function prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl, child_hl)
   ---@diagnostic disable-next-line: assign-type-mismatch
   o_transitional_hl.bg, o_transitional_hl.fg = hl.bg, hl.fg or curr_hl and curr_hl.bg or "bg"
 
@@ -243,11 +243,11 @@ local function resolve_highlight(hl, item, ctx)
   end
 
   if type(highlight) == "string" then
-    return mod.get_hl(highlight)
+    return get_hl(highlight)
   end
 
   if type(highlight) == "number" then
-    return mod.get_hl("User" .. highlight)
+    return get_hl("User" .. highlight)
   end
 
   return false
@@ -268,7 +268,7 @@ end
 ---@param items NougatItem[]|{ len?: integer }
 ---@param ctx nougat_ctx
 ---@param item_fallback_hl? nougat_hl_def
-function mod.prepare_parts(items, ctx, item_fallback_hl)
+local function prepare_parts(items, ctx, item_fallback_hl)
   local breakpoint = ctx.ctx.breakpoint
 
   local hls, parts = ctx.hls, ctx.parts
@@ -361,7 +361,7 @@ function mod.prepare_parts(items, ctx, item_fallback_hl)
               parts.len = part_idx
 
               ---@cast content NougatItem[]
-              mod.prepare_parts(content, ctx, item_hl.c)
+              prepare_parts(content, ctx, item_hl.c)
 
               if hl_idx ~= hls.len then
                 local total_child_hls = hls.len - hl_idx
@@ -442,7 +442,7 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     if hl.sl then
       local child_hl_c = hl.fc_idx and hls[hl.fc_idx].c or nil
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
+        set_hl(prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sl_idx
@@ -450,13 +450,13 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.c then
-      core.add_highlight(mod.set_hl(hl.c, hl.fb or fallback_hl), nil, parts, hl.c_idx)
+      core.add_highlight(set_hl(hl.c, hl.fb or fallback_hl), nil, parts, hl.c_idx)
     end
 
     if hl.sr then
       local child_hl_c = hl.lc_idx and hls[hl.lc_idx].c or nil
       core.add_highlight(
-        mod.set_hl(mod.prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
+        set_hl(prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
         nil,
         parts,
         hl.sr_idx
@@ -464,9 +464,14 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.r then
-      core.add_highlight(mod.set_hl(hl.r, fallback_hl), nil, parts, hl.r_idx)
+      core.add_highlight(set_hl(hl.r, fallback_hl), nil, parts, hl.r_idx)
     end
   end
 end
+
+mod.get_hl = get_hl
+mod.set_hl = set_hl
+
+mod.prepare_parts = prepare_parts
 
 return mod
