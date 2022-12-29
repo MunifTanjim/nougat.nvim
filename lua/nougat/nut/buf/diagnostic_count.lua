@@ -12,6 +12,10 @@ diagnostic_cache.on("update", function(cache)
   cache.cc = nil
 end)
 
+local function default_hidden(item, ctx)
+  return item.cache[ctx.bufnr][item:config(ctx).severity] == 0
+end
+
 local function get_count_content(item, ctx)
   local config = item:config(ctx)
   local count = item.cache[ctx.bufnr][config.severity]
@@ -120,7 +124,7 @@ function mod.create(opts)
   end
 
   local item = Item({
-    hidden = opts.hidden,
+    hidden = opts.hidden == nil and default_hidden or opts.hidden,
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,
