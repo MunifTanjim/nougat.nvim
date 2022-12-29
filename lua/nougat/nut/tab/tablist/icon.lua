@@ -1,28 +1,44 @@
 local Item = require("nougat.item")
 local has_devicons, devicons = pcall(require, "nvim-web-devicons")
 
+local buffer_cache = require("nougat.cache.buffer")
+
+buffer_cache.enable("filetype")
+
 local filetype_overide = {
   fugitive = "git",
   gitcommit = "git",
 }
 
-local function get_content(_, ctx)
-  return vim.api.nvim_buf_get_var(ctx.ctx.tab.bufnr, "ft_icon")[1]
+---@type table<string, string>
+local icon_char_by_ft = {}
+---@type table<string, { fg: string }>
+local icon_hl_by_ft = {}
+
+local function get_content(item, ctx)
+  return icon_char_by_ft[item.buf_cache[ctx.ctx.tab.bufnr].filetype]
 end
 
-local function get_hl(_, ctx)
-  return vim.api.nvim_buf_get_var(ctx.ctx.tab.bufnr, "ft_icon")[2]
+local function get_hl(item, ctx)
+  return icon_hl_by_ft[item.buf_cache[ctx.ctx.tab.bufnr].filetype]
 end
 
-local function prepare(_, ctx)
+local function prepare(item, ctx)
   local bufnr = ctx.ctx.tab.bufnr
+  local cache = item.buf_cache[bufnr]
 
-  local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+  local filetype = cache.filetype
+  if not filetype then
+    filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+    cache.filetype = filetype
+  end
+
   filetype = filetype_overide[filetype] or filetype
 
-  if not vim.fn.getbufvar(bufnr, "ft_icon", false) then
+  if not icon_char_by_ft[filetype] then
     local icon_char, icon_fg = devicons.get_icon_color_by_filetype(filetype, { default = true })
-    vim.api.nvim_buf_set_var(bufnr, "ft_icon", { icon_char, { fg = icon_fg } })
+    icon_char_by_ft[filetype] = icon_char
+    icon_hl_by_ft[filetype] = { fg = icon_fg }
   end
 end
 
@@ -45,6 +61,8 @@ function mod.create(opts)
   if not has_devicons then
     item.hidden = true
   end
+
+  item.buf_cache = buffer_cache.store
 
   return item
 end

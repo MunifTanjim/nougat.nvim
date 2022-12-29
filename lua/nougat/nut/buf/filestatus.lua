@@ -1,14 +1,19 @@
 local Item = require("nougat.item")
 
+local buffer_cache = require("nougat.cache.buffer")
+
+buffer_cache.enable("modified")
+
 -- re-used table
 local o_parts = { len = 0 }
 
 local function get_content(item, ctx)
+  local bufnr = ctx.bufnr
   local config = item:config(ctx)
 
   local part_idx = 0
 
-  local bufnr = ctx.bufnr
+  local buf_cache = item.buf_cache[bufnr]
 
   if config.readonly and vim.api.nvim_buf_get_option(bufnr, "readonly") then
     part_idx = part_idx + 1
@@ -16,7 +21,7 @@ local function get_content(item, ctx)
     part_idx = part_idx + 1
     o_parts[part_idx] = config.sep
   end
-  if config.modified and vim.api.nvim_buf_get_option(bufnr, "modified") then
+  if config.modified and buf_cache.modified then
     part_idx = part_idx + 1
     o_parts[part_idx] = config.modified
     part_idx = part_idx + 1
@@ -54,6 +59,8 @@ function mod.create(opts)
     on_click = opts.on_click,
     context = opts.context,
   })
+
+  item.buf_cache = buffer_cache.store
 
   return item
 end
