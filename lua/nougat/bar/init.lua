@@ -19,23 +19,6 @@ local fallback_hl_name_by_type = {
   },
 }
 
-local option_value_global_opts = { scope = "global" }
-
----@type table<'statusline'|'tabline'|'winbar', fun(winid: integer): integer>
-local get_width = {
-  statusline = function(winid)
-    return vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
-        and vim.api.nvim_get_option_value("columns", option_value_global_opts)
-      or vim.api.nvim_win_get_width(winid)
-  end,
-  tabline = function()
-    return vim.api.nvim_get_option_value("columns", option_value_global_opts)
-  end,
-  winbar = function(winid)
-    return vim.api.nvim_win_get_width(winid)
-  end,
-}
-
 ---@type table<'min'|'max', fun(width: integer, breakpoints: integer[]): integer>
 local get_breakpoint_index = {
   min = function(width, breakpoints)
@@ -85,8 +68,6 @@ function Bar:init(type, opts)
 
   self._breakpoints = opts and opts.breakpoints or { 0 }
   self._get_breakpoint_index = get_breakpoint_index[get_breakpoint_type(self._breakpoints)]
-
-  self._get_width = get_width[type]
 end
 
 ---@param item string|table|NougatItem
@@ -119,8 +100,6 @@ local o_parts = { len = 0 }
 
 ---@param ctx nougat_ctx
 function Bar:generate(ctx)
-  ctx.width = self._get_width(ctx.winid)
-
   ctx.ctx.breakpoint = self._get_breakpoint_index(ctx.width, self._breakpoints)
 
   local bar_hl = u.get_hl(self._hl_name[ctx.is_focused])
