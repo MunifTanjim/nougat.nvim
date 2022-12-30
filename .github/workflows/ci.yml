@@ -50,3 +50,18 @@ jobs:
           version: 0.13.1
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --color always --check lua/
+
+  release:
+    name: release
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          package-name: nougat.nvim
+          bump-minor-pre-major: true
+          pull-request-title-pattern: "chore: release ${version}"
+          include-v-in-tag: false
+      - uses: actions/checkout@v2
