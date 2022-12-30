@@ -54,6 +54,9 @@ jobs:
   release:
     name: release
     if: ${{ github.ref == 'refs/heads/main' }}
+    needs:
+      - lint
+      - format
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
