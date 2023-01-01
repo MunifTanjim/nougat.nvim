@@ -65,6 +65,32 @@ Plug 'MunifTanjim/nui.nvim'
 ```
 </details>
 
+## Usage
+
+`nougat.nvim` is at your disposal to build exactly what you want.
+
+### Examples
+
+A handful of examples are available to get you started.
+
+#### Bubbly
+
+Source: [bubbly.lua](examples/bubbly.lua)
+
+![Bubbly Statusline](https://github.com/MunifTanjim/nougat.nvim/wiki/media/bubbly-statusline.png)
+
+#### Pointy
+
+Source: [pointy.lua](examples/pointy.lua)
+
+![Pointy Statusline](https://github.com/MunifTanjim/nougat.nvim/wiki/media/pointy-statusline.png)
+
+#### Slanty
+
+Source: [slanty.lua](examples/slanty.lua)
+
+![Slanty Statusline](https://github.com/MunifTanjim/nougat.nvim/wiki/media/slanty-statusline.png)
+
 ---
 
 ## :gear: NougatBar
