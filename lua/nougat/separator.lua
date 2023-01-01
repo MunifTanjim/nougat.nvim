@@ -34,7 +34,6 @@ mod.char = char
 
 mod.hl = {
   prev_bg = -1,
-  child_bg = 0,
   next_bg = 1,
 }
 
