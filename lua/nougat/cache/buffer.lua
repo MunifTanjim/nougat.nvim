@@ -11,8 +11,8 @@ local subscribe = {
     vim.api.nvim_create_autocmd("FileType", {
       group = vim.api.nvim_create_augroup("nougat.cache.buffer.filetype", { clear = true }),
       callback = function(params)
-        local bufnr = params.buf
-        store[bufnr].filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+        local bufnr, filetype = params.buf, params.match
+        store[bufnr].filetype = filetype
       end,
       desc = "[nougat] cache.buffer.filetype",
     })
