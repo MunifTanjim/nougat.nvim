@@ -101,7 +101,7 @@ local filename = (function()
       data.modified = vim.api.nvim_buf_get_option(bufnr, "modified")
     end,
     hl = { bg = "fg", fg = color.bg },
-    sep_left = sep.left_half_circle_solid({ fg = sep.hl.child_bg }),
+    sep_left = sep.left_half_circle_solid(true),
     content = {
       Item({
         hl = { bg = color.bg4, fg = color.fg },
@@ -111,7 +111,6 @@ local filename = (function()
         suffix = " ",
         content = "RO",
       }),
-      Item({ content = core.truncation_point() }),
       Item({
         hl = { bg = color.bg4, fg = color.fg },
         hidden = function(_, ctx)
@@ -120,6 +119,7 @@ local filename = (function()
         content = "",
         suffix = " ",
       }),
+      Item({ content = core.truncation_point() }),
       nut.buf.filename({
         prefix = function(_, ctx)
           local data = ctx.ctx
@@ -145,7 +145,7 @@ local filename = (function()
         content = "+",
       }),
     },
-    sep_right = sep.right_half_circle_solid({ fg = sep.hl.child_bg }),
+    sep_right = sep.right_half_circle_solid(true),
   })
 
   return item
@@ -186,8 +186,8 @@ local gitstatus = (function()
     hidden = function(_, ctx)
       return ctx.gitstatus.total == 0
     end,
-    hl = { bg = color.fg, fg = color.bg },
-    sep_left = sep.left_half_circle_solid({ fg = sep.hl.child_bg }),
+    hl = { fg = color.bg },
+    sep_left = sep.left_half_circle_solid(true),
     content = {
       Item({
         hl = { bg = color.green },
@@ -230,7 +230,7 @@ local gitstatus = (function()
         end,
       }),
     },
-    sep_right = sep.right_half_circle_solid({ fg = sep.hl.child_bg }),
+    sep_right = sep.right_half_circle_solid(true),
   })
 
   item.cache = gitstatus_cache

@@ -150,22 +150,19 @@ local o_transitional_hl = {}
 ---@return nougat_hl_def transitional_hl
 local function prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl, child_hl)
   ---@diagnostic disable-next-line: assign-type-mismatch
-  o_transitional_hl.bg, o_transitional_hl.fg = hl.bg, hl.fg or curr_hl and curr_hl.bg or "bg"
+  o_transitional_hl.bg, o_transitional_hl.fg =
+    hl.bg, hl.fg or child_hl and child_hl.bg or curr_hl and curr_hl.bg or "bg"
 
   if o_transitional_hl.bg == -1 then
     o_transitional_hl.bg = prev_hl and prev_hl.bg or nil
   elseif o_transitional_hl.bg == 1 then
     o_transitional_hl.bg = next_hl and next_hl.bg or nil
-  elseif o_transitional_hl.bg == 0 then
-    o_transitional_hl.bg = child_hl and child_hl.bg or nil
   end
 
   if o_transitional_hl.fg == -1 then
     o_transitional_hl.fg = prev_hl and prev_hl.bg or nil
   elseif o_transitional_hl.fg == 1 then
     o_transitional_hl.fg = next_hl and next_hl.bg or nil
-  elseif o_transitional_hl.fg == 0 then
-    o_transitional_hl.fg = child_hl and child_hl.bg or nil
   end
 
   return o_transitional_hl
