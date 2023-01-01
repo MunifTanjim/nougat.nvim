@@ -1,7 +1,6 @@
 local core = require("nui.bar.core")
 local Bar = require("nougat.bar")
 local bar_util = require("nougat.bar.util")
-local create_cache_store = require("nougat.cache").create_store
 local Item = require("nougat.item")
 local sep = require("nougat.separator")
 
@@ -17,6 +16,7 @@ local nut = {
   },
   mode = require("nougat.nut.mode").create,
   spacer = require("nougat.nut.spacer").create,
+  truncation_point = require("nougat.nut.truncation_point").create,
 }
 
 local color = {
@@ -94,48 +94,11 @@ local mode = nut.mode({
   },
 })
 
-local gitstatus_cache = create_cache_store("buf", "examples.bubbly.gitstatus", {
-  head = "",
-  added = nil,
-  changed = nil,
-  removed = nil,
-  total = 0,
-})
-
-vim.api.nvim_create_autocmd("User", {
-  group = vim.api.nvim_create_augroup("nougat.examples.bubby.gitstatus", { clear = true }),
-  pattern = "GitSignsUpdate",
-  callback = function(params)
-    local bufnr = params.buf
-    vim.schedule(function()
-      local cache = gitstatus_cache[bufnr]
-
-      cache.head = vim.fn.getbufvar(bufnr, "gitsigns_head", "")
-
-      local status = vim.fn.getbufvar(bufnr, "gitsigns_status_dict", false)
-      if status and status.added then
-        cache.added = status.added > 0 and tostring(status.added) or nil
-        cache.changed = status.changed > 0 and tostring(status.changed) or nil
-        cache.removed = status.removed > 0 and tostring(status.removed) or nil
-        cache.total = status.added + status.changed + status.removed
-      else
-        cache.total = 0
-      end
-    end)
-  end,
-})
-
 local stl = Bar("statusline")
 stl:add_item(mode)
-stl:add_item(Item({
-  prepare = function(_, ctx)
-    ctx.gitstatus = gitstatus_cache[ctx.bufnr]
-  end,
+stl:add_item(nut.git.branch({
   hl = { bg = color.purple, fg = color.bg },
   prefix = "  ",
-  content = function(_, ctx)
-    return ctx.gitstatus.head
-  end,
   suffix = " ",
   sep_right = sep.right_chevron_solid(true),
 }))
@@ -156,6 +119,7 @@ local filestatus = stl:add_item(nut.buf.filestatus({
   },
 }))
 stl:add_item(nut.spacer())
+stl:add_item(nut.truncation_point())
 stl:add_item(nut.buf.diagnostic_count({
   hidden = false,
   hl = { bg = color.red, fg = color.bg },
