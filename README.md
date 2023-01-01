@@ -28,16 +28,31 @@ Hyperextensible plugin for Neovim's `'statusline'`, `'tabline'` and `'winbar'`.
 
 Install the plugins with your preferred plugin manager. For example:
 
-**With [`packer.nvim`](https://github.com/wbthomason/packer.nvim)**
+**With [`lazy.nvim`](https://github.com/folke/lazy.nvim)**
+
+```lua
+{
+  "MunifTanjim/nougat.nvim",
+  dependencies = {
+    "MunifTanjim/nui.nvim",
+  },
+},
+```
+
+<details>
+<summary>
+<strong>With <a href="https://github.com/wbthomason/packer.nvim"><code>packer.nvim</code></a></strong>
+</summary>
 
 ```lua
 use({
-  'MunifTanjim/nougat.nvim',
+  "MunifTanjim/nougat.nvim",
   requires = {
     "MunifTanjim/nui.nvim",
   },
 })
 ```
+</details>
 
 <details>
 <summary>
@@ -48,7 +63,6 @@ use({
 Plug 'MunifTanjim/nougat.nvim'
 Plug 'MunifTanjim/nui.nvim'
 ```
-
 </details>
 
 ---
