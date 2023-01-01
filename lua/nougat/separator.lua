@@ -104,8 +104,13 @@ function mod.adjust_hl(side, separator)
     return separator
   end
 
-  if (side == -1 and is_right_separator[separator.content]) or (side == 1 and is_left_separator[separator.content]) then
-    separator.hl.bg, separator.hl.fg = separator.hl.fg, separator.hl.bg
+  if type(separator.hl.bg) == "number" then
+    if
+      (side == -1 and is_right_separator[separator.content])
+      or (side == 1 and is_left_separator[separator.content])
+    then
+      separator.hl.bg, separator.hl.fg = separator.hl.fg, -separator.hl.bg
+    end
   end
 
   return separator

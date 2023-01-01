@@ -140,32 +140,44 @@ end
 
 -- re-used table
 ---@type nougat_hl_def
-local o_transitional_hl = {}
+local o_sep_hl = {}
+
+---@param hl nougat_hl_def|nougat_separator_hl_def
+---@param far_hl? nougat_hl_def
+---@param near_hl? nougat_hl_def
+---@param curr_hl? nougat_hl_def
+---@param next_hl? nougat_hl_def
+---@return nougat_hl_def sep_hl
+local function prepare_sep_left_hl(hl, far_hl, near_hl, curr_hl, next_hl)
+  o_sep_hl.bg = hl.bg or curr_hl and curr_hl.bg or "bg"
+  o_sep_hl.fg = hl.fg or curr_hl and curr_hl.bg or next_hl and next_hl.bg or "bg"
+
+  if o_sep_hl.bg == -1 then
+    o_sep_hl.bg = near_hl and near_hl.bg or far_hl and far_hl.bg or nil
+  elseif o_sep_hl.fg == -1 then
+    o_sep_hl.fg = near_hl and near_hl.bg or far_hl and far_hl.bg or nil
+  end
+
+  return o_sep_hl
+end
 
 ---@param hl nougat_hl_def|nougat_separator_hl_def
 ---@param prev_hl? nougat_hl_def
----@param curr_hl nougat_hl_def
----@param next_hl? nougat_hl_def
----@param child_hl? nougat_hl_def
----@return nougat_hl_def transitional_hl
-local function prepare_transitional_hl(hl, prev_hl, curr_hl, next_hl, child_hl)
-  ---@diagnostic disable-next-line: assign-type-mismatch
-  o_transitional_hl.bg, o_transitional_hl.fg =
-    hl.bg, hl.fg or child_hl and child_hl.bg or curr_hl and curr_hl.bg or "bg"
+---@param curr_hl? nougat_hl_def
+---@param near_hl? nougat_hl_def
+---@param far_hl? nougat_hl_def
+---@return nougat_hl_def sep_hl
+local function prepare_sep_right_hl(hl, prev_hl, curr_hl, near_hl, far_hl)
+  o_sep_hl.bg = hl.bg or curr_hl and curr_hl.bg or "bg"
+  o_sep_hl.fg = hl.fg or prev_hl and prev_hl.bg or curr_hl and curr_hl.bg or "bg"
 
-  if o_transitional_hl.bg == -1 then
-    o_transitional_hl.bg = prev_hl and prev_hl.bg or nil
-  elseif o_transitional_hl.bg == 1 then
-    o_transitional_hl.bg = next_hl and next_hl.bg or nil
+  if o_sep_hl.bg == 1 then
+    o_sep_hl.bg = near_hl and near_hl.bg or far_hl and far_hl.bg or nil
+  elseif o_sep_hl.fg == 1 then
+    o_sep_hl.fg = near_hl and near_hl.bg or far_hl and far_hl.bg or nil
   end
 
-  if o_transitional_hl.fg == -1 then
-    o_transitional_hl.fg = prev_hl and prev_hl.bg or nil
-  elseif o_transitional_hl.fg == 1 then
-    o_transitional_hl.fg = next_hl and next_hl.bg or nil
-  end
-
-  return o_transitional_hl
+  return o_sep_hl
 end
 
 ---@class nougat_lazy_item_hl
@@ -179,8 +191,6 @@ end
 ---@field r_idx? integer reset index
 ---@field fc_idx? integer first child index
 ---@field lc_idx? integer last child index
----@field pio? integer prev index offset
----@field nio? integer next index offset
 ---@field fb? nougat_hl_def fallback
 
 ---@param hls nougat_lazy_item_hl[]
@@ -200,8 +210,6 @@ local function get_item_hl_table(hls, hl_idx)
     item_hl.r_idx = nil
     item_hl.fc_idx = nil
     item_hl.lc_idx = nil
-    item_hl.pio = -1
-    item_hl.nio = 1
     item_hl.fb = nil
     return item_hl
   end
@@ -217,8 +225,6 @@ local function get_item_hl_table(hls, hl_idx)
     r_idx = nil,
     fc_idx = nil,
     lc_idx = nil,
-    pio = -1,
-    nio = 1,
     fb = nil,
   }
   hls[hl_idx] = item_hl
@@ -362,7 +368,6 @@ local function prepare_parts(items, ctx, item_fallback_hl)
 
               if hl_idx ~= hls.len then
                 local total_child_hls = hls.len - hl_idx
-                item_hl.nio = item_hl.nio + total_child_hls
                 hl_idx = hls.len
                 item_hl.fc_idx = total_child_hls == 1 and hl_idx or hl_idx - total_child_hls + 1
                 item_hl.lc_idx = hl_idx
@@ -416,6 +421,10 @@ local function prepare_parts(items, ctx, item_fallback_hl)
           part_idx = core.add_highlight(0, nil, parts, part_idx)
         end
       end
+
+      if item.hl == false then
+        hl_idx = hl_idx - 1
+      end
     end
 
     hls.len = hl_idx
@@ -433,13 +442,28 @@ function mod.process_bar_highlights(ctx, fallback_hl)
 
   for idx = 1, hl_idx do
     local hl = hls[idx]
-    local prev_hl_c = idx + hl.pio > 1 and hls[idx + hl.pio].c or nil
-    local next_hl_c = idx + hl.nio <= hl_idx and hls[idx + hl.nio].c or nil
 
     if hl.sl then
-      local child_hl_c = hl.fc_idx and hls[hl.fc_idx].c or nil
+      -- for parent:
+      -- - last child of prev sibling
+      -- - or prev sibling
+      -- for first child:
+      -- - parent
+      -- for children:
+      -- - prev sibling
+      local near_prev_hl = idx > 1 and hls[idx - 1] or nil
+      -- for first child:
+      -- - prev sibling of parent
+      local far_prev_hl_c = ((near_prev_hl and idx == near_prev_hl.fc_idx) and idx > 2) and hls[idx - 2].c or nil
+      -- for parent
+      -- - first child
+      local near_next_hl_c = hl.fc_idx and hls[hl.fc_idx].c or nil
+
       core.add_highlight(
-        set_hl(prepare_transitional_hl(hl.sl, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
+        set_hl(
+          prepare_sep_left_hl(hl.sl, far_prev_hl_c, near_prev_hl and near_prev_hl.c or nil, hl.c, near_next_hl_c),
+          hl.fb or fallback_hl
+        ),
         nil,
         parts,
         hl.sl_idx
@@ -451,9 +475,29 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.sr then
-      local child_hl_c = hl.lc_idx and hls[hl.lc_idx].c or nil
+      -- for parent:
+      -- - last child
+      local prev_hl_c = hl.lc_idx and hls[hl.lc_idx].c or nil
+      -- for parent:
+      -- - next sibling
+      -- for children:
+      -- - next sibling
+      -- for last child:
+      -- - next sibling of parent
+      local near_next_hl = hl.lc_idx and (hl.lc_idx + 1 <= hl_idx and hls[hl.lc_idx + 1])
+        or idx + 1 <= hl_idx and hls[idx + 1]
+        or nil
+      -- for parent:
+      -- - first child of next sibling
+      -- for last child:
+      -- - first child of next sibling of parent
+      local far_next_hl_c = (near_next_hl and near_next_hl.fc_idx) and hls[near_next_hl.fc_idx].c or nil
+
       core.add_highlight(
-        set_hl(prepare_transitional_hl(hl.sr, prev_hl_c, hl.c, next_hl_c, child_hl_c), hl.fb or fallback_hl),
+        set_hl(
+          prepare_sep_right_hl(hl.sr, prev_hl_c, hl.c, near_next_hl and near_next_hl.c or nil, far_next_hl_c),
+          hl.fb or fallback_hl
+        ),
         nil,
         parts,
         hl.sr_idx
