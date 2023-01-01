@@ -13,6 +13,7 @@ local nut = {
   },
   git = {
     branch = require("nougat.nut.git.branch").create,
+    status = require("nougat.nut.git.status"),
   },
   mode = require("nougat.nut.mode").create,
   spacer = require("nougat.nut.spacer").create,
@@ -99,6 +100,25 @@ stl:add_item(mode)
 stl:add_item(nut.git.branch({
   hl = { bg = color.purple, fg = color.bg },
   prefix = "  ",
+  suffix = " ",
+  sep_right = sep.right_chevron_solid(true),
+}))
+stl:add_item(nut.git.status.create({
+  hl = { bg = color.bg1 },
+  content = {
+    nut.git.status.count("added", {
+      hl = { fg = color.green },
+      prefix = " +",
+    }),
+    nut.git.status.count("changed", {
+      hl = { fg = color.blue },
+      prefix = " ~",
+    }),
+    nut.git.status.count("removed", {
+      hl = { fg = color.red },
+      prefix = " -",
+    }),
+  },
   suffix = " ",
   sep_right = sep.right_chevron_solid(true),
 }))

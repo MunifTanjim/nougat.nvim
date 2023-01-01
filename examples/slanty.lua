@@ -107,7 +107,7 @@ stl:add_item(nut.git.status.create({
   hl = { fg = color.bg },
   content = {
     nut.git.status.count("added", {
-      hl = { bg = color.aqua },
+      hl = { bg = color.green },
       prefix = "+",
       sep_right = sep.right_upper_triangle_solid(true),
     }),
