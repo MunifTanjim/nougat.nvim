@@ -4,6 +4,8 @@ local default_value = {}
 
 local store = create_store("buf", "buffer", default_value)
 
+local hooks = {}
+
 local subscribe = {
   filetype = function()
     vim.api.nvim_create_autocmd("FileType", {
@@ -27,6 +29,52 @@ local subscribe = {
       desc = "[nougat] cache.buffer.modified",
     })
   end,
+  gitstatus = function()
+    hooks["gitstatus.change"] = {}
+
+    local provider
+    if pcall(require, "gitsigns") then
+      provider = "gitsigns"
+    end
+
+    if not provider then
+      return
+    end
+
+    if provider == "gitsigns" then
+      vim.api.nvim_create_autocmd("User", {
+        group = vim.api.nvim_create_augroup("nougat.cache.buffer.gitstatus", { clear = true }),
+        pattern = "GitSignsUpdate",
+        callback = function(params)
+          local bufnr = params.buf
+
+          vim.schedule(function()
+            local status = vim.fn.getbufvar(bufnr, "gitsigns_status_dict", false)
+            if not status then
+              store[bufnr].gitstatus = nil
+              return
+            end
+
+            local cache = store[bufnr].gitstatus
+            if not cache then
+              cache = {}
+              store[bufnr].gitstatus = cache
+            end
+
+            cache.added = status.added or 0
+            cache.changed = status.changed or 0
+            cache.removed = status.removed or 0
+            cache.total = cache.added + cache.changed + cache.removed
+
+            for i = 1, #hooks["gitstatus.change"] do
+              hooks["gitstatus.change"][i](cache, bufnr)
+            end
+          end)
+        end,
+        desc = "[nougat] cache.buffer.gitstatus",
+      })
+    end
+  end,
 }
 
 local enabled_key = {}
@@ -47,6 +95,14 @@ function mod.enable(key)
   subscribe[key]()
 
   enabled_key[key] = true
+end
+
+function mod.on(event, callback)
+  if not hooks[event] then
+    return
+  end
+
+  hooks[event][#hooks[event] + 1] = callback
 end
 
 return mod
