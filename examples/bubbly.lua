@@ -1,7 +1,6 @@
 local core = require("nui.bar.core")
 local Bar = require("nougat.bar")
 local bar_util = require("nougat.bar.util")
-local create_cache_store = require("nougat.cache").create_store
 local Item = require("nougat.item")
 local sep = require("nougat.separator")
 
@@ -13,9 +12,11 @@ local nut = {
   },
   git = {
     branch = require("nougat.nut.git.branch").create,
+    status = require("nougat.nut.git.status"),
   },
   mode = require("nougat.nut.mode").create,
   spacer = require("nougat.nut.spacer").create,
+  truncation_point = require("nougat.nut.truncation_point").create,
 }
 
 local color = {
@@ -100,7 +101,6 @@ local filename = (function()
       data.modifiable = vim.api.nvim_buf_get_option(bufnr, "modifiable")
       data.modified = vim.api.nvim_buf_get_option(bufnr, "modified")
     end,
-    hl = { bg = "fg", fg = color.bg },
     sep_left = sep.left_half_circle_solid(true),
     content = {
       Item({
@@ -119,8 +119,8 @@ local filename = (function()
         content = "",
         suffix = " ",
       }),
-      Item({ content = core.truncation_point() }),
       nut.buf.filename({
+        hl = { bg = color.fg, fg = color.bg },
         prefix = function(_, ctx)
           local data = ctx.ctx
           if data.readonly or not data.modifiable then
@@ -147,93 +147,6 @@ local filename = (function()
     },
     sep_right = sep.right_half_circle_solid(true),
   })
-
-  return item
-end)()
-
-local gitstatus_cache = create_cache_store("buf", "examples.bubbly.gitstatus", {
-  added = nil,
-  changed = nil,
-  removed = nil,
-  total = 0,
-})
-
-vim.api.nvim_create_autocmd("User", {
-  group = vim.api.nvim_create_augroup("nougat.examples.bubby.gitstatus", { clear = true }),
-  pattern = "GitSignsUpdate",
-  callback = function(params)
-    local bufnr = params.buf
-    vim.schedule(function()
-      local status = vim.fn.getbufvar(bufnr, "gitsigns_status_dict", false)
-      local cache = gitstatus_cache[bufnr]
-      if status and status.added then
-        cache.added = status.added > 0 and tostring(status.added) or nil
-        cache.changed = status.changed > 0 and tostring(status.changed) or nil
-        cache.removed = status.removed > 0 and tostring(status.removed) or nil
-        cache.total = status.added + status.changed + status.removed
-      else
-        cache.total = 0
-      end
-    end)
-  end,
-})
-
-local gitstatus = (function()
-  local item = Item({
-    prepare = function(item, ctx)
-      ctx.gitstatus = item.cache[ctx.bufnr]
-    end,
-    hidden = function(_, ctx)
-      return ctx.gitstatus.total == 0
-    end,
-    hl = { fg = color.bg },
-    sep_left = sep.left_half_circle_solid(true),
-    content = {
-      Item({
-        hl = { bg = color.green },
-        hidden = function(_, ctx)
-          return not ctx.gitstatus.added
-        end,
-        prefix = "+",
-        content = function(_, ctx)
-          return ctx.gitstatus.added
-        end,
-        suffix = function(_, ctx)
-          return (ctx.gitstatus.changed or ctx.gitstatus.removed) and " " or ""
-        end,
-      }),
-      Item({
-        hl = { bg = color.blue },
-        hidden = function(_, ctx)
-          return not ctx.gitstatus.changed
-        end,
-        prefix = function(_, ctx)
-          return ctx.gitstatus.added and " ~" or "~"
-        end,
-        content = function(_, ctx)
-          return ctx.gitstatus.changed
-        end,
-        suffix = function(_, ctx)
-          return ctx.gitstatus.removed and " " or ""
-        end,
-      }),
-      Item({
-        hl = { bg = color.red },
-        hidden = function(_, ctx)
-          return not ctx.gitstatus.removed
-        end,
-        prefix = function(_, ctx)
-          return (ctx.gitstatus.added or ctx.gitstatus.changed) and " -" or "-"
-        end,
-        content = function(_, ctx)
-          return ctx.gitstatus.removed
-        end,
-      }),
-    },
-    sep_right = sep.right_half_circle_solid(true),
-  })
-
-  item.cache = gitstatus_cache
 
   return item
 end)()
@@ -301,11 +214,40 @@ stl:add_item(nut.git.branch({
   sep_right = sep.right_half_circle_solid(true),
 }))
 stl:add_item(sep.space())
-stl:add_item(gitstatus)
+local gitstatus = stl:add_item(nut.git.status.create({
+  hl = { fg = color.bg },
+  sep_left = sep.left_half_circle_solid(true),
+  content = {
+    nut.git.status.count("added", {
+      hl = { bg = color.green },
+      prefix = "+",
+      suffix = function(_, ctx)
+        return (ctx.gitstatus.changed > 0 or ctx.gitstatus.removed > 0) and " " or ""
+      end,
+    }),
+    nut.git.status.count("changed", {
+      hl = { bg = color.blue },
+      prefix = function(_, ctx)
+        return ctx.gitstatus.added > 0 and " ~" or "~"
+      end,
+      suffix = function(_, ctx)
+        return ctx.gitstatus.removed > 0 and " " or ""
+      end,
+    }),
+    nut.git.status.count("removed", {
+      hl = { bg = color.red },
+      prefix = function(_, ctx)
+        return (ctx.gitstatus.added > 0 or ctx.gitstatus.changed > 0) and " -" or "-"
+      end,
+    }),
+  },
+  sep_right = sep.right_half_circle_solid(true),
+}))
 stl:add_item(paired_space(gitstatus))
 stl:add_item(filename)
 stl:add_item(sep.space())
 stl:add_item(nut.spacer())
+stl:add_item(nut.truncation_point())
 stl:add_item(nut.buf.filetype({
   hl = { bg = color.blue, fg = color.bg },
   sep_left = sep.left_half_circle_solid(true),
