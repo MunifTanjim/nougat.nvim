@@ -23,9 +23,13 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
     local bufnr = params.buf
 
     vim.schedule(function()
-      local error, warn, info, hint = 0, 0, 0, 0
+      if not vim.api.nvim_buf_is_valid(bufnr) or vim.api.nvim_buf_get_option(bufnr, "buftype") ~= "" then
+        return
+      end
 
       local diagnostics = vim.diagnostic.get(bufnr)
+
+      local error, warn, info, hint = 0, 0, 0, 0
 
       for idx = 1, #diagnostics do
         local diagnostic = diagnostics[idx]
