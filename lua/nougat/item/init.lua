@@ -27,11 +27,34 @@ local next_id = u.create_id_generator()
 local Item = Object("NougatItem")
 
 local function content_function_processor(item, ctx)
-  return core.clickable(item._content(item, ctx), {
+  local parts = ctx.parts
+  local part_idx = parts.len
+
+  part_idx = core.add_clickable("", {
     id = item._on_click_id,
     context = item._on_click_context or item,
     on_click = item._on_click,
-  })
+  }, parts, part_idx)
+
+  local end_delim = parts[part_idx]
+
+  parts.len = part_idx - 2
+
+  local content = item._content(item, ctx) or ""
+
+  if #content > 0 then
+    parts[part_idx - 1] = content
+  else -- no content returned
+    if part_idx == parts.len then -- no parts added
+      -- discard clickable parts
+      part_idx = part_idx - 7
+    else
+      part_idx = parts.len
+      parts[part_idx + 1] = end_delim
+    end
+  end
+
+  parts.len = part_idx
 end
 
 local function hl_item_processor(item, ctx)
