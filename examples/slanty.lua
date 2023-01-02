@@ -1,4 +1,4 @@
-local core = require("nui.bar.core")
+local core = require("nougat.core")
 local Bar = require("nougat.bar")
 local bar_util = require("nougat.bar.util")
 local Item = require("nougat.item")

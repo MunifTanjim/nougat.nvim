@@ -118,25 +118,25 @@ bar:add_item({
 
 ### `context`
 
-**Type:** `boolean|number|string|table` or `(ctx: nui_bar_core_expression_context) -> nui_bar_core_expression_context`
+**Type:** `boolean|number|string|table` or `(ctx: nougat_core_expression_context) -> nougat_core_expression_context`
 
 If provided, it will be attached to the `ctx` parameter of the `on_click` option as
 `ctx.ctx`.
 
-If `context` is function, it receives the `nui_bar_core_expression_context` table as `ctx` parameter and it should
+If `context` is function, it receives the `nougat_core_expression_context` table as `ctx` parameter and it should
 return the same table, storing `boolean|number|string|table` as `ctx.ctx`.
 
 Default value is the item itself.
 
 ### `on_click`
 
-**Type:** `(handler_id: integer, click_count: integer, mouse_button: string, modifiers: string, ctx: nui_bar_core_expression_context) -> nil` or `string`
+**Type:** `(handler_id: integer, click_count: integer, mouse_button: string, modifiers: string, ctx: nougat_core_expression_context) -> nil` or `string`
 
 If provided, this function is called when the item is clicked.
 
 **Parameters**
 
-- `handler_id`: _irrelevant (lower-level `nui.bar` implementation details)_
+- `handler_id`: _irrelevant (lower-level `nougat.core` implementation details)_
 - `click_count`: number of mouse clicks
 - `mouse_button`:
   - `"l"` - left
@@ -149,9 +149,9 @@ If provided, this function is called when the item is clicked.
   - `"a"` - alt
   - `"m"` - meta
   - or other unknowns
-- `ctx`: `nui_bar_core_expression_context`
+- `ctx`: `nougat_core_expression_context`
 
-`nui_bar_core_expression_context` is a table:
+`nougat_core_expression_context` is a table:
 
 | Key          | Type                                      | Description                   |
 | ------------ | ----------------------------------------- | ----------------------------- |
@@ -183,13 +183,13 @@ With specific `type`, item can:
 - take additional type-specific options
 - treat `content` option differently
 
-| `type` Type   | `content` Type                                                           | Notes                                                             |
-| ------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `'code'`      | `string`                                                                 | one of the item codes listed in `:help 'statusline'`              |
-| `'vim_expr'`  | `number` / `string`                                                      | `string` is treated as vimscript                                  |
-| `'lua_expr'`  | `number` / `string` / `(ctx: nui_bar_core_expression_context) -> string` | for `function`, the `ctx` parameter is same as `on_click` option. |
-| `'literal'`   | `boolean` / `number` / `string`                                          |                                                                   |
-| `'tag_label'` | `number` / `string`                                                      |                                                                   |
+| `type` Type   | `content` Type                                                          | Notes                                                             |
+| ------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `'code'`      | `string`                                                                | one of the item codes listed in `:help 'statusline'`              |
+| `'vim_expr'`  | `number` / `string`                                                     | `string` is treated as vimscript                                  |
+| `'lua_expr'`  | `number` / `string` / `(ctx: nougat_core_expression_context) -> string` | for `function`, the `ctx` parameter is same as `on_click` option. |
+| `'literal'`   | `boolean` / `number` / `string`                                         |                                                                   |
+| `'tag_label'` | `number` / `string`                                                     |                                                                   |
 
 ### `align`
 

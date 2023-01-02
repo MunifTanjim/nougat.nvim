@@ -36,13 +36,13 @@ function mod.bench()
     if #value > 0 then
       local bar = {}
 
-      local id = tonumber(string.match(value, "nui_bar_core_generator_fn%((.+)%)"))
+      local id = tonumber(string.match(value, "nougat_core_generator_fn%((.+)%)"))
 
       for _ = 1, redraw_count do
         local start_time = vim.loop.hrtime()
 
         vim.g.statusline_winid = vim.api.nvim_get_current_win()
-        _G.nui_bar_core_generator_fn(id)
+        _G.nougat_core_generator_fn(id)
         vim.g.statusline_winid = nil
 
         local end_time = vim.loop.hrtime()

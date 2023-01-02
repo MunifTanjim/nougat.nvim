@@ -1,4 +1,4 @@
-local core = require("nui.bar.core")
+local core = require("nougat.core")
 local Item = require("nougat.item")
 
 local mod = {}
