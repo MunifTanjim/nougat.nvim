@@ -1,5 +1,5 @@
 local Item = require("nougat.item")
-local core = require("nui.bar.core")
+local core = require("nougat.core")
 local u = require("nougat.util")
 
 local diagnostic_cache = require("nougat.cache.diagnostic")
