@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.1.0...0.2.0) (2023-01-02)
+
+
+### Features
+
+* **cache:** add .gitstatus to buffer cache ([c2d10f2](https://github.com/MunifTanjim/nougat.nvim/commit/c2d10f2259b5a00737338def3ab443440055ddd4))
+* **core:** add nougat.core module ([9291fac](https://github.com/MunifTanjim/nougat.nvim/commit/9291fac6bd0323e9d7600d52ec4873ac0fc75b19))
+* **nut:** add git.status ([aab870c](https://github.com/MunifTanjim/nougat.nvim/commit/aab870c6011ee77daf05633b1251993a2cfba787))
+* **nut:** add truncation_point ([8eb4d4b](https://github.com/MunifTanjim/nougat.nvim/commit/8eb4d4be4c2f4e1d67fa5629a9baaf142b0e761c))
+* **separator:** improve hl processing ([3bf7f98](https://github.com/MunifTanjim/nougat.nvim/commit/3bf7f98b3825533acce904e4ce025133fb231bda))
+* **separator:** make closest child hl automagic ([8755374](https://github.com/MunifTanjim/nougat.nvim/commit/8755374c9ee017c091b9f19c48dae2183a7d2f83))
+
+
+### Bug Fixes
+
+* **cache:** ignore diagnostic from invalid or scratch buffer ([edb59df](https://github.com/MunifTanjim/nougat.nvim/commit/edb59df603352b08796e58fb06cc0498033082ea))
+* **item:** .on_click with function .content ([f31b5ec](https://github.com/MunifTanjim/nougat.nvim/commit/f31b5ecc426c9840930526b5fa12832ed8738a87))
+
+
+### Performance Improvements
+
+* **cache:** read filetype from autocmd params ([4a076aa](https://github.com/MunifTanjim/nougat.nvim/commit/4a076aa89ab3a23b9a37f222737d40db918b423b))
+
 ## 0.1.0 (2022-12-30)
 
 
