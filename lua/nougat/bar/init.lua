@@ -1,4 +1,3 @@
-local Object = require("nui.object")
 local Item = require("nougat.item")
 local u = require("nougat.util")
 
@@ -53,12 +52,12 @@ local function get_breakpoint_type(breakpoints)
   return breakpoints[1] < breakpoints[2] and "min" or "max"
 end
 
----@class NougatBar
-local Bar = Object("NougatBar")
-
 ---@param type 'statusline'|'tabline'|'winbar'
 ---@param opts? { breakpoints?: integer[] }
-function Bar:init(type, opts)
+local function init(class, type, opts)
+  ---@class NougatBar
+  local self = setmetatable({}, { __index = class })
+
   self.id = next_id()
   self.type = type
 
@@ -68,7 +67,15 @@ function Bar:init(type, opts)
 
   self._breakpoints = opts and opts.breakpoints or { 0 }
   self._get_breakpoint_index = get_breakpoint_index[get_breakpoint_type(self._breakpoints)]
+
+  return self
 end
+
+---@class NougatBar
+local Bar = setmetatable({}, {
+  __call = init,
+  __name = "NougatBar",
+})
 
 ---@param item string|table|NougatItem
 ---@return NougatItem

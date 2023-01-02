@@ -1,4 +1,3 @@
-local Object = require("nui.object")
 local core = require("nui.bar.core")
 local iu = require("nougat.item.util")
 local u = require("nougat.util")
@@ -13,18 +12,6 @@ local next_id = u.create_id_generator()
 ---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: nougat_ctx):boolean)
 
 --luacheck: pop
-
----@class NougatItem
----@field id integer
----@field hl? nougat_item_hl
----@field sep_left? nougat_separator[]
----@field prefix? nougat_item_affix
----@field content nougat_item_content
----@field suffix? nougat_item_affix
----@field sep_right? nougat_separator[]
----@field hidden? nougat_item_hidden
----@field prepare? fun(self: NougatItem, ctx: nougat_ctx):nil
-local Item = Object("NougatItem")
 
 local function content_function_processor(item, ctx)
   local parts = ctx.parts
@@ -61,7 +48,10 @@ local function hl_item_processor(item, ctx)
   return type(item._hl_item.hl) == "function" and item._hl_item:hl(ctx) or item._hl_item.hl
 end
 
-function Item:init(config)
+local function init(class, config)
+  ---@class NougatItem
+  local self = setmetatable({}, { __index = class })
+
   self.id = next_id()
 
   self.hl = config.hl
@@ -142,7 +132,24 @@ function Item:init(config)
   self._config = config.config or {}
 
   self._on_init_breakpoints = config.on_init_breakpoints
+
+  return self
 end
+
+---@class NougatItem
+---@field id integer
+---@field hl? nougat_item_hl
+---@field sep_left? nougat_separator[]
+---@field prefix? nougat_item_affix
+---@field content nougat_item_content
+---@field suffix? nougat_item_affix
+---@field sep_right? nougat_separator[]
+---@field hidden? nougat_item_hidden
+---@field prepare? fun(self: NougatItem, ctx: nougat_ctx):nil
+local Item = setmetatable({}, {
+  __call = init,
+  __name = "NougatItem",
+})
 
 ---@param breakpoints integer[]
 function Item:_init_breakpoints(breakpoints)
