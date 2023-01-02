@@ -22,7 +22,6 @@ Hyperextensible plugin for Neovim's `'statusline'`, `'tabline'` and `'winbar'`.
 ## :spider_web: Requirements
 
 - Neovim >= 0.7.0
-- [`MunifTanjim/nui.nvim`](https://github.com/MunifTanjim/nui.nvim)
 
 ## :inbox_tray: Installation
 
@@ -33,9 +32,6 @@ Install the plugins with your preferred plugin manager. For example:
 ```lua
 {
   "MunifTanjim/nougat.nvim",
-  dependencies = {
-    "MunifTanjim/nui.nvim",
-  },
 },
 ```
 
@@ -47,9 +43,6 @@ Install the plugins with your preferred plugin manager. For example:
 ```lua
 use({
   "MunifTanjim/nougat.nvim",
-  requires = {
-    "MunifTanjim/nui.nvim",
-  },
 })
 ```
 </details>
@@ -61,7 +54,6 @@ use({
 
 ```vim
 Plug 'MunifTanjim/nougat.nvim'
-Plug 'MunifTanjim/nui.nvim'
 ```
 </details>
 
@@ -121,7 +113,6 @@ Separator that goes between two `NougatItem`s.
 
 - Discussion: [MunifTanjim/nougat.nvim/discussions](https://github.com/MunifTanjim/nougat.nvim/discussions)
 - Wiki: [MunifTanjim/nougat.nvim/wiki](https://github.com/MunifTanjim/nougat.nvim/wiki)
-- `nui.bar`: [MunifTanjim/nui.nvim - lua/nui/bar](https://github.com/MunifTanjim/nui.nvim/tree/main/lua/nui/bar)
 
 ## :scroll: License
 
