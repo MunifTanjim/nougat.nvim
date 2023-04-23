@@ -43,6 +43,50 @@ function mod.create_id_generator()
   end
 end
 
+local augroup = vim.api.nvim_create_augroup("nougat.on_event", { clear = true })
+
+---@type table<string, (fun(info:table):nil)[]>
+local autocmd_cb_store = {}
+
+---@param event string|string[]
+---@param callback (fun(info:table):nil)
+local function on_event(event, callback)
+  if type(event) == "string" then
+    event = { event }
+  end
+
+  for _, ev in ipairs(event) do
+    local event_name = ev
+    local pattern
+
+    if string.sub(ev, 1, 5) == "User " then
+      event_name = "User"
+      pattern = string.sub(ev, 6)
+    end
+
+    if not autocmd_cb_store[ev] then
+      autocmd_cb_store[ev] = {}
+
+      vim.api.nvim_create_autocmd(event_name, {
+        group = augroup,
+        pattern = pattern,
+        callback = function(info)
+          local cbs = info.event == "User" and autocmd_cb_store["User " .. info.match] or autocmd_cb_store[info.event]
+
+          for _, cb in ipairs(cbs) do
+            cb(info)
+          end
+        end,
+        desc = "[nougat] util.on_event - " .. ev,
+      })
+    end
+
+    autocmd_cb_store[ev][#autocmd_cb_store[ev] + 1] = callback
+  end
+end
+
+mod.on_event = on_event
+
 ---@alias nougat_hl_def { bg?: string, fg?: string, bold?: boolean, italic?: boolean }
 
 ---@type table<string, nougat_hl_def>
@@ -77,16 +121,12 @@ local function get_hl(name)
   return def
 end
 
-vim.api.nvim_create_autocmd("ColorScheme", {
-  group = vim.api.nvim_create_augroup("nougat.util.get_hl", { clear = true }),
-  callback = function()
-    local names = vim.tbl_keys(get_hl_cache)
-    for idx = 1, #names do
-      get_hl_cache[names[idx]] = nil
-    end
-  end,
-  desc = "[nougat] util.get_hl cache cleanup",
-})
+on_event("ColorScheme", function()
+  local names = vim.tbl_keys(get_hl_cache)
+  for idx = 1, #names do
+    get_hl_cache[names[idx]] = nil
+  end
+end)
 
 local nougat_hl_name_format = "nougat_hl_bg_%s_fg_%s_%s"
 local attr_bold_italic = "b.i"

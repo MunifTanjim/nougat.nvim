@@ -1,19 +1,15 @@
 local Item = require("nougat.item")
 local create_cache_store = require("nougat.cache").create_store
+local on_event = require("nougat.util").on_event
 
 local cache_store = create_cache_store("buf", "nut.buf.filename", { v = nil })
 
-local augroup = vim.api.nvim_create_augroup("nougat.nut.buf.filename", { clear = true })
-
-vim.api.nvim_create_autocmd("BufFilePost", {
-  group = augroup,
-  callback = function(info)
-    local cache = cache_store[info.buf]
-    for key in pairs(cache) do
-      cache[key] = nil
-    end
-  end,
-})
+on_event("BufFilePost", function(info)
+  local cache = cache_store[info.buf]
+  for key in pairs(cache) do
+    cache[key] = nil
+  end
+end)
 
 local function get_content(item, ctx)
   local cache = item.cache[ctx.bufnr][ctx.ctx.breakpoint]

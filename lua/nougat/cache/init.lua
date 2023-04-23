@@ -1,3 +1,5 @@
+local on_event = require("nougat.util").on_event
+
 local mod = {}
 
 local registry = { buf = {}, win = {} }
@@ -47,30 +49,20 @@ local function clear_cache(type, id)
   end
 end
 
-local augroup = vim.api.nvim_create_augroup("nougat.cache", { clear = true })
+on_event("BufWipeout", function(info)
+  local bufnr = info.buf
+  vim.schedule(function()
+    clear_cache("buf", bufnr)
+  end)
+end)
 
-vim.api.nvim_create_autocmd("BufWipeout", {
-  group = augroup,
-  callback = function(info)
-    local bufnr = info.buf
+on_event("WinClosed", function(info)
+  local winid = tonumber(info.match)
+  if winid then
     vim.schedule(function()
-      clear_cache("buf", bufnr)
+      clear_cache("win", winid)
     end)
-  end,
-  desc = "[nougat] cache cleanup (buf)",
-})
-
-vim.api.nvim_create_autocmd("WinClosed", {
-  group = augroup,
-  callback = function(info)
-    local winid = tonumber(info.match)
-    if winid then
-      vim.schedule(function()
-        clear_cache("win", winid)
-      end)
-    end
-  end,
-  desc = "[nougat] cache cleanup (win)",
-})
+  end
+end)
 
 return mod
