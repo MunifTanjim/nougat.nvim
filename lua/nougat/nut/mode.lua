@@ -1,7 +1,5 @@
 local Item = require("nougat.item")
-local create_cache_store = require("nougat.cache").create_store
-
-local cache_store = create_cache_store("win", "nut.mode", { mode = "", group = "" })
+local on_event = require("nougat.util").on_event
 
 local mode_group = {
   ["n"] = "normal",
@@ -128,21 +126,29 @@ local default_highlight = {
   },
 }
 
-local function prepare(item, ctx)
-  local mode = ctx.is_focused and vim.api.nvim_get_mode().mode or "-"
-  local cache = item.cache[ctx.winid]
-  if cache.mode ~= mode then
-    cache.mode, cache.group = mode, mode_group[mode]
+local cache = {
+  mode = "n",
+  group = mode_group["n"],
+}
+
+on_event("ModeChanged", function()
+  local event = vim.v.event
+  local old_mode, new_mode = event.old_mode, event.new_mode
+  cache.mode, cache.group = new_mode, mode_group[new_mode]
+  if old_mode == "t" then
+    vim.schedule(function()
+      vim.cmd("redrawstatus")
+    end)
   end
-end
+end)
 
 local function get_content(item, ctx)
-  local mode = item.cache[ctx.winid].mode
+  local mode = ctx.is_focused and cache.mode or "-"
   return item:config(ctx).text[mode] or mode
 end
 
 local function get_hl(item, ctx)
-  return item:config(ctx).highlight[item.cache[ctx.winid].group]
+  return item:config(ctx).highlight[ctx.is_focused and cache.group or "inactive"]
 end
 
 local mod = {}
@@ -151,7 +157,6 @@ function mod.create(opts)
   opts = opts or {}
 
   local item = Item({
-    prepare = prepare,
     hidden = opts.hidden,
     hl = get_hl,
     sep_left = opts.sep_left,
@@ -166,8 +171,6 @@ function mod.create(opts)
     on_click = opts.on_click,
     context = opts.context,
   })
-
-  item.cache = cache_store
 
   return item
 end
