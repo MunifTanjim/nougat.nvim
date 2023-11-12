@@ -8,6 +8,10 @@ local registry = { buf = {}, win = {}, tab = {} }
 ---@param name string
 ---@param default_value? table
 function mod.create_store(cache_type, name, default_value)
+  if registry[cache_type][name] then
+    error("already created")
+  end
+
   default_value = default_value or {}
   local storage = setmetatable({}, {
     __index = function(storage, id)

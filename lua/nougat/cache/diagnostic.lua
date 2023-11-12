@@ -2,9 +2,10 @@ local create_store = require("nougat.cache").create_store
 local on_event = require("nougat.util").on_event
 
 local severity = vim.deepcopy(vim.diagnostic.severity)
+---@cast severity -nil|unknown
 severity.COMBINED = severity.ERROR + severity.WARN + severity.INFO + severity.HINT
 
-local store = create_store("buf", "diagnostic", {
+local store = create_store("buf", "nougat.cache.diagnostic", {
   [severity.ERROR] = 0,
   [severity.WARN] = 0,
   [severity.INFO] = 0,
