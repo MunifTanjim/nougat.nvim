@@ -21,6 +21,10 @@ function mod.create(opts)
     }, opts.config or {}),
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      scope = "buf",
+      invalidate = "BufWritePost",
+    },
   })
 
   return item

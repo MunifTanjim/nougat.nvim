@@ -5,14 +5,9 @@ local Item = require("nougat.item")
 local o_label_opts = { tabnr = nil, close = false }
 
 local function get_content(_, ctx)
-  local tab_ctx, parts = ctx.tab, ctx.parts
+  local tab_ctx = ctx.tab
   o_label_opts.tabnr = tab_ctx.tabnr
-  parts.len = core.add_label(
-    vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"),
-    o_label_opts,
-    parts,
-    parts.len
-  )
+  return core.label(vim.fn.fnamemodify(vim.api.nvim_buf_get_name(tab_ctx.bufnr), ":t"), o_label_opts)
 end
 
 local hl = {}
@@ -70,6 +65,13 @@ function mod.create(opts)
     sep_right = opts.sep_right,
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      scope = "buf",
+      get = function(store, ctx)
+        return store[ctx.tab.bufnr][ctx.ctx.breakpoint]
+      end,
+      invalidate = "BufFilePost",
+    },
   })
 
   return item

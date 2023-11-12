@@ -1,30 +1,14 @@
 local Item = require("nougat.item")
-local create_cache_store = require("nougat.cache").create_store
-local on_event = require("nougat.util").on_event
-
-local cache_store = create_cache_store("buf", "nut.buf.filename", { v = nil })
-
-on_event("BufFilePost", function(info)
-  local cache = cache_store[info.buf]
-  for key in pairs(cache) do
-    cache[key] = nil
-  end
-end)
 
 local function get_content(item, ctx)
-  local cache = item.cache[ctx.bufnr][ctx.ctx.breakpoint]
-
-  if not cache.v then
-    local config = item:config(ctx)
-    cache.v = vim.fn.expand("%" .. config.modifier)
-    if #cache.v == 0 then
-      cache.v = config.unnamed
-    elseif config.format then
-      cache.v = config.format(cache.v, ctx)
-    end
+  local config = item:config(ctx)
+  local v = vim.fn.expand("%" .. config.modifier)
+  if #v == 0 then
+    v = config.unnamed
+  elseif config.format then
+    v = config.format(v, ctx)
   end
-
-  return cache.v
+  return v
 end
 
 local mod = {}
@@ -45,9 +29,11 @@ function mod.create(opts)
     }, opts.config or {}),
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      scope = "buf",
+      invalidate = "BufFilePost",
+    },
   })
-
-  item.cache = cache_store
 
   return item
 end

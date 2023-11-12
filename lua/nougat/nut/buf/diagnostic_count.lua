@@ -13,17 +13,17 @@ diagnostic_cache.on("update", function(cache)
 end)
 
 local function default_hidden(item, ctx)
-  return item.cache[ctx.bufnr][item:config(ctx).severity] == 0
+  return item:cache(ctx)[item:config(ctx).severity] == 0
 end
 
 local function get_count_content(item, ctx)
   local config = item:config(ctx)
-  local count = item.cache[ctx.bufnr][config.severity]
+  local count = item:cache(ctx)[config.severity]
   return count > 0 and tostring(count) or ""
 end
 
 local function get_combined_content(item, ctx)
-  local cache = item.cache[ctx.bufnr]
+  local cache = item:cache(ctx)
 
   if cache.cc then
     -- show cached combined content
@@ -105,7 +105,7 @@ end
 local hidden = {}
 
 local function hidden_if_zero(item, ctx)
-  return item.cache[ctx.bufnr][item:config(ctx).severity] == 0
+  return item:cache(ctx)[item:config(ctx).severity] == 0
 end
 
 function hidden.if_zero()
@@ -129,6 +129,7 @@ function mod.create(opts)
       sep = " ",
       severity = severity.COMBINED,
     }, opts.config or {})
+    ---@cast config -nil
 
     if config.sep and #config.sep == 0 then
       config.sep = nil
@@ -146,9 +147,13 @@ function mod.create(opts)
     config = config,
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      get = function(store, ctx)
+        return store[ctx.bufnr]
+      end,
+      store = diagnostic_cache.store,
+    },
   })
-
-  item.cache = diagnostic_cache.store
 
   return item
 end

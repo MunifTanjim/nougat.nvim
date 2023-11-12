@@ -9,7 +9,7 @@ buffer_cache.on("gitstatus.change", function(cache)
 end)
 
 local function get_prepare(item, ctx)
-  ctx.gitstatus = item.cache[ctx.bufnr].gitstatus
+  ctx.gitstatus = item:cache(ctx).gitstatus
 end
 
 local function get_hidden(_, ctx)
@@ -17,14 +17,14 @@ local function get_hidden(_, ctx)
 end
 
 local function get_count_content(item, ctx)
-  return ctx.gitstatus[item._count_string_key]
+  return ctx.gitstatus[item._str_key]
 end
 
 local hidden = {}
 
 function hidden.if_zero_count()
   return function(item, ctx)
-    return ctx.gitstatus[item._count_number_key] == 0
+    return ctx.gitstatus[item._num_key] == 0
   end
 end
 
@@ -46,9 +46,8 @@ function mod.count(type, opts)
     context = opts.context,
   })
 
-  item.cache = buffer_cache.store
-  item._count_number_key = type
-  item._count_string_key = type .. "_str"
+  item._num_key = type
+  item._str_key = type .. "_str"
 
   return item
 end
@@ -65,9 +64,13 @@ function mod.create(opts)
     sep_right = opts.sep_right,
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      get = function(store, ctx)
+        return store[ctx.bufnr]
+      end,
+      store = buffer_cache.store,
+    },
   })
-
-  item.cache = buffer_cache.store
 
   return item
 end

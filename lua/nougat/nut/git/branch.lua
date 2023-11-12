@@ -2,10 +2,10 @@ local Item = require("nougat.item")
 
 local get_content = {
   fugitive = function()
-    return vim.fn.FugitiveHead()
+    return vim.fn.FugitiveHead(7)
   end,
   gitsigns = function(_, ctx)
-    return vim.fn.getbufvar(ctx.bufnr, "gitsigns_head")
+    return vim.fn.getbufvar(ctx.bufnr, "gitsigns_head", false)
   end,
   [""] = function() end,
 }
@@ -16,12 +16,13 @@ function mod.create(opts)
   local config = vim.tbl_deep_extend("force", {
     provider = "auto",
   }, opts.config or {})
+  ---@cast config -nil
 
   if config.provider == "auto" then
-    if pcall(require, "gitsigns") then
-      config.provider = "gitsigns"
-    elseif vim.api.nvim_get_runtime_file("plugin/fugitive.vim", false)[1] then
+    if vim.api.nvim_get_runtime_file("plugin/fugitive.vim", false)[1] then
       config.provider = "fugitive"
+    elseif pcall(require, "gitsigns") then
+      config.provider = "gitsigns"
     else
       config.provider = ""
     end
@@ -37,6 +38,10 @@ function mod.create(opts)
     sep_right = opts.sep_right,
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      scope = "buf",
+      invalidate = "BufModifiedSet",
+    },
   })
 
   return item

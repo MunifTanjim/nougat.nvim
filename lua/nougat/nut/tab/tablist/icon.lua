@@ -16,27 +16,19 @@ local icon_char_by_ft = {}
 local icon_hl_by_ft = {}
 
 local function get_content(item, ctx)
-  return icon_char_by_ft[item.buf_cache[ctx.tab.bufnr].filetype]
+  return icon_char_by_ft[item:cache(ctx).filetype]
 end
 
 local function get_hl(item, ctx)
-  return icon_hl_by_ft[item.buf_cache[ctx.tab.bufnr].filetype]
+  return icon_hl_by_ft[item:cache(ctx).filetype]
 end
 
 local function prepare(item, ctx)
-  local bufnr = ctx.tab.bufnr
-  local cache = item.buf_cache[bufnr]
-
-  local filetype = cache.filetype
-  if not filetype then
-    filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
-    cache.filetype = filetype
-  end
-
-  filetype = filetype_overide[filetype] or filetype
+  local filetype = item:cache(ctx).filetype or ""
 
   if not icon_char_by_ft[filetype] then
-    local icon_char, icon_fg = devicons.get_icon_color_by_filetype(filetype, { default = true })
+    local ft = filetype_overide[filetype] or filetype
+    local icon_char, icon_fg = devicons.get_icon_color_by_filetype(ft, { default = true })
     icon_char_by_ft[filetype] = icon_char
     icon_hl_by_ft[filetype] = { fg = icon_fg }
   end
@@ -56,13 +48,17 @@ function mod.create(opts)
     sep_right = opts.sep_right,
     on_click = opts.on_click,
     context = opts.context,
+    cache = {
+      get = function(store, ctx)
+        return store[ctx.tab.bufnr]
+      end,
+      store = buffer_cache.store,
+    },
   })
 
   if not has_devicons then
     item.hidden = true
   end
-
-  item.buf_cache = buffer_cache.store
 
   return item
 end
