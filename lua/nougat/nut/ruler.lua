@@ -5,6 +5,7 @@ local mod = {}
 
 function mod.create(opts)
   return Item({
+    priority = opts.priority,
     hl = opts.hl,
     sep_left = opts.sep_left,
     prefix = opts.prefix,

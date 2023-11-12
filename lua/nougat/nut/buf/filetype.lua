@@ -4,6 +4,7 @@ local mod = {}
 
 function mod.create(opts)
   return Item({
+    priority = opts.priority,
     type = "vim_expr",
     is_vimscript = true,
     hidden = opts.hidden,

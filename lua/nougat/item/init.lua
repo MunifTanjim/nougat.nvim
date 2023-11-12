@@ -68,6 +68,8 @@ local function init(class, config)
   self.hidden = config.hidden
   self.prepare = config.prepare
 
+  self.priority = config.priority
+
   if config.type == "code" then
     self.content = core.code(config.content, {
       align = config.align,

@@ -6,6 +6,7 @@ local mod = {}
 function mod.create()
   return Item({
     hl = false,
+    priority = false,
     content = core.truncation_point(),
   })
 end

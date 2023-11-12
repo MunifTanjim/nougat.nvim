@@ -4,7 +4,7 @@ local Item = require("nougat.item")
 local mod = {}
 
 function mod.create()
-  return Item({ content = core.spacer() })
+  return Item({ priority = false, content = core.spacer() })
 end
 
 return mod

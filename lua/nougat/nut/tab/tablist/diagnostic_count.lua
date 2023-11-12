@@ -17,6 +17,7 @@ local mod = {}
 
 function mod.create(opts)
   local item = Item({
+    priority = opts.priority,
     hidden = hidden,
     hl = label_hl.diagnostic(),
     sep_left = opts.sep_left,

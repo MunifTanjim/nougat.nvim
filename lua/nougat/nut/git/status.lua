@@ -35,6 +35,7 @@ local mod = {
 ---@param type 'added'|'changed'|'removed'
 function mod.count(type, opts)
   local item = Item({
+    priority = opts.priority,
     hidden = opts.hidden == nil and hidden.if_zero_count() or opts.hidden,
     hl = opts.hl,
     sep_left = opts.sep_left,
@@ -54,6 +55,7 @@ end
 
 function mod.create(opts)
   local item = Item({
+    priority = opts.priority,
     prepare = get_prepare,
     hidden = get_hidden,
     hl = opts.hl,

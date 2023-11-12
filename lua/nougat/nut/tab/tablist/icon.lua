@@ -38,6 +38,7 @@ local mod = {}
 
 function mod.create(opts)
   local item = Item({
+    priority = opts.priority,
     prepare = prepare,
     hidden = opts.hidden,
     hl = get_hl,

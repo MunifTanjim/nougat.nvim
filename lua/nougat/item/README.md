@@ -287,6 +287,15 @@ If `cache.invalidate` is `table`:
 - First element should be `string`, used as the name for autocmd event.
 - Second element should be `function`, used to extract id from autocmd event.
 
+### `priority`
+
+**Type:** `integer`
+
+If `priority` is present for any item, the `NougatBar` considers item priority during generation.
+
+Items with higher priority will be evaluated first. And depending on the available width, items with
+lower priority will automatically be hidden from the bar.
+
 > **Note**:
 > **Advance Options**
 
