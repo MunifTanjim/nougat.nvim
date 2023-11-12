@@ -1,5 +1,7 @@
 local core = require("nougat.core")
 local iu = require("nougat.item.util")
+local ic = require("nougat.item.cache")
+local create_store = require("nougat.cache").create_store
 local u = require("nougat.util")
 
 local next_id = u.create_id_generator()
@@ -12,6 +14,8 @@ local next_id = u.create_id_generator()
 ---@alias nougat_item_hidden boolean|(fun(self: NougatItem, ctx: nougat_ctx):boolean)
 
 --luacheck: pop
+
+local invalidate_cache = ic.invalidate_cache
 
 local function content_function_processor(item, ctx)
   local parts = ctx.parts
@@ -105,6 +109,45 @@ local function init(class, config)
     })
   else
     self.content = config.content
+  end
+
+  if config.cache then
+    local cache = config.cache
+
+    if cache.store then
+      self._cache_store = cache.store
+    elseif cache.scope then
+      self._cache_store = create_store(cache.scope, self.id .. "_cache_store", cache.initial_value)
+    end
+    assert(type(self._cache_store) == "table", "one of cache.scope or cache.store is required")
+
+    if cache.get then
+      self._cache_get = cache.get
+      self.cache = ic.cache_getter._wrap_fn
+    elseif cache.scope then
+      self.cache = ic.cache_getter[cache.scope]
+    end
+    assert(type(self.cache) == "function", "one of cache.get or cache.scope is required")
+
+    self._cache_type = cache.store and "manual" or "auto"
+    if self._cache_type == "auto" and type(self.content) == "function" then
+      self._get_content = self.content
+      self.content = ic.auto_cached_content
+    end
+
+    if type(cache.invalidate) == "string" then
+      local get_id = ic.get_invalidation_id_getter(cache.invalidate, cache.scope)
+      u.on_event(cache.invalidate, function(info)
+        invalidate_cache(self._cache_store, get_id, info)
+      end)
+    elseif type(cache.invalidate) == "table" then
+      assert(type(cache.invalidate[1]) == "string", "unexpected cache.invalidate[1], expected string")
+      local get_id = cache.invalidate[2]
+      assert(type(get_id) == "function", "unexpected cache.invalidate[2], expected function")
+      u.on_event(cache.invalidate[1], function(info)
+        invalidate_cache(self._cache_store, get_id, info)
+      end)
+    end
   end
 
   if config.on_click then

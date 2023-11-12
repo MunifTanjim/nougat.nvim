@@ -242,6 +242,49 @@ _Accepted for `type`:_ `'tab_label'`
 
 Associates the item with the specified tab number.
 
+### `cache`
+
+#### `cache.get`
+
+**Type:** `function`
+
+_Signature:_ `(store: table<integer, table>, ctx: nougat_ctx) -> table`
+
+This is used to get the value from cache store for the current context.
+
+#### `cache.initial_value`
+
+**Type:** `table`
+
+If cache store is created by `NougatItem`, this will be used as initial value for the cache.
+
+#### `cache.scope`
+
+**Type:** `'buf'|'win'|'tab'`
+
+If `cache.scope` is present and `cache.store` is missing, it will be used create cache store.
+
+It will also be used if `cache.invalidate` is `string`, for making id extractor from autocmd event. 
+
+#### `cache.store`
+
+**Type:** `table<integer, table>`
+
+If cache store is given, `NougatItem` will not automatically cache the item content.
+
+If it is missing, `NougatItem` will create a cache store using `cache.scope` and
+automatically cache the item content.
+
+#### `cache.invalidate`
+
+**Type:** `string` or `{ [1]: string, [2]: (info: table) -> integer }`
+
+If `cache.invalidate` is `string`, it'll be used as the name for autocmd event.
+
+If `cache.invalidate` is `table`:
+- First element should be `string`, used as the name for autocmd event.
+- Second element should be `function`, used to extract id from autocmd event.
+
 > **Note**:
 > **Advance Options**
 
@@ -254,6 +297,14 @@ Used to prepare item's internals for the bar's breakpoints.
 If provided, it is called when the item is added to the bar.
 
 ## Methods
+
+### `item:cache`
+
+_Signature:_ `(ctx: nougat_ctx) -> table`
+
+Returns the cache for current context.
+
+_Only available when `cache` option is present._
 
 ### `item:config`
 
