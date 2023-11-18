@@ -25,9 +25,7 @@ local function get_content(item, ctx)
   item.tabs.len = item_idx
   item.tabs.tabids = tabids
 
-  u.prepare_parts(item.tabs, ctx)
-
-  ctx.tab = nil
+  return item.tabs
 end
 
 local function on_init_breakpoints(item, breakpoints)
@@ -45,17 +43,19 @@ local function on_init_breakpoints(item, breakpoints)
 end
 
 local function get_next_tab_item(tabs)
+  local ctx, tab_ctx = tabs.ctx, tabs.tab_ctx
+
   local idx = tabs._idx + 1
 
   local tabid = tabs.tabids[idx]
+
   if not tabid then
     tabs._idx = 0
+    ctx.tab = nil
     return nil, nil
   end
 
   tabs._idx = idx
-
-  local ctx, tab_ctx = tabs.ctx, tabs.tab_ctx
 
   tab_ctx.tabid, tab_ctx.tabnr = tabid, vim.api.nvim_tabpage_get_number(tabid)
   tab_ctx.winid = vim.api.nvim_tabpage_get_win(tabid)
@@ -99,13 +99,6 @@ function mod.create(opts)
     inactive_tab.hl = default_tab_hl.inactive
   end
 
-  for _, tab in ipairs({ active_tab, inactive_tab }) do
-    tab.sep_left = iu.normalize_sep(-1, tab.sep_left)
-    tab.prefix = type(tab.prefix) == "string" and { tab.prefix } or tab.prefix
-    tab.suffix = type(tab.suffix) == "string" and { tab.suffix } or tab.suffix
-    tab.sep_right = iu.normalize_sep(1, tab.sep_right)
-  end
-
   local item = Item({
     priority = opts.priority,
     hidden = opts.hidden,
@@ -117,6 +110,15 @@ function mod.create(opts)
 
     on_init_breakpoints = on_init_breakpoints,
   })
+
+  for mode, tab in pairs({ active = active_tab, inactive = inactive_tab }) do
+    tab.id = string.format("%s-%s", item.id, mode)
+    tab.sep_left = iu.normalize_sep(-1, tab.sep_left)
+    tab.prefix = type(tab.prefix) == "string" and { tab.prefix } or tab.prefix
+    tab.suffix = type(tab.suffix) == "string" and { tab.suffix } or tab.suffix
+    tab.sep_right = iu.normalize_sep(1, tab.sep_right)
+    tab.content.len = #tab.content
+  end
 
   item.active_tab = active_tab
   item.inactive_tab = inactive_tab
