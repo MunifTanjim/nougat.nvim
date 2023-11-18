@@ -249,6 +249,7 @@ end
 ---@field fc_idx? integer first child index
 ---@field lc_idx? integer last child index
 ---@field fb? nougat_hl_def fallback
+---@field x? boolean skip highlight
 
 ---@param hls nougat_lazy_item_hl[]
 ---@param hl_idx integer
@@ -525,6 +526,324 @@ function mod.initialize_priority_item_list(items, get_next)
   items._node = items._next
 
   return items
+end
+
+---@param slots table<integer, (string|table)[]|{ hl: nougat_lazy_item_hl, len: integer }|nil>
+---@param idx integer
+---@return (string|table)[]|{ hl: nougat_lazy_item_hl, len: integer }
+local function get_item_parts_slot(slots, idx)
+  local slot = slots[idx]
+  if not slot then
+    slot = { hl = {} }
+    slots[idx] = slot
+  end
+
+  local item_hl = slot.hl
+  item_hl.c = nil
+  item_hl.c_idx = nil
+  item_hl.sl = nil
+  item_hl.sl_idx = nil
+  item_hl.sr = nil
+  item_hl.sr_idx = nil
+  item_hl.r = nil
+  item_hl.r_idx = nil
+  item_hl.fc_idx = nil
+  item_hl.lc_idx = nil
+  item_hl.fb = nil
+  item_hl.x = false
+
+  return slot
+end
+
+local o_eval_stl_opts = {}
+
+local function prepare_slots(items, ctx, item_fallback_hl)
+  local available_width = ctx.available_width
+
+  local initial_available_width = available_width
+
+  local breakpoint = ctx.ctx.breakpoint
+
+  local slots = ctx.slots
+
+  local item, item_idx = items:next()
+  while item do
+    local slot_initial_available_width = available_width
+
+    local parts = get_item_parts_slot(slots, item_idx)
+    local item_hl = parts.hl
+    item_hl.fb = item_fallback_hl
+
+    local part_idx = 0
+
+    local should_skip_slot
+
+    if available_width >= 0 then
+      if item.prepare then
+        item:prepare(ctx)
+      end
+
+      local hidden = item.hidden and (item.hidden == true or item:hidden(ctx))
+
+      if not hidden then
+        if item.sep_left then
+          local sep = item.sep_left[breakpoint]
+
+          if sep.content then
+            item_hl.sl = resolve_highlight(sep.hl, item, ctx)
+
+            if item_hl.sl then
+              item_hl.sl_idx = part_idx
+              part_idx = part_idx + 3
+            elseif item.hl then
+              item_hl.c = resolve_highlight(item.hl, item, ctx)
+
+              if item_hl.c then
+                item_hl.c_idx = part_idx
+                part_idx = part_idx + 3
+              end
+            end
+
+            part_idx = part_idx + 1
+            parts[part_idx] = sep.content
+
+            available_width = available_width - vim.api.nvim_strwidth(sep.content)
+          else
+            part_idx = part_idx + 1
+            parts[part_idx] = ""
+          end
+        end
+
+        -- content hl is not added yet
+        if not item_hl.c_idx then
+          -- content hl is not resolved yet
+          if item_hl.c ~= false then
+            item_hl.c = resolve_highlight(item.hl, item, ctx)
+          end
+
+          if item_hl.c then
+            item_hl.c_idx = part_idx
+            part_idx = part_idx + 3
+          elseif item_hl.sl_idx then -- sep_left hl was added
+            -- separator's highlight should not bleed into content
+            part_idx = core.add_highlight(0, nil, parts, part_idx)
+          end
+        end
+
+        local nested_items_idx, nested_items
+
+        if item.content then
+          if item.prefix then
+            part_idx = part_idx + 1
+            parts[part_idx] = resolve_affix(item.prefix, item, ctx, breakpoint)
+
+            available_width = available_width - vim.api.nvim_strwidth(parts[part_idx])
+          end
+
+          local content = item.content
+          local content_type = type(content)
+          if content_type == "function" then
+            parts.len = part_idx
+
+            content = item:content(ctx) or ""
+            content_type = type(content)
+          end
+
+          if (content_type == "table" and content.len or #content) > 0 then
+            o_eval_stl_opts.winid = ctx.winid
+
+            if content_type == "table" then
+              if type(content[1]) == "string" then
+                ---@cast content string[]
+                for idx = 1, (content.len or #content) do
+                  local c = vim.api.nvim_eval_statusline(content[idx], o_eval_stl_opts)
+
+                  part_idx = part_idx + 1
+                  parts[part_idx] = content[idx]
+
+                  available_width = available_width - c.width
+                end
+              else
+                if not content.next then
+                  mod.initialize_priority_item_list(content)
+                end
+
+                part_idx = part_idx + 1
+
+                nested_items_idx = part_idx
+                nested_items = content
+              end
+            else
+              if item.priority == -math.huge then
+                part_idx = part_idx + 1
+                parts[part_idx] = content
+              else
+                local c = vim.api.nvim_eval_statusline(content, o_eval_stl_opts)
+
+                part_idx = part_idx + 1
+                parts[part_idx] = content
+
+                available_width = available_width - c.width
+              end
+            end
+
+            if item.suffix then
+              part_idx = part_idx + 1
+              parts[part_idx] = resolve_affix(item.suffix, item, ctx, breakpoint)
+
+              available_width = available_width - vim.api.nvim_strwidth(parts[part_idx])
+            end
+          else -- no content returned
+            if part_idx == parts.len then -- no parts added
+              if item.prefix then
+                -- discard prefix
+                part_idx = part_idx - 1
+                parts.len = part_idx
+              end
+            else
+              part_idx = parts.len
+            end
+          end
+        end
+
+        if item.sep_right then
+          local sep = item.sep_right[breakpoint]
+
+          if sep.content then
+            item_hl.sr = resolve_highlight(sep.hl, item, ctx)
+
+            if item_hl.sr then
+              item_hl.sr_idx = part_idx
+              part_idx = part_idx + 3
+            end
+
+            part_idx = part_idx + 1
+            parts[part_idx] = sep.content
+
+            available_width = available_width - vim.api.nvim_strwidth(sep.content)
+          else
+            part_idx = part_idx + 1
+            parts[part_idx] = ""
+          end
+        end
+
+        if nested_items_idx then
+          local nested_slots = parts[nested_items_idx]
+          if not nested_slots or nested_slots.id ~= item.id then
+            nested_slots = { id = item.id }
+            parts[nested_items_idx] = nested_slots
+          end
+
+          nested_slots.len = nested_items.len
+          ctx.available_width = available_width
+          ctx.slots = nested_slots
+
+          ---@cast nested_items NougatItem[]
+          prepare_slots(nested_items, ctx, item_hl.c)
+
+          if ctx.available_width == available_width then
+            should_skip_slot = true
+          else
+            available_width = ctx.available_width
+          end
+
+          ctx.slots = slots
+          ctx.available_width = available_width
+        end
+
+        if item_hl.c or item_hl.sl or item_hl.sr then
+          if item_fallback_hl then
+            item_hl.r = item_fallback_hl
+            item_hl.r_idx = part_idx
+            part_idx = part_idx + 3
+          else
+            part_idx = core.add_highlight(0, nil, parts, part_idx)
+          end
+        end
+
+        if item.hl == false then
+          item_hl.x = true
+        end
+      end
+    end
+
+    if should_skip_slot then
+      part_idx = 0
+      available_width = slot_initial_available_width
+    elseif available_width < 0 then
+      if items._overflow == "hide-all" then
+        for i = 1, #slots do
+          slots[i].len = 0
+        end
+        ctx.available_width = initial_available_width
+        break
+      else
+        -- hide-self
+        part_idx = 0
+        available_width = slot_initial_available_width
+      end
+    end
+
+    parts.len = part_idx
+    ctx.available_width = available_width
+
+    item, item_idx = items:next()
+  end
+end
+
+local function prepare_parts_from_slots(slots, parts, parts_len, hls, hls_len, item_hl)
+  for i = 1, slots.len do
+    local slot = slots[i]
+
+    if type(slot) == "table" then
+      if slot.len > 0 then
+        local c_len = parts_len
+        if slot.hl and not slot.hl.x then
+          hls_len = hls_len + 1
+
+          local item_hls_len = hls_len
+
+          if slot.hl.sl_idx then
+            slot.hl.sl_idx = slot.hl.sl_idx + parts_len
+          end
+
+          if slot.hl.c_idx then
+            slot.hl.c_idx = slot.hl.c_idx + parts_len
+          end
+
+          if slot.hl.sr_idx then
+            slot.hl.sr_idx = slot.hl.sr_idx + parts_len
+          end
+
+          if slot.hl.r_idx then
+            slot.hl.r_idx = slot.hl.r_idx + parts_len
+          end
+
+          parts_len, hls_len = prepare_parts_from_slots(slot, parts, parts_len, hls, hls_len, slot.hl)
+
+          hls[item_hls_len] = slot.hl
+        else
+          parts_len, hls_len = prepare_parts_from_slots(slot, parts, parts_len, hls, hls_len)
+        end
+
+        c_len = parts_len - c_len
+
+        if item_hl and item_hl.sr_idx then
+          item_hl.sr_idx = item_hl.sr_idx + c_len - 1
+        end
+      end
+    else
+      parts_len = parts_len + 1
+      parts[parts_len] = slot or ""
+    end
+  end
+
+  return parts_len, hls_len
+end
+
+function mod.prepare_priority_parts(items, ctx)
+  prepare_slots(items, ctx)
+  ctx.parts.len, ctx.hls.len = prepare_parts_from_slots(ctx.slots, ctx.parts, 0, ctx.hls, 0)
 end
 
 ---@param ctx nougat_ctx

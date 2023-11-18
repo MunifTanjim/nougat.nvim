@@ -71,9 +71,11 @@ local function init(class, type, opts)
   self.id = next_id()
   self.type = type
 
-  ---@type NougatItem[]|{ len: integer, next: (fun(self: NougatItem[]): table,integer) }
+  --luacheck: push no max line length
+  ---@type NougatItem[]|{ len: integer, next: (fun(self: NougatItem[]): table,integer), _overflow?: 'hide-all'|'hide-self' }
   self._items = { len = 0, next = u.get_next_list_item }
   self._hl_name = fallback_hl_name_by_type[self.type]
+  --luacheck: pop
 
   self._breakpoints = opts and opts.breakpoints or { 0 }
   self._get_breakpoint_index = get_breakpoint_index[get_breakpoint_type(self._breakpoints)]
@@ -100,6 +102,7 @@ function Bar:add_item(item)
 
   if priority and not self._slots then
     self._slots = { len = 0 }
+    self._items._overflow = "hide-self"
     self._items.next = nil
     u.initialize_priority_item_list(self._items)
   end
@@ -124,7 +127,7 @@ local o_hls = { len = 0 }
 local o_parts = { len = 0 }
 
 --luacheck: push no max line length
----@alias nougat_ctx nougat_core_expression_context|{ hls: nougat_lazy_item_hl[]|{ len: integer }, parts: string[]|{ len: integer }, width: integer }
+---@alias nougat_ctx nougat_core_expression_context|{ hls: nougat_lazy_item_hl[]|{ len: integer }, parts: string[]|{ len: integer }, width: integer, slots?: any[], available_width?: integer }
 --luacheck: pop
 
 ---@param ctx nougat_ctx
@@ -137,7 +140,18 @@ function Bar:generate(ctx)
   o_hls.len, o_parts.len = 0, 0
   ctx.hls, ctx.parts = o_hls, o_parts
 
-  u.prepare_parts(self._items, ctx)
+  if self._slots then
+    local o_slots = self._slots
+    o_slots.len = self._items.len
+    ctx.slots = o_slots
+
+    ctx.available_width = ctx.width
+
+    u.prepare_priority_parts(self._items, ctx)
+  else
+    u.prepare_parts(self._items, ctx)
+  end
+
   u.process_bar_highlights(ctx, bar_hl)
 
   return table.concat(o_parts, nil, 1, o_parts.len)

@@ -154,6 +154,19 @@ local function init(class, config)
 
   if type(self.content) == "table" then
     self.content.len = #self.content
+
+    if self.content[1].id then
+      -- NougatItem[]
+
+      self.content._overflow = "hide-all"
+
+      for i = 1, #self.content do
+        if self.content[i].priority then
+          self.content._overflow = "hide-self"
+          break
+        end
+      end
+    end
   end
 
   if config.on_click then
