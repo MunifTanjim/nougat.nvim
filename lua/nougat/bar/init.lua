@@ -38,6 +38,16 @@ local get_breakpoint_index = {
   end,
 }
 
+---@param item NougatItem
+---@return NougatItem
+local function clone_item(item)
+  local clone = {}
+  for key, val in pairs(item) do
+    clone[key] = val
+  end
+  return setmetatable(clone, getmetatable(item))
+end
+
 ---@param breakpoints integer[]
 ---@returns 'min'|'max'
 local function get_breakpoint_type(breakpoints)
@@ -61,8 +71,8 @@ local function init(class, type, opts)
   self.id = next_id()
   self.type = type
 
-  ---@type NougatItem[]|{ next: fun(self: NougatItem[]): table,integer }
-  self._items = { next = u.get_next_list_item }
+  ---@type NougatItem[]|{ len: integer, next: (fun(self: NougatItem[]): table,integer) }
+  self._items = { len = 0, next = u.get_next_list_item }
   self._hl_name = fallback_hl_name_by_type[self.type]
 
   self._breakpoints = opts and opts.breakpoints or { 0 }
@@ -80,21 +90,33 @@ local Bar = setmetatable({}, {
 ---@param item string|table|NougatItem
 ---@return NougatItem
 function Bar:add_item(item)
-  local idx = #self._items + 1
-
   if type(item) == "string" then
-    self._items[idx] = Item({ content = item })
+    item = Item({ content = item })
   elseif not item.id then
-    self._items[idx] = Item(item)
-  else
-    self._items[idx] = item
+    item = Item(item)
   end
 
-  local new_item = self._items[idx]
+  local priority = item.priority
 
-  new_item:_init_breakpoints(self._breakpoints)
+  if priority and not self._slots then
+    self._slots = { len = 0 }
+    self._items.next = nil
+    u.initialize_priority_item_list(self._items)
+  end
 
-  return new_item
+  local idx = self._items.len + 1
+  self._items.len = idx
+
+  if self._slots then
+    item = clone_item(item)
+    u.link_priority_item(self._items, item, idx)
+  end
+
+  self._items[idx] = item
+
+  item:_init_breakpoints(self._breakpoints)
+
+  return item
 end
 
 -- re-used tables

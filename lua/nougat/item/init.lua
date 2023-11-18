@@ -152,6 +152,10 @@ local function init(class, config)
     end
   end
 
+  if type(self.content) == "table" then
+    self.content.len = #self.content
+  end
+
   if config.on_click then
     if type(self.content) == "function" then
       self._content = self.content

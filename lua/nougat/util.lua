@@ -50,6 +50,16 @@ local function get_next_list_item(items)
   return item, idx
 end
 
+local function get_next_priority_list_item(items)
+  local item = items._node
+  if item then
+    items._node = item._next
+    return item, item._idx
+  end
+  items._node = items._next
+  return nil, nil
+end
+
 local augroup = vim.api.nvim_create_augroup("nougat.on_event", { clear = true })
 
 ---@type table<string, (fun(info:table):nil)[]>
@@ -482,6 +492,39 @@ local function prepare_parts(items, ctx, item_fallback_hl)
 
     item = items:next()
   end
+end
+
+function mod.link_priority_item(node, item, idx)
+  item.priority = item.priority == false and -math.huge or item.priority or 0
+  while node do
+    local next_item = node._next
+    if not next_item or next_item.priority < item.priority then
+      item._idx = idx
+      item._next = next_item
+      node._next = item
+      return
+    end
+    node = next_item
+  end
+end
+
+function mod.initialize_priority_item_list(items, get_next)
+  if not items.next then
+    items.next = get_next or get_next_priority_list_item
+  end
+
+  for idx = 1, (items.len or #items) do
+    local item = items[idx]
+    mod.link_priority_item(items, item, idx)
+
+    if type(item.content) == "table" then
+      mod.initialize_priority_item_list(item.content, items.next)
+    end
+  end
+
+  items._node = items._next
+
+  return items
 end
 
 ---@param ctx nougat_ctx
