@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.2.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.1.0...0.2.0) (2023-11-19)
+
+
+### Features
+
+* add on_event util ([d407874](https://github.com/MunifTanjim/nougat.nvim/commit/d407874a163b11f8b1414635ae7db4696c6e3a0e))
+* **bar:** add 'items:next' interface for iteration ([a9fdb61](https://github.com/MunifTanjim/nougat.nvim/commit/a9fdb6107a92e36a4c76b50c8967001097deb29e))
+* **bar:** support item priority ([6362246](https://github.com/MunifTanjim/nougat.nvim/commit/63622465301d14c3af301e3ead98ae21d46d577a))
+* **bar:** update method add_item ([a588772](https://github.com/MunifTanjim/nougat.nvim/commit/a588772576829e40da5edc76623e62b914f9b8d9))
+* **cache:** add .gitstatus to buffer cache ([c2d10f2](https://github.com/MunifTanjim/nougat.nvim/commit/c2d10f2259b5a00737338def3ab443440055ddd4))
+* **cache:** add buffer filename ([3ab2c0a](https://github.com/MunifTanjim/nougat.nvim/commit/3ab2c0a8b7d233b4d80adc89e86423bae1f0cf12))
+* **cache:** add more hooks ([4902e96](https://github.com/MunifTanjim/nougat.nvim/commit/4902e967cdf4b6328364f649497def85a91208b2))
+* **cache:** support tab cache ([507dd2d](https://github.com/MunifTanjim/nougat.nvim/commit/507dd2deaaceaea223f9f107268512902feb274f))
+* **core:** add nougat.core module ([9291fac](https://github.com/MunifTanjim/nougat.nvim/commit/9291fac6bd0323e9d7600d52ec4873ac0fc75b19))
+* **item:** add cache config ([dba049f](https://github.com/MunifTanjim/nougat.nvim/commit/dba049fe50b2b3b07f446e66e6159b663650ee63))
+* **item:** support priority config ([1b8ca44](https://github.com/MunifTanjim/nougat.nvim/commit/1b8ca446743608119c95dbe0e45c3a4f5c5305d7))
+* **nut:** add .hidden.if_not_filetype for wordcount ([2b310ab](https://github.com/MunifTanjim/nougat.nvim/commit/2b310ab1eaec94e405727f36a1febf412405ca6c))
+* **nut:** add .hidden.if_zero for diagnostic_count ([e820de1](https://github.com/MunifTanjim/nougat.nvim/commit/e820de186ffc00669aa454e54fcd93b4e5b47aa6))
+* **nut:** add git.status ([aab870c](https://github.com/MunifTanjim/nougat.nvim/commit/aab870c6011ee77daf05633b1251993a2cfba787))
+* **nut:** add truncation_point ([8eb4d4b](https://github.com/MunifTanjim/nougat.nvim/commit/8eb4d4be4c2f4e1d67fa5629a9baaf142b0e761c))
+* **nut:** improve mode tracking ([413bb1f](https://github.com/MunifTanjim/nougat.nvim/commit/413bb1fda680dc67779c01f496ed6e477188be77))
+* **nut:** remove fancy icon from tab.tablist.close ([daf4f15](https://github.com/MunifTanjim/nougat.nvim/commit/daf4f155ea703d04e095c2521b2281d8cf0611f8))
+* **nut:** tweak some tab.tablist stuffs ([ea09613](https://github.com/MunifTanjim/nougat.nvim/commit/ea096136b6dd6edfe7dcecbd4ce8e0286b9355bc))
+* **nut:** use cache config for caching ([45cc6e6](https://github.com/MunifTanjim/nougat.nvim/commit/45cc6e6ac8fb562ce3304c68041d655d9a4930c3))
+* **separator:** improve hl processing ([3bf7f98](https://github.com/MunifTanjim/nougat.nvim/commit/3bf7f98b3825533acce904e4ce025133fb231bda))
+* **separator:** make closest child hl automagic ([8755374](https://github.com/MunifTanjim/nougat.nvim/commit/8755374c9ee017c091b9f19c48dae2183a7d2f83))
+
+
+### Bug Fixes
+
+* **cache:** ignore diagnostic from invalid or scratch buffer ([edb59df](https://github.com/MunifTanjim/nougat.nvim/commit/edb59df603352b08796e58fb06cc0498033082ea))
+* **item:** .on_click with function .content ([f31b5ec](https://github.com/MunifTanjim/nougat.nvim/commit/f31b5ecc426c9840930526b5fa12832ed8738a87))
+* **nut:** fix buf.filename cache invalidation ([75ad4e9](https://github.com/MunifTanjim/nougat.nvim/commit/75ad4e98a9275a595d1136fa1b19a39ab2e235fd))
+* **nut:** support priority in tab.tablist ([660aaf4](https://github.com/MunifTanjim/nougat.nvim/commit/660aaf4af2deeb69c18917fb88852d75d9810335))
+* **nut:** tab.tablist.label ([ea3679c](https://github.com/MunifTanjim/nougat.nvim/commit/ea3679cf201b107e740b220f35497ec11001311a))
+* **nut:** tab.tablist.label tabnr after tabmove ([ad7a20f](https://github.com/MunifTanjim/nougat.nvim/commit/ad7a20fd42ea1a3e16c96425c4089cbf73231af3))
+* **nut:** wordcount in visual mode ([5818222](https://github.com/MunifTanjim/nougat.nvim/commit/58182225e56855e98d635027fb4560e825e3ef86))
+
+
+### Performance Improvements
+
+* **cache:** read filetype from autocmd params ([4a076aa](https://github.com/MunifTanjim/nougat.nvim/commit/4a076aa89ab3a23b9a37f222737d40db918b423b))
+* **core:** reuse parts tables ([b2128a2](https://github.com/MunifTanjim/nougat.nvim/commit/b2128a2b1abba1c24cddad8b731889d763228c0e))
+
 ## 0.1.0 (2022-12-30)
 
 
