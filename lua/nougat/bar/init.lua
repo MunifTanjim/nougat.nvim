@@ -1,4 +1,6 @@
 local Item = require("nougat.item")
+local get_hl_def = require("nougat.util.hl").get_hl_def
+local get_hl_name = require("nougat.util.hl").get_hl_name
 local u = require("nougat.util")
 
 --luacheck: push no max line length
@@ -57,19 +59,19 @@ local function get_bar_hl(bar, ctx)
 
   if highlight == 0 then
     local hl_name = bar._hl_name[ctx.is_focused]
-    return u.get_hl(hl_name), hl_name
+    return get_hl_def(hl_name), hl_name
   end
 
   if type(highlight) == "table" then
-    return highlight, u.set_hl(highlight, highlight)
+    return highlight, get_hl_name(highlight, highlight)
   end
 
   if type(highlight) == "string" then
-    return u.get_hl(highlight), highlight
+    return get_hl_def(highlight), highlight
   end
 
   if type(highlight) == "number" then
-    return u.get_hl("User" .. highlight), highlight
+    return get_hl_def("User" .. highlight), highlight
   end
 
   error("missing bar highlight")

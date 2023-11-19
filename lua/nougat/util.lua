@@ -1,4 +1,7 @@
 local core = require("nougat.core")
+local u_hl = require("nougat.util.hl")
+
+local get_hl_def, get_hl_name = u_hl.get_hl_def, u_hl.get_hl_name
 
 local mod = {}
 
@@ -60,140 +63,7 @@ local function get_next_priority_list_item(items)
   return nil, nil
 end
 
-local augroup = vim.api.nvim_create_augroup("nougat.on_event", { clear = true })
-
----@type table<string, (fun(info:table):nil)[]>
-local autocmd_cb_store = {}
-
----@param event string|string[]
----@param callback (fun(info:table):nil)
-local function on_event(event, callback)
-  if type(event) == "string" then
-    event = { event }
-  end
-
-  for _, ev in ipairs(event) do
-    local event_name = ev
-    local pattern
-
-    if string.sub(ev, 1, 5) == "User " then
-      event_name = "User"
-      pattern = string.sub(ev, 6)
-    end
-
-    if not autocmd_cb_store[ev] then
-      autocmd_cb_store[ev] = {}
-
-      vim.api.nvim_create_autocmd(event_name, {
-        group = augroup,
-        pattern = pattern,
-        callback = function(info)
-          local cbs = info.event == "User" and autocmd_cb_store["User " .. info.match] or autocmd_cb_store[info.event]
-
-          for _, cb in ipairs(cbs) do
-            cb(info)
-          end
-        end,
-        desc = "[nougat] util.on_event - " .. ev,
-      })
-    end
-
-    autocmd_cb_store[ev][#autocmd_cb_store[ev] + 1] = callback
-  end
-end
-
-mod.on_event = on_event
-
----@alias nougat_hl_def { bg?: string, fg?: string, bold?: boolean, italic?: boolean }
-
----@type table<string, nougat_hl_def>
-local get_hl_cache = {}
-
----@param name string
----@return nougat_hl_def
-local function get_hl(name)
-  if get_hl_cache[name] then
-    return get_hl_cache[name]
-  end
-
-  local def = vim.api.nvim_get_hl_by_name(name, true)
-
-  if def.background then
-    def.bg = string.format("#%06x", def.background)
-    def.background = nil
-  end
-
-  if def.foreground then
-    def.fg = string.format("#%06x", def.foreground)
-    def.foreground = nil
-  end
-
-  if def.reverse then
-    def.bg, def.fg = def.fg, def.bg
-    def.reverse = nil
-  end
-
-  get_hl_cache[name] = def
-
-  return def
-end
-
-on_event("ColorScheme", function()
-  local names = vim.tbl_keys(get_hl_cache)
-  for idx = 1, #names do
-    get_hl_cache[names[idx]] = nil
-  end
-end)
-
-local nougat_hl_name_format = "nougat_hl_bg_%s_fg_%s_%s"
-local attr_bold_italic = "b.i"
-local attr_bold = "b"
-local attr_italic = "i"
-local attr_none = ""
-
--- format: `nougat_hl_bg_<bg>_fg_<fg>_<attr...>`
----@param hl nougat_hl_def
----@return string
-local function make_nougat_hl_name(hl)
-  return string.format(
-    nougat_hl_name_format,
-    (hl.bg or ""):gsub("^#", "", 1),
-    (hl.fg or ""):gsub("^#", "", 1),
-    (hl.bold and hl.italic) and attr_bold_italic or hl.bold and attr_bold or hl.italic and attr_italic or attr_none
-  )
-end
-
-local set_hl_cache = {}
-local needs_fallback = { bg = true, fg = true }
-
--- re-used table
----@type nougat_hl_def
-local o_hl_def = {}
-
----@param hl nougat_hl_def
----@param fallback_hl nougat_hl_def
----@return string hl_name
-local function set_hl(hl, fallback_hl)
-  o_hl_def.bg, o_hl_def.fg, o_hl_def.bold, o_hl_def.italic =
-    hl.bg or fallback_hl.bg, hl.fg or fallback_hl.fg, hl.bold, hl.italic
-
-  if needs_fallback[o_hl_def.bg] then
-    o_hl_def.bg = fallback_hl[o_hl_def.bg or "bg"]
-  end
-
-  if needs_fallback[o_hl_def.fg] then
-    o_hl_def.fg = fallback_hl[o_hl_def.fg or "fg"]
-  end
-
-  local hl_name = make_nougat_hl_name(o_hl_def)
-
-  if not set_hl_cache[hl_name] then
-    vim.api.nvim_set_hl(0, hl_name, o_hl_def)
-    set_hl_cache[hl_name] = true
-  end
-
-  return hl_name
-end
+mod.on_event = require("nougat.util.on_event")
 
 -- re-used table
 ---@type nougat_hl_def
@@ -304,11 +174,11 @@ local function resolve_highlight(hl, item, ctx)
   end
 
   if type(highlight) == "string" then
-    return get_hl(highlight)
+    return get_hl_def(highlight)
   end
 
   if type(highlight) == "number" then
-    return get_hl("User" .. highlight)
+    return get_hl_def("User" .. highlight)
   end
 
   return false
@@ -876,7 +746,7 @@ function mod.process_bar_highlights(ctx, fallback_hl)
       local near_next_hl_c = hl.fc_idx and hls[hl.fc_idx].c or nil
 
       core.add_highlight(
-        set_hl(
+        get_hl_name(
           prepare_sep_left_hl(hl.sl, far_prev_hl_c, near_prev_hl and near_prev_hl.c or nil, hl.c, near_next_hl_c),
           hl.fb or fallback_hl
         ),
@@ -887,7 +757,7 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.c then
-      core.add_highlight(set_hl(hl.c, hl.fb or fallback_hl), nil, parts, hl.c_idx)
+      core.add_highlight(get_hl_name(hl.c, hl.fb or fallback_hl), nil, parts, hl.c_idx)
     end
 
     if hl.sr then
@@ -910,7 +780,7 @@ function mod.process_bar_highlights(ctx, fallback_hl)
       local far_next_hl_c = (near_next_hl and near_next_hl.fc_idx) and hls[near_next_hl.fc_idx].c or nil
 
       core.add_highlight(
-        set_hl(
+        get_hl_name(
           prepare_sep_right_hl(hl.sr, prev_hl_c, hl.c, near_next_hl and near_next_hl.c or nil, far_next_hl_c),
           hl.fb or fallback_hl
         ),
@@ -921,13 +791,10 @@ function mod.process_bar_highlights(ctx, fallback_hl)
     end
 
     if hl.r then
-      core.add_highlight(set_hl(hl.r, fallback_hl), nil, parts, hl.r_idx)
+      core.add_highlight(get_hl_name(hl.r, fallback_hl), nil, parts, hl.r_idx)
     end
   end
 end
-
-mod.get_hl = get_hl
-mod.set_hl = set_hl
 
 mod.prepare_parts = prepare_parts
 

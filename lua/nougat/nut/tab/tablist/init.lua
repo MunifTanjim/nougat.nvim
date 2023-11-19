@@ -1,6 +1,6 @@
 local buf_cache = require("nougat.cache.buffer")
 local Item = require("nougat.item")
-local u = require("nougat.util")
+local get_hl_def = require("nougat.util.hl").get_hl_def
 local iu = require("nougat.item.util")
 
 buf_cache.enable("filename")
@@ -69,8 +69,8 @@ local function get_next_tab_item(tabs)
 end
 
 local default_tab_hl = {
-  active = u.get_hl("TabLineSel"),
-  inactive = u.get_hl("TabLine"),
+  active = get_hl_def("TabLineSel"),
+  inactive = get_hl_def("TabLine"),
 }
 
 local function get_default_tab()

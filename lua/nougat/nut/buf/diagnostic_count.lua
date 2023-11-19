@@ -1,6 +1,6 @@
 local Item = require("nougat.item")
 local core = require("nougat.core")
-local u = require("nougat.util")
+local get_hl_name = require("nougat.util.hl").get_hl_name
 
 local diagnostic_cache = require("nougat.cache.diagnostic")
 local severity = diagnostic_cache.severity
@@ -41,7 +41,7 @@ local function get_combined_content(item, ctx)
 
     local bar_hl = ctx.ctx.bar_hl
     local item_hl = item.hl or bar_hl
-    local sep_hl = config.sep and core.highlight(u.set_hl(item.hl or {}, bar_hl))
+    local sep_hl = config.sep and core.highlight(get_hl_name(item.hl or {}, bar_hl))
 
     if config.error and cache[severity.ERROR] > 0 then
       if part_idx > 0 and config.sep then
@@ -49,7 +49,7 @@ local function get_combined_content(item, ctx)
         parts[part_idx + 2] = config.sep
         part_idx = part_idx + 2
       end
-      part_idx = core.add_highlight(u.set_hl(config.error, item_hl), nil, parts, part_idx)
+      part_idx = core.add_highlight(get_hl_name(config.error, item_hl), nil, parts, part_idx)
       parts[part_idx + 1] = config.error.prefix
       parts[part_idx + 2] = cache[severity.ERROR]
       parts[part_idx + 3] = config.error.suffix
@@ -62,7 +62,7 @@ local function get_combined_content(item, ctx)
         parts[part_idx + 2] = config.sep
         part_idx = part_idx + 2
       end
-      part_idx = core.add_highlight(u.set_hl(config.warn, item_hl), nil, parts, part_idx)
+      part_idx = core.add_highlight(get_hl_name(config.warn, item_hl), nil, parts, part_idx)
       parts[part_idx + 1] = config.warn.prefix
       parts[part_idx + 2] = cache[severity.WARN]
       parts[part_idx + 3] = config.warn.suffix
@@ -75,7 +75,7 @@ local function get_combined_content(item, ctx)
         parts[part_idx + 2] = config.sep
         part_idx = part_idx + 2
       end
-      part_idx = core.add_highlight(u.set_hl(config.info, item_hl), nil, parts, part_idx)
+      part_idx = core.add_highlight(get_hl_name(config.info, item_hl), nil, parts, part_idx)
       parts[part_idx + 1] = config.info.prefix
       parts[part_idx + 2] = cache[severity.INFO]
       parts[part_idx + 3] = config.info.suffix
@@ -88,7 +88,7 @@ local function get_combined_content(item, ctx)
         parts[part_idx + 2] = config.sep
         part_idx = part_idx + 2
       end
-      part_idx = core.add_highlight(u.set_hl(config.hint, item_hl), nil, parts, part_idx)
+      part_idx = core.add_highlight(get_hl_name(config.hint, item_hl), nil, parts, part_idx)
       parts[part_idx + 1] = config.hint.prefix
       parts[part_idx + 2] = cache[severity.HINT]
       parts[part_idx + 3] = config.hint.suffix
