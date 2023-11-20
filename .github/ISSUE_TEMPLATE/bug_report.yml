@@ -1,0 +1,102 @@
+name: Bug Report
+description: Report a problem in nougat.nvim
+title: ":bug: "
+labels: []
+projects: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before** reporting an issue, make sure to read the [documentation](https://github.com/MunifTanjim/nougat.nvim) and search [existing issues](https://github.com/MunifTanjim/nougat.nvim/issues).
+
+        Usage questions such as _**"How to ...?"**_ belong in [Discussions](https://github.com/MunifTanjim/nougat.nvim/discussions) and will be closed.
+
+  - type: checkboxes
+    attributes:
+      label: Did you check the docs and existing issues?
+      description: Make sure you checked all of the below before submitting an issue
+      options:
+        - label: I am using latest nougat.nvim
+          required: true
+        - label: I have read all the nougat.nvim docs
+          required: true
+        - label: I have searched the existing issues of nougat.nvim
+          required: true
+        - label: I have searched the existing issues of plugins related to this issue
+          required: true
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Problem
+      description: Describe what the bug is. Please include any related errors you see in Neovim.
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1.
+        2.
+        3.
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expected to happen.
+
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: "Neovim version (`nvim -v`)"
+      placeholder: "0.10.0"
+
+  - type: textarea
+    validations:
+      required: false
+    attributes:
+      label: Repro
+      description: Minimal `init.lua` to reproduce the bug. Save as `repro.lua` and run with `nvim -u repro.lua`
+      render: Lua
+      value: |
+        local root = vim.fn.fnamemodify("./.repro", ":p")
+
+        -- set stdpaths to use .repro
+        for _, name in ipairs({ "config", "data", "state", "cache" }) do
+          vim.env[("XDG_%s_HOME"):format(name:upper())] = root .. "/" .. name
+        end
+
+        -- bootstrap lazy
+        local lazypath = root .. "/plugins/lazy.nvim"
+        if not vim.loop.fs_stat(lazypath) then
+          vim.fn.system({
+            "git",
+            "clone",
+            "--filter=blob:none",
+            "--single-branch",
+            "https://github.com/folke/lazy.nvim.git",
+            lazypath,
+          })
+        end
+        vim.opt.runtimepath:prepend(lazypath)
+
+        local plugins = {
+          "folke/tokyonight.nvim",
+          "MunifTanjim/nougat.nvim",
+          -- add plugins here
+        }
+
+        require("lazy").setup(plugins, {
+          root = root .. "/plugins",
+        })
+
+        vim.cmd.colorscheme("tokyonight")
+
+        -- add config here
