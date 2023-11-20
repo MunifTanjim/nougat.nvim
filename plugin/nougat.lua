@@ -1,5 +1,5 @@
 local completion_store = {
-  [""] = { "profile" },
+  [""] = { "profile", "version" },
   profile = { "bench", "start", "result", "stop" },
 }
 
@@ -24,6 +24,15 @@ vim.api.nvim_create_user_command("Nougat", function(opts)
       mod[action_name]()
       return
     end
+  end
+
+  if mod_name == "version" then
+    local version = require("nougat").version()
+    vim.api.nvim_echo({
+      { "nougat.nvim " .. version },
+      { "\n", "NONE" },
+    }, true, {})
+    return
   end
 
   print("[Nougat] unknow params: " .. opts.args)
