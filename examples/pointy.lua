@@ -29,85 +29,19 @@ local nut = {
   truncation_point = require("nougat.nut.truncation_point").create,
 }
 
-local color = {
-  bg = "#1d2021",
-  bg0_h = "#1d2021",
-  bg0 = "#282828",
-  bg0_s = "#32302f",
-  bg1 = "#3c3836",
-  bg2 = "#504945",
-  bg3 = "#665c54",
-  bg4 = "#7c6f64",
-
-  gray = "#928374",
-
-  fg = "#ebdbb2",
-  fg0 = "#fbf1c7",
-  fg1 = "#ebdbb2",
-  fg2 = "#d5c4a1",
-  fg3 = "#bdae93",
-  fg4 = "#a89984",
-
-  lightgray = "#a89984",
-
-  red = "#fb4934",
-  green = "#b8bb26",
-  yellow = "#fabd2f",
-  blue = "#83a598",
-  purple = "#d3869b",
-  aqua = "#8ec07c",
-  orange = "#f38019",
-
-  accent = {
-    red = "#cc241d",
-    green = "#98971a",
-    yellow = "#d79921",
-    blue = "#458588",
-    purple = "#b16286",
-    aqua = "#689d6a",
-    orange = "#d65d0e",
-  },
-}
+---@type nougat.color
+local color = require("nougat.color").get()
 
 local mode = nut.mode({
   prefix = " ",
   suffix = " ",
   sep_right = sep.right_chevron_solid(true),
-  config = {
-    highlight = {
-      normal = {
-        bg = "fg",
-        fg = color.bg,
-      },
-      visual = {
-        bg = color.orange,
-        fg = color.bg,
-      },
-      insert = {
-        bg = color.blue,
-        fg = color.bg,
-      },
-      replace = {
-        bg = color.purple,
-        fg = color.bg,
-      },
-      commandline = {
-        bg = color.green,
-        fg = color.bg,
-      },
-      terminal = {
-        bg = color.accent.green,
-        fg = color.bg,
-      },
-      inactive = {},
-    },
-  },
 })
 
 local stl = Bar("statusline")
 stl:add_item(mode)
 stl:add_item(nut.git.branch({
-  hl = { bg = color.purple, fg = color.bg },
+  hl = { bg = color.magenta, fg = color.bg },
   prefix = "  ",
   suffix = " ",
   sep_right = sep.right_chevron_solid(true),
@@ -227,7 +161,7 @@ local tal = Bar("tabline")
 
 tal:add_item(nut.tab.tablist.tabs({
   active_tab = {
-    hl = { bg = color.bg0_h, fg = color.blue },
+    hl = { bg = color.bg, fg = color.blue },
     prefix = " ",
     suffix = " ",
     content = {
