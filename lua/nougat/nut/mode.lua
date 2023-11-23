@@ -1,4 +1,5 @@
 local Item = require("nougat.item")
+local color = require("nougat.color").get()
 local on_event = require("nougat.util").on_event
 
 local mode_group = {
@@ -101,24 +102,24 @@ local default_highlight = {
     fg = "bg",
   },
   visual = {
-    bg = "orange",
+    bg = color.yellow,
     fg = "bg",
   },
   insert = {
-    bg = "lightblue",
+    bg = color.blue,
     fg = "bg",
   },
   replace = {
-    bg = "violet",
+    bg = color.magenta,
     fg = "bg",
   },
   commandline = {
-    bg = "lightgreen",
+    bg = color.green,
     fg = "bg",
   },
   terminal = {
-    bg = "teal",
-    fg = "fg",
+    bg = color.cyan,
+    fg = "bg",
   },
   inactive = {
     bg = "fg",

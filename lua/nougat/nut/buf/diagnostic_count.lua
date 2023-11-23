@@ -1,6 +1,8 @@
 local Item = require("nougat.item")
 local core = require("nougat.core")
+local get_hl_def = require("nougat.util.hl").get_hl_def
 local get_hl_name = require("nougat.util.hl").get_hl_name
+local color = require("nougat.color").get()
 
 local diagnostic_cache = require("nougat.cache.diagnostic")
 local severity = diagnostic_cache.severity
@@ -123,10 +125,10 @@ function mod.create(opts)
     config = { severity = opts.config.severity }
   else
     config = vim.tbl_deep_extend("force", {
-      error = { prefix = "E:", suffix = "", fg = "red" },
-      warn = { prefix = "W:", suffix = "", fg = "yellow" },
-      info = { prefix = "I:", suffix = "", fg = "lightblue" },
-      hint = { prefix = "H:", suffix = "", fg = "lightgreen" },
+      error = { prefix = "E:", suffix = "", fg = get_hl_def("DiagnosticError").fg or color.red },
+      warn = { prefix = "W:", suffix = "", fg = get_hl_def("DiagnosticWarn").fg or color.yellow },
+      info = { prefix = "I:", suffix = "", fg = get_hl_def("DiagnosticInfo").fg or color.blue },
+      hint = { prefix = "H:", suffix = "", fg = get_hl_def("DiagnosticHint").fg or color.cyan },
       sep = " ",
       severity = severity.COMBINED,
     }, opts.config or {})
