@@ -44,6 +44,11 @@ local id_getter_by_key = {
   end,
 }
 
+local buf_id_getter_by_event = {
+  lspattach = id_getter_by_key.buf,
+  lspdetach = id_getter_by_key.buf,
+}
+
 ---@param event string
 ---@param scope? string
 function mod.get_invalidation_id_getter(event, scope)
@@ -52,6 +57,10 @@ function mod.get_invalidation_id_getter(event, scope)
   end
   if string.sub(event, 1, 3):lower() == "buf" then
     return id_getter_by_key.buf
+  end
+  local get_id = buf_id_getter_by_event[event:lower()]
+  if get_id then
+    return get_id
   end
   error("auto invalidation not supported for event: " .. event)
 end
