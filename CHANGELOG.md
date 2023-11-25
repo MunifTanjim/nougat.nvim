@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.3.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.2.0...0.3.0) (2023-11-25)
+
+
+### Features
+
+* **bar:** add ctx.hl for current item hl ([8683545](https://github.com/MunifTanjim/nougat.nvim/commit/86835454b6212a6aaa4780d3882aaeca6612bc54))
+* **bar:** keep reused tables isolated per bar ([5491005](https://github.com/MunifTanjim/nougat.nvim/commit/54910058fc90d86707b3b3c862bba936358782eb))
+* **bar:** support hl config ([1e94e75](https://github.com/MunifTanjim/nougat.nvim/commit/1e94e75cbe6498101df2638c006ac992b046bdf7))
+* **cache:** add buffer modifiable and readonly ([b77be4e](https://github.com/MunifTanjim/nougat.nvim/commit/b77be4e865b518020ac9cd10f0ce490a2ecfc2d8))
+* **cache:** add method 'store:clear' ([5897b9f](https://github.com/MunifTanjim/nougat.nvim/commit/5897b9fe70ca4390ad3cd3e12418829c64c3d44e))
+* **color:** add color palette ([d969995](https://github.com/MunifTanjim/nougat.nvim/commit/d9699952b65dd998b14feea6db46a3cbb3d59631))
+* **item:** accept item as .hidden ([653686e](https://github.com/MunifTanjim/nougat.nvim/commit/653686e254bdd73e30c4a39d0a879be89f5f2a38))
+* **item:** add config cache.name ([f56a564](https://github.com/MunifTanjim/nougat.nvim/commit/f56a564405dbc45c1aa48d2c4c97ce2137c13530))
+* **item:** add item.ctx ([c840e8c](https://github.com/MunifTanjim/nougat.nvim/commit/c840e8ccb1f0870236846455a9aa90838ee2460a))
+* **item:** add option 'cache.clear' ([bc16788](https://github.com/MunifTanjim/nougat.nvim/commit/bc16788827a52e0c4a7a8604fbe393eb9a7b3fda))
+* **item:** support init callback ([ba54ea2](https://github.com/MunifTanjim/nougat.nvim/commit/ba54ea225c55826614ed8c4563b3399c836e304b))
+* **nut:** add lsp.servers ([872166d](https://github.com/MunifTanjim/nougat.nvim/commit/872166d155271fbcd8ba0a7e40f51c137729005f))
+* **nut:** use nougat.color ([e901a39](https://github.com/MunifTanjim/nougat.nvim/commit/e901a394b8ecdb111922aab668e8f6dd87749d1c))
+* **profiler:** measure item perf ([7f7c5c0](https://github.com/MunifTanjim/nougat.nvim/commit/7f7c5c0eb388b3aaae7c95014ec199f81ef5d3fb))
+* update command :Nougat ([06c370d](https://github.com/MunifTanjim/nougat.nvim/commit/06c370db771c4e9f9ce67a1c921a3f13f493dda7))
+* **util:** add module nougat.util.hl ([7572323](https://github.com/MunifTanjim/nougat.nvim/commit/7572323c52e1010a6314592e498b37988deb3f89))
+* **utils:** use weak table for object map ([6f95a04](https://github.com/MunifTanjim/nougat.nvim/commit/6f95a045b697856552b67ad1256bcd3f78c2660d))
+
+
+### Bug Fixes
+
+* **bar:** allow items to use ctx.parts ([b728db6](https://github.com/MunifTanjim/nougat.nvim/commit/b728db61edbead5ec5bae84128c679929f453d98))
+* **item:** breakpoints for nested items ([cddf0df](https://github.com/MunifTanjim/nougat.nvim/commit/cddf0df402c167090b99ffd49fd544238022a967))
+* **item:** on_click for function content ([b04e3d2](https://github.com/MunifTanjim/nougat.nvim/commit/b04e3d25a59c0e4e92c6b7b342fbed9f01dda8f4))
+* **item:** safely access field ([667be3d](https://github.com/MunifTanjim/nougat.nvim/commit/667be3df84fc097e27c196d5ce894840e3a3ed21))
+* **nut:** wordcount .hidden.if_not_filetype ([70b40c4](https://github.com/MunifTanjim/nougat.nvim/commit/70b40c401a433932e7c720aee3b5903b8a6bbfb4))
+* **profiler:** item scoping typo ([8cb6aef](https://github.com/MunifTanjim/nougat.nvim/commit/8cb6aefde61c48b9f900f3dc6d233b3507b1a0bb))
+* **profiler:** surface nested items ([dca1504](https://github.com/MunifTanjim/nougat.nvim/commit/dca150442a0699578623ffa9a255c84f3d43b6ff))
+* **util:** consider .len for get_next_list_item ([3287317](https://github.com/MunifTanjim/nougat.nvim/commit/328731789b46b7199a8f6c88de8316b746d522d3))
+* **util:** consider fallback separator highlight ([cbf03e3](https://github.com/MunifTanjim/nougat.nvim/commit/cbf03e35906862d6fd9f5af55ba00ba8388d2213))
+* **util:** nested hl for priority items ([0772682](https://github.com/MunifTanjim/nougat.nvim/commit/0772682c2c1e9b074c76cfcda42d90f5c63e420e))
+* **util:** parts slot hl mixup ([9d56b21](https://github.com/MunifTanjim/nougat.nvim/commit/9d56b217163152b2a1994ecafc7739407641e1fe))
+
+
+### Performance Improvements
+
+* **nut:** tweak cache for buf.filestatus ([994de44](https://github.com/MunifTanjim/nougat.nvim/commit/994de44a642f474d0ed15ce3b303373e32b0778c))
+* **nut:** tweak cache for tab.tablist.icon ([2da5dca](https://github.com/MunifTanjim/nougat.nvim/commit/2da5dca75b7b9cbfcd146dbb55ada04f6c21a417))
+
 ## [0.2.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.1.0...0.2.0) (2023-11-19)
 
 
