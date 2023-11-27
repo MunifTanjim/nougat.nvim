@@ -1,2 +1,7 @@
 .luacheckcache
+
+luacov.*.out
+
 .repro
+
+.tests
