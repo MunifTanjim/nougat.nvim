@@ -51,12 +51,54 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --color always --check lua/
 
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get Cache Key
+        id: luver-cache-key
+        env:
+          CI_RUNNER_OS: ${{ runner.os }}
+          CI_SECRETS_CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
+        run: |
+          echo "value=${CI_RUNNER_OS}-luver-${CI_SECRETS_CACHE_VERSION}-$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Setup Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/share/luver
+          key: ${{ steps.luver-cache-key.outputs.value }}
+      - name: Setup Lua
+        uses: MunifTanjim/luver-action@v1
+        with:
+          default: 5.1.5
+          lua_versions: 5.1.5
+          luarocks_versions: 5.1.5:3.8.0
+      - name: Setup luacov
+        run: |
+          luarocks install luacov
+      - name: Setup Neovim
+        uses: MunifTanjim/setup-neovim-action@v1
+        with:
+          tag: nightly
+      - name: Run Tests
+        run: |
+          nvim --version
+          ./scripts/test.sh
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          verbose: true
+
   release:
     name: release
     if: ${{ github.ref == 'refs/heads/main' }}
     needs:
       - lint
       - format
+      - test
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
