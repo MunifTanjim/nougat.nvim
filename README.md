@@ -1,4 +1,5 @@
 ![GitHub Workflow Status: CI](https://img.shields.io/github/actions/workflow/status/MunifTanjim/nougat.nvim/ci.yml?branch=main&label=CI&style=for-the-badge)
+[![Coverage](https://img.shields.io/codecov/c/gh/MunifTanjim/nougat.nvim/main?style=for-the-badge)](https://codecov.io/gh/MunifTanjim/nougat.nvim)
 ![License](https://img.shields.io/github/license/MunifTanjim/nougat.nvim?color=%231385D0&style=for-the-badge)
 
 # :chocolate_bar: nougat.nvim
