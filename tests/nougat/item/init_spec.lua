@@ -53,4 +53,40 @@ describe("NougatItem", function()
       )
     end)
   end)
+
+  describe("o.type=vim_expr", function()
+    it("&option", function()
+      t.eq(
+        Item({
+          type = "vim_expr",
+          content = "&filetype",
+          align = "left",
+          max_width = 8,
+          min_width = 4,
+        }).content,
+        "%-4.8{&filetype}"
+      )
+    end)
+
+    it("*:variable", function()
+      t.eq(
+        Item({
+          type = "vim_expr",
+          content = "g:colors_name",
+        }).content,
+        "%{g:colors_name}"
+      )
+    end)
+
+    it(".expand=true", function()
+      t.eq(
+        Item({
+          type = "vim_expr",
+          content = "'%4.8{&filetype}'",
+          expand = true,
+        }).content,
+        "%{%'%4.8{&filetype}'%}"
+      )
+    end)
+  end)
 end)
