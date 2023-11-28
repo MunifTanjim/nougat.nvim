@@ -89,4 +89,90 @@ describe("NougatItem", function()
       )
     end)
   end)
+
+  describe("o.type=lua_expr", function()
+    describe("function", function()
+      local function assert_context(context, ctx)
+        t.type(context.bufnr, "number")
+        t.type(context.tabid, "number")
+        t.type(context.winid, "number")
+        t.type(context.is_focused, "boolean")
+        t.eq(context.ctx, ctx)
+      end
+
+      it("w/o context", function()
+        local fn_params
+
+        local item = Item({
+          type = "lua_expr",
+          align = "left",
+          max_width = 8,
+          min_width = 4,
+          content = function(...)
+            fn_params = { ... }
+            return "Lua"
+          end,
+        })
+
+        local fn_name, fn_id = t.match(item.content, "%%-4%.8{v:lua%.(nougat_.+)%((.+)%)}")
+
+        t.eq(_G[fn_name](tonumber(fn_id)), "Lua")
+
+        assert_context(fn_params[1], item)
+      end)
+
+      it("w/ context", function()
+        local fn_params
+
+        local item_context = {}
+        local item = Item({
+          type = "lua_expr",
+          align = "left",
+          max_width = 8,
+          min_width = 4,
+          content = function(...)
+            fn_params = { ... }
+            return "Lua"
+          end,
+          context = item_context,
+        })
+
+        local fn_name, fn_id = t.match(item.content, "%%-4%.8{v:lua%.(nougat_.+)%((.+)%)}")
+
+        t.eq(_G[fn_name](tonumber(fn_id)), "Lua")
+
+        assert_context(fn_params[1], item_context)
+      end)
+
+      it(".expand=true", function()
+        local item = Item({
+          type = "lua_expr",
+          content = function() end,
+          expand = true,
+        })
+
+        t.match(item.content, "%%{%%v:lua%.nougat_.+%(.+%)%%}")
+      end)
+    end)
+
+    it("number", function()
+      t.eq(
+        Item({
+          type = "lua_expr",
+          content = 42,
+        }).content,
+        "%{luaeval('42')}"
+      )
+    end)
+
+    it("string", function()
+      t.eq(
+        Item({
+          type = "lua_expr",
+          content = "'Lua'",
+        }).content,
+        "%{luaeval('''Lua''')}"
+      )
+    end)
+  end)
 end)

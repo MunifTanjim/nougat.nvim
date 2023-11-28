@@ -8,6 +8,21 @@ function mod.neq(...)
   return assert["not"].are.same(...)
 end
 
+function mod.match(str, pattern)
+  local matches = { string.match(str, pattern) }
+  assert(
+    #matches > 0,
+    table.concat({
+      "",
+      "Input:",
+      "  " .. str,
+      "Found no match for:",
+      "  " .. pattern,
+    }, "\n")
+  )
+  return unpack(matches)
+end
+
 function mod.type(v, t)
   return mod.eq(type(v), t)
 end
