@@ -25,4 +25,32 @@ describe("NougatItem", function()
       t.eq(item, init_params[1])
     end)
   end)
+
+  describe("o.type=code", function()
+    it("n", function()
+      t.eq(
+        Item({
+          type = "code",
+          content = "n",
+          align = "left",
+          max_width = 8,
+          min_width = 4,
+          leading_zero = true,
+        }).content,
+        "%-04.8n"
+      )
+
+      t.eq(
+        Item({
+          type = "code",
+          content = "n",
+          align = "right",
+          max_width = 8,
+          min_width = 4,
+          leading_zero = true,
+        }).content,
+        "%04.8n"
+      )
+    end)
+  end)
 end)
