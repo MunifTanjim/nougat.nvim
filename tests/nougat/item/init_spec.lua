@@ -321,13 +321,61 @@ describe("NougatItem", function()
       t.eq(Item({ content = "Lua" }).content, "Lua")
     end)
   end)
+
+  describe("o.on_click", function()
+    it("fn content", function()
+      local spy = t.spy()
+
+      local context = {}
+
+      local item = Item({
+        content = function()
           return "Lua"
         end,
+        on_click = function(id, click_count, mouse_button, modifiers, ctx)
+          spy(id, click_count, mouse_button, modifiers)
+          t.assert_ctx(ctx)
+          t.ref(ctx.ctx, context)
+        end,
+        context = context,
       })
 
       t.type(item.content, "function")
 
-      item:content(context)
+      local ctx = t.make_ctx(0, context)
+
+      local click_fn, fn_id = t.get_click_fn(item:content(ctx), "Lua")
+      click_fn(fn_id, 1, "l", "s")
+
+      t.spy(spy).was.called_with(fn_id, 1, "l", "s")
+
+      local n_click_fn, n_fn_id = t.get_click_fn(item:content(ctx), "Lua")
+      t.ref(n_click_fn, click_fn)
+      t.eq(n_fn_id, fn_id)
+
+      n_click_fn(fn_id, 1, "l", "s")
+
+      t.spy(spy).was.called(2)
+    end)
+
+    it("string content", function()
+      local fn_id, click_fn
+      local spy = t.spy()
+
+      local item
+      item = Item({
+        content = "Lua",
+        on_click = function(id, click_count, mouse_button, modifiers, ctx)
+          spy(id, click_count, mouse_button, modifiers)
+          t.assert_ctx(ctx)
+          t.ref(ctx.ctx, item)
+        end,
+      })
+
+      click_fn, fn_id = t.get_click_fn(item.content, "Lua")
+      click_fn(fn_id, 1, "l", "s")
+
+      t.spy(spy).was.called_with(fn_id, 1, "l", "s")
     end)
   end)
 end)
