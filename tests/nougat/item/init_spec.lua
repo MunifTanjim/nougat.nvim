@@ -297,4 +297,31 @@ describe("NougatItem", function()
       )
     end)
   end)
+
+  describe("fn content", function()
+    it("works", function()
+      local context = {}
+      local item
+
+      local function content(self, ctx)
+        t.ref(self, item)
+        t.ref(ctx, context)
+        return "Lua"
+      end
+
+      item = Item({ content = content })
+
+      t.eq(item.content, content)
+      t.eq(item:content(context), "Lua")
+    end)
+  end)
+          return "Lua"
+        end,
+      })
+
+      t.type(item.content, "function")
+
+      item:content(context)
+    end)
+  end)
 end)

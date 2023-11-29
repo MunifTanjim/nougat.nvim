@@ -23,6 +23,10 @@ function mod.match(str, pattern)
   return unpack(matches)
 end
 
+function mod.ref(a, b)
+  return assert(a == b, "references are not same")
+end
+
 function mod.type(v, t)
   return mod.eq(type(v), t)
 end
