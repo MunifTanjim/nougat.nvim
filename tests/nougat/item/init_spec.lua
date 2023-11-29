@@ -315,6 +315,12 @@ describe("NougatItem", function()
       t.eq(item:content(context), "Lua")
     end)
   end)
+
+  describe("string content", function()
+    it("works", function()
+      t.eq(Item({ content = "Lua" }).content, "Lua")
+    end)
+  end)
           return "Lua"
         end,
       })
