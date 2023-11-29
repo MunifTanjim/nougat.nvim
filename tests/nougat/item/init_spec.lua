@@ -175,4 +175,75 @@ describe("NougatItem", function()
       )
     end)
   end)
+
+  describe("o.type=literal", function()
+    describe("w/ opts", function()
+      it("boolean", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = true,
+            align = "left",
+            max_width = 5,
+          }).content,
+          "%-.5{'true'}"
+        )
+      end)
+
+      it("number", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = 7,
+            leading_zero = true,
+            min_width = 3,
+          }).content,
+          "%03{'7'}"
+        )
+      end)
+
+      it("string", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = "'%string%'",
+            align = "right",
+          }).content,
+          "%{'''%string%'''}"
+        )
+      end)
+    end)
+
+    describe("w/o opts", function()
+      it("boolean", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = true,
+          }).content,
+          "true"
+        )
+      end)
+
+      it("number", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = 42,
+          }).content,
+          "42"
+        )
+      end)
+
+      it("string", function()
+        t.eq(
+          Item({
+            type = "literal",
+            content = "'%string%'",
+          }).content,
+          "'%%string%%'"
+        )
+      end)
+    end)
+  end)
 end)
