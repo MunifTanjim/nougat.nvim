@@ -246,4 +246,55 @@ describe("NougatItem", function()
       end)
     end)
   end)
+
+  describe("o.type=tab_label", function()
+    it("label", function()
+      t.eq(
+        Item({
+          type = "tab_label",
+          content = "label",
+          tabnr = 7,
+        }).content,
+        "%7Tlabel%T"
+      )
+    end)
+
+    it("close label", function()
+      t.eq(
+        Item({
+          type = "tab_label",
+          content = "x",
+          tabnr = 7,
+          close = true,
+        }).content,
+        "%7Xx%X"
+      )
+    end)
+
+    it("close current label", function()
+      t.eq(
+        Item({
+          type = "tab_label",
+          content = "x",
+          tabnr = 0,
+          close = true,
+        }).content,
+        "%999Xx%X"
+      )
+    end)
+
+    it("w/o opts", function()
+      t.eq(
+        Item({
+          type = "tab_label",
+          content = "x",
+        }).content,
+        Item({
+          type = "literal",
+          content = "x",
+          align = "right",
+        }).content
+      )
+    end)
+  end)
 end)
