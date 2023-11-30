@@ -68,7 +68,7 @@ local function process_item_cache_clear(clear, store, scope)
     error("unexpected item.cache.clear type: " .. type(clear))
   end
 
-  if type(clear[2]) == "string" then
+  if not clear[2] or type(clear[2]) == "string" then
     -- {"A", "B"}
     ---@cast clear string[]
 
