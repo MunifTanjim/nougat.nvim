@@ -1,16 +1,31 @@
+local register_store = require("nougat.util.store").register
+
 local augroup = vim.api.nvim_create_augroup("nougat.on_event", { clear = true })
 
----@type table<string, (fun(info:table):nil)[]>
-local autocmd_cb_store = {}
-
-local option_set = {
+local store = register_store("on_event", {
+  ---@type table<string, (fun(info:table):nil)[]>
   cb_store = {},
-  autocmd_id = nil,
-}
+  ---@type table<string, (fun(info:table):nil)[]>
+  option_set_cb_store = {},
+  ---@type integer
+  option_set_autocmd_id = nil,
+}, function(store)
+  vim.api.nvim_clear_autocmds({ group = augroup })
+  for key in pairs(store.cb_store) do
+    store.cb_store[key] = nil
+  end
+  for key in pairs(store.option_set_cb_store) do
+    store.option_set_cb_store[key] = nil
+  end
+  store.option_set_autocmd_id = nil
+end)
 
-function option_set.cb(info)
-  for _, cb in ipairs(option_set.cb_store[info.match]) do
-    cb(info)
+local cb_store = store.cb_store
+local option_set_cb_store = store.option_set_cb_store
+
+local function option_set_callback(info)
+  for _, callback in ipairs(option_set_cb_store[info.match]) do
+    callback(info)
   end
 end
 
@@ -34,36 +49,35 @@ local function on_event(event, callback)
     end
 
     if event_name == "OptionSet" then
-      local cb_store = option_set.cb_store
-      if not cb_store[pattern] then
-        cb_store[pattern] = {}
+      if not option_set_cb_store[pattern] then
+        option_set_cb_store[pattern] = {}
       end
 
-      table.insert(cb_store[pattern], callback)
+      table.insert(option_set_cb_store[pattern], callback)
 
       local autocmd_id = vim.api.nvim_create_autocmd(event_name, {
         group = augroup,
-        pattern = table.concat(vim.tbl_keys(cb_store), ","),
-        callback = option_set.cb,
+        pattern = table.concat(vim.tbl_keys(option_set_cb_store), ","),
+        callback = option_set_callback,
         desc = "[nougat] util.on_event - " .. event_name,
       })
 
-      if option_set.autocmd_id then
-        vim.api.nvim_del_autocmd(option_set.autocmd_id)
+      if store.option_set_autocmd_id then
+        vim.api.nvim_del_autocmd(store.option_set_autocmd_id)
       end
 
-      option_set.autocmd_id = autocmd_id
+      store.option_set_autocmd_id = autocmd_id
     else
-      if not autocmd_cb_store[ev] then
-        autocmd_cb_store[ev] = {}
+      if not cb_store[ev] then
+        cb_store[ev] = {}
 
         vim.api.nvim_create_autocmd(event_name, {
           group = augroup,
           pattern = pattern,
           callback = function(info)
-            local cbs = info.event == "User" and autocmd_cb_store["User " .. info.match]
-              or info.event == "OptionSet" and autocmd_cb_store["OptionSet " .. info.match]
-              or autocmd_cb_store[info.event]
+            local cbs = info.event == "User" and cb_store["User " .. info.match]
+              or info.event == "OptionSet" and cb_store["OptionSet " .. info.match]
+              or cb_store[info.event]
 
             for _, cb in ipairs(cbs) do
               cb(info)
@@ -73,7 +87,7 @@ local function on_event(event, callback)
         })
       end
 
-      autocmd_cb_store[ev][#autocmd_cb_store[ev] + 1] = callback
+      cb_store[ev][#cb_store[ev] + 1] = callback
     end
   end
 end
