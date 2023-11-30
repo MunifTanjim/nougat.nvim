@@ -322,6 +322,30 @@ describe("NougatItem", function()
     end)
   end)
 
+  describe("table content", function()
+    it("string elements", function()
+      local item = Item({
+        content = { "L", "u", "a" },
+      })
+
+      t.eq(item.content.len, 3)
+      t.type(item.content.next, "function")
+    end)
+
+    it("item elements", function()
+      local item = Item({
+        content = {
+          Item({ content = "L" }),
+          Item({ content = "u" }),
+          Item({ content = "a" }),
+        },
+      })
+
+      t.eq(item.content.len, 3)
+      t.type(item.content.next, "function")
+    end)
+  end)
+
   describe("o.on_click", function()
     it("fn content", function()
       local spy = t.spy()
