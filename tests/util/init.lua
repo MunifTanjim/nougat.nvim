@@ -48,6 +48,12 @@ function mod.type(v, t)
   return mod.eq(type(v), t)
 end
 
+function mod.error(fn, ...)
+  local ok, err = pcall(fn, ...)
+  mod.eq(ok, false)
+  return err
+end
+
 ---@param tbl table
 ---@param keys string[]
 function mod.tbl_pick(tbl, keys)
@@ -76,18 +82,17 @@ function mod.tbl_omit(tbl, keys)
   return new_tbl
 end
 
-function mod.make_ctx(winid, ctx)
+function mod.make_ctx(winid, extra)
   if not winid or winid == 0 then
     winid = vim.api.nvim_get_current_win()
   end
 
-  return {
-    ctx = ctx,
+  return vim.tbl_extend("keep", {
     bufnr = vim.api.nvim_win_get_buf(winid),
     winid = winid,
     tabid = vim.api.nvim_win_get_tabpage(winid),
     is_focused = winid == vim.api.nvim_get_current_win(),
-  }
+  }, extra or {})
 end
 
 function mod.assert_ctx(ctx)

@@ -366,7 +366,7 @@ describe("NougatItem", function()
 
       t.type(item.content, "function")
 
-      local ctx = t.make_ctx(0, context)
+      local ctx = t.make_ctx(0, { ctx = context })
 
       local click_fn, fn_id = t.get_click_fn(item:content(ctx), "Lua")
       click_fn(fn_id, 1, "l", "s")
@@ -400,6 +400,270 @@ describe("NougatItem", function()
       click_fn(fn_id, 1, "l", "s")
 
       t.spy(spy).was.called_with(fn_id, 1, "l", "s")
+    end)
+  end)
+
+  describe("o.cache", function()
+    it("throws if missing both .scope and .store", function()
+      local err = t.error(function()
+        Item({
+          content = function()
+            return "Lua"
+          end,
+          cache = {},
+        })
+      end)
+      t.match(err, "one of cache.scope or cache.store is required")
+    end)
+
+    it("creates store with .scope", function()
+      local store
+      local item = Item({
+        content = function()
+          return "Lua"
+        end,
+        cache = {
+          scope = "buf",
+          get = function(cstore, ctx)
+            store = cstore
+            return store[ctx.bufnr]
+          end,
+        },
+      })
+
+      local ctx = t.make_ctx(0, nil)
+      local cache = item:cache(ctx)
+
+      t.type(store, "table")
+      t.ref(cache, store[ctx.bufnr])
+    end)
+
+    it("sets default cache getter for .scope", function()
+      local store = require("nougat.cache").create_store("win", "tests.item.default_cache_getter")
+
+      local item = Item({
+        content = function()
+          return "Lua"
+        end,
+        cache = {
+          scope = "win",
+          store = store,
+        },
+      })
+
+      local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+      local cache = item:cache(ctx)
+
+      t.ref(cache, store[ctx.winid][ctx.breakpoint])
+    end)
+
+    describe(".clear", function()
+      local function create_item(clear)
+        local content_spy = t.spy()
+        local item = Item({
+          content = function(_, ctx)
+            content_spy()
+            return tostring(ctx.winid)
+          end,
+          cache = {
+            scope = "buf",
+            clear = clear,
+          },
+        })
+        return item, content_spy
+      end
+
+      before_each(function()
+        require("nougat.util.store").clear_all()
+      end)
+
+      it("event", function()
+        local event = "BufModifiedSet"
+
+        local item, content_spy = create_item(event)
+        local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+        local content = item:content(ctx)
+
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(1)
+
+        vim.api.nvim_exec_autocmds("BufModifiedSet", {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(2)
+      end)
+
+      it("event[]", function()
+        local event = { "BufModifiedSet", "BufWinLeave" }
+
+        local item, content_spy = create_item(event)
+        local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+        local content = item:content(ctx)
+
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(1)
+
+        vim.api.nvim_exec_autocmds("BufModifiedSet", {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(2)
+
+        vim.api.nvim_exec_autocmds("BufWinLeave", {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(3)
+      end)
+
+      it("{event,get_id}", function()
+        local event = {
+          "User NougatItemTest",
+          function(info)
+            return info.data.bufnr
+          end,
+        }
+
+        local item, content_spy = create_item(event)
+        local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+        local content = item:content(ctx)
+
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(1)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[1], " ")[2],
+          data = { bufnr = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(2)
+      end)
+
+      it("{event[],get_id}", function()
+        local event = {
+          { "User NougatItemTestA", "User NougatItemTestB" },
+          function(info)
+            return info.data.bufnr
+          end,
+        }
+
+        local item, content_spy = create_item(event)
+        local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+        local content = item:content(ctx)
+
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(1)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[1][1], " ")[2],
+          data = { bufnr = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(2)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[1][2], " ")[2],
+          data = { bufnr = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(3)
+      end)
+
+      it("(event|event[]|{event,get_id}|{event[],get_id})[]", function()
+        local event = {
+          "BufModifiedSet",
+          { "BufWinEnter", "BufWinLeave" },
+          {
+            "User NougatItemTestA",
+            function(info)
+              return info.data.A
+            end,
+          },
+          {
+            { "User NougatItemTestB1", "User NougatItemTestB2" },
+            function(info)
+              return info.data.B
+            end,
+          },
+        }
+
+        local item, content_spy = create_item(event)
+        local ctx = t.make_ctx(0, { breakpoint = 0 })
+
+        local content = item:content(ctx)
+
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(1)
+
+        vim.api.nvim_exec_autocmds(event[1], {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(2)
+
+        vim.api.nvim_exec_autocmds(event[2][1], {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(3)
+
+        vim.api.nvim_exec_autocmds(event[2][2], {
+          buffer = ctx.bufnr,
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(4)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[3][1], " ")[2],
+          data = { A = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(5)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[4][1][1], " ")[2],
+          data = { B = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(6)
+
+        vim.api.nvim_exec_autocmds("User", {
+          pattern = vim.split(event[4][1][2], " ")[2],
+          data = { B = ctx.bufnr },
+        })
+
+        t.eq(item:content(ctx), content)
+        t.eq(item:content(ctx), content)
+        t.spy(content_spy).was.called(7)
+      end)
     end)
   end)
 end)

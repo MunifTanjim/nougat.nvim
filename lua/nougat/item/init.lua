@@ -253,7 +253,9 @@ local function init(class, config)
       ic.process_item_cache_clear(cache.clear, self._cache_store, cache.scope)
     end
 
+    --luacov: disable
     ---@diagnostic disable: undefined-field
+    ---@deprecated
     if cache.invalidate then
       vim.deprecate("NougatItem option cache.invalidate", "cache.clear", "0.4.0", "nougat.nvim")
 
@@ -272,6 +274,7 @@ local function init(class, config)
       end
     end
     ---@diagnostic enable: undefined-field
+    --luacov: enable
   end
 
   if type(self.content) == "table" then
