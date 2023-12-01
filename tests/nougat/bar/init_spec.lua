@@ -91,4 +91,51 @@ describe("NougatBar", function()
       t.eq(bar:generate(ctx), "  some/folder/file.md  ")
     end)
   end)
+
+  describe(":generate w/ max breakpoints", function()
+    local breakpoint = { l = 1, m = 2, s = 3 }
+    local breakpoints = { [breakpoint.l] = math.huge, [breakpoint.m] = 80, [breakpoint.s] = 40 }
+    local bar, ctx
+
+    before_each(function()
+      bar = Bar("statusline", { breakpoints = breakpoints })
+      ctx = t.make_ctx(0, {
+        ctx = {},
+        width = breakpoints[2] + 1,
+      })
+    end)
+
+    it("filename", function()
+      bar:add_item(nut.buf.filename.create({
+        prefix = { "  ", " ", "" },
+        suffix = { "  ", " ", "" },
+        config = {
+          modifier = ":.",
+          [breakpoint.m] = {
+            format = function(name)
+              return vim.fn.pathshorten(name)
+            end,
+          },
+          [breakpoint.s] = {
+            modifier = ":t",
+            format = false,
+          },
+        },
+      }))
+
+      local root_dir = vim.fn.fnamemodify(vim.trim(vim.fn.system("git rev-parse --show-toplevel")), ":p")
+
+      vim.api.nvim_buf_set_name(ctx.bufnr, root_dir .. "/some/folder/file.md")
+
+      t.eq(bar:generate(ctx), "  some/folder/file.md  ")
+
+      ctx.width = breakpoints[3] + 1
+
+      t.eq(bar:generate(ctx), " s/f/file.md ")
+
+      ctx.width = breakpoints[3] - 1
+
+      t.eq(bar:generate(ctx), "file.md")
+    end)
+  end)
 end)
