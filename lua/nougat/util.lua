@@ -352,18 +352,20 @@ function mod.prepare_parts(items, ctx)
   end
 end
 
-function mod.link_priority_item(node, item, idx)
+function mod.link_priority_item(items, item, idx)
   item.priority = item.priority == false and -math.huge or item.priority or 0
+  local node = items
   while node do
     local next_item = node._next
     if not next_item or next_item.priority < item.priority then
       item._idx = idx
       item._next = next_item
       node._next = item
-      return
+      break
     end
     node = next_item
   end
+  items._node = items._next
 end
 
 function mod.initialize_priority_item_list(items, get_next)
