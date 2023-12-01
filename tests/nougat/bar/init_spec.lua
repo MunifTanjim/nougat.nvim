@@ -18,6 +18,83 @@ describe("NougatBar", function()
     t.eq(bar.type, "statusline")
   end)
 
+  describe("o.hl", function()
+    local ctx, hl
+
+    before_each(function()
+      ctx = t.make_ctx(0, {
+        ctx = {},
+        width = vim.api.nvim_win_get_width(0),
+      })
+      hl = { bg = "#ffcd00", fg = "#663399" }
+    end)
+
+    it("string", function()
+      vim.api.nvim_set_hl(0, "NougatTest", hl)
+
+      local bar = Bar("statusline", { hl = "NougatTest" })
+
+      bar:add_item(Item({
+        hl = { bold = true },
+        content = "Content",
+      }))
+
+      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+
+      t.eq(ctx.hl, hl)
+    end)
+
+    it("integer", function()
+      vim.api.nvim_set_hl(0, "User1", hl)
+
+      local bar = Bar("statusline", { hl = 1 })
+
+      bar:add_item(Item({
+        hl = { bold = true },
+        content = "Content",
+      }))
+
+      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+
+      t.eq(ctx.hl, hl)
+    end)
+
+    it("nougat_hl_def", function()
+      local bar = Bar("statusline", { hl = hl })
+
+      bar:add_item(Item({
+        hl = { bold = true },
+        content = "Content",
+      }))
+
+      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+
+      t.eq(ctx.hl, hl)
+    end)
+
+    it("function", function()
+      vim.api.nvim_set_hl(0, "NougatTest", { bg = "#ffcd00", fg = "#663399" })
+
+      local bar
+      bar = Bar("statusline", {
+        hl = function(self, context)
+          t.ref(self, bar)
+          t.ref(context, ctx)
+          return "NougatTest"
+        end,
+      })
+
+      bar:add_item(Item({
+        hl = { bold = true },
+        content = "Content",
+      }))
+
+      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+
+      t.eq(ctx.hl, hl)
+    end)
+  end)
+
   describe(":generate basic", function()
     local bar, ctx
 
