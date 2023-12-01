@@ -22,3 +22,7 @@ vim.opt.packpath:prepend(root_dir .. "/.tests/site")
 vim.cmd([[
   packadd plenary.nvim
 ]])
+
+vim.cmd([[
+  hi StatusLine guibg=#ffcd00 guifg=#663399
+]])
