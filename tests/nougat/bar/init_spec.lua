@@ -215,4 +215,42 @@ describe("NougatBar", function()
       t.eq(bar:generate(ctx), "file.md")
     end)
   end)
+
+  describe(":generate", function()
+    describe("w/ priority", function()
+      local bar, ctx
+
+      before_each(function()
+        bar = Bar("statusline")
+        ctx = t.make_ctx(0, {
+          ctx = {},
+          width = vim.api.nvim_win_get_width(0),
+        })
+      end)
+
+      it("basic", function()
+        bar:add_item(Item({
+          priority = 1,
+          content = string.rep("A", 10),
+        }))
+        bar:add_item(Item({
+          priority = 3,
+          content = string.rep("B", 10),
+        }))
+        bar:add_item(Item({
+          priority = 2,
+          content = string.rep("C", 10),
+        }))
+
+        ctx.width = 30
+        t.eq(bar:generate(ctx), string.format("%s%s%s", string.rep("A", 10), string.rep("B", 10), string.rep("C", 10)))
+
+        ctx.width = 25
+        t.eq(bar:generate(ctx), string.format("%s%s%s", string.rep("A", 0), string.rep("B", 10), string.rep("C", 10)))
+
+        ctx.width = 15
+        t.eq(bar:generate(ctx), string.format("%s%s%s", string.rep("A", 0), string.rep("B", 10), string.rep("C", 0)))
+      end)
+    end)
+  end)
 end)
