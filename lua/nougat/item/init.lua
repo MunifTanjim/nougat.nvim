@@ -279,7 +279,9 @@ local function init(class, config)
 
   if type(self.content) == "table" then
     self.content.len = #self.content
-    self.content.next = u.get_next_list_item
+    if not iu.has_priority_content(self.content) then
+      self.content.next = u.get_next_list_item
+    end
 
     if self.content[1] and self.content[1].id then
       -- NougatItem[]
