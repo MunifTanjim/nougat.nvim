@@ -45,4 +45,16 @@ function mod.prepare_property_breakpoints(item, name, breakpoints)
   end
 end
 
+---@param content (string|NougatItem)[]|{len?: integer}
+---@return boolean has_priority
+function mod.has_priority_content(content)
+  for idx = 1, (content.len or #content) do
+    local item = content[idx]
+    if item.priority then
+      return true
+    end
+  end
+  return false
+end
+
 return mod
