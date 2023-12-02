@@ -12,6 +12,20 @@ local nut = {
 local t = require("tests.util")
 
 describe("NougatBar", function()
+  local ctx
+
+  before_each(function()
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(0, bufnr)
+    ctx = t.make_ctx(0, { ctx = {} })
+  end)
+
+  after_each(function()
+    if ctx.bufnr then
+      vim.api.nvim_buf_delete(ctx.bufnr, { force = true })
+    end
+  end)
+
   it("can be initialized", function()
     local bar = Bar("statusline")
     t.type(bar.id, "number")
@@ -19,13 +33,10 @@ describe("NougatBar", function()
   end)
 
   describe("o.hl", function()
-    local ctx, hl
+    local hl
 
     before_each(function()
-      ctx = t.make_ctx(0, {
-        ctx = {},
-        width = vim.api.nvim_win_get_width(0),
-      })
+      ctx.width = vim.api.nvim_win_get_width(0)
       hl = { bg = "#ffcd00", fg = "#663399" }
     end)
 
@@ -96,14 +107,11 @@ describe("NougatBar", function()
   end)
 
   describe(":generate basic", function()
-    local bar, ctx
+    local bar
 
     before_each(function()
       bar = Bar("statusline")
-      ctx = t.make_ctx(0, {
-        ctx = {},
-        width = vim.api.nvim_win_get_width(0),
-      })
+      ctx.width = vim.api.nvim_win_get_width(0)
     end)
 
     it("strings", function()
@@ -125,14 +133,11 @@ describe("NougatBar", function()
   describe(":generate w/ min breakpoints", function()
     local breakpoint = { s = 1, m = 2, l = 3 }
     local breakpoints = { [breakpoint.s] = 0, [breakpoint.m] = 40, [breakpoint.l] = 80 }
-    local bar, ctx
+    local bar
 
     before_each(function()
       bar = Bar("statusline", { breakpoints = breakpoints })
-      ctx = t.make_ctx(0, {
-        ctx = {},
-        width = breakpoints[2] - 1,
-      })
+      ctx.width = breakpoints[2] - 1
     end)
 
     it("filename", function()
@@ -172,14 +177,11 @@ describe("NougatBar", function()
   describe(":generate w/ max breakpoints", function()
     local breakpoint = { l = 1, m = 2, s = 3 }
     local breakpoints = { [breakpoint.l] = math.huge, [breakpoint.m] = 80, [breakpoint.s] = 40 }
-    local bar, ctx
+    local bar
 
     before_each(function()
       bar = Bar("statusline", { breakpoints = breakpoints })
-      ctx = t.make_ctx(0, {
-        ctx = {},
-        width = breakpoints[2] + 1,
-      })
+      ctx.width = breakpoints[2] + 1
     end)
 
     it("filename", function()
@@ -218,14 +220,11 @@ describe("NougatBar", function()
 
   describe(":generate", function()
     describe("w/ priority", function()
-      local bar, ctx
+      local bar
 
       before_each(function()
         bar = Bar("statusline")
-        ctx = t.make_ctx(0, {
-          ctx = {},
-          width = vim.api.nvim_win_get_width(0),
-        })
+        ctx.width = vim.api.nvim_win_get_width(0)
       end)
 
       it("basic", function()
@@ -250,6 +249,60 @@ describe("NougatBar", function()
 
         ctx.width = 15
         t.eq(bar:generate(ctx), string.format("%s%s%s", string.rep("A", 0), string.rep("B", 10), string.rep("C", 0)))
+      end)
+
+      it("nested", function()
+        bar:add_item(nut.mode.create({
+          priority = 3,
+        }))
+        bar:add_item(nut.buf.filename.create({
+          priority = 1,
+        }))
+        bar:add_item(Item({
+          priority = 2,
+          prefix = " ",
+          content = {
+            Item({
+              priority = 1,
+              prefix = "+",
+              content = "1",
+              suffix = " ",
+            }),
+            Item({
+              priority = 2,
+              prefix = "~",
+              content = "1",
+              suffix = " ",
+            }),
+            Item({
+              priority = 1,
+              prefix = "-",
+              content = "1",
+              suffix = " ",
+            }),
+          },
+        }))
+
+        ctx.width = string.len("NORMAL") + string.len("[No Name]") + 1 + (2 + 1) * 3
+        t.eq(
+          bar:generate(ctx),
+          "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_#[No Name] +1 ~1 -1 "
+        )
+
+        ctx.width = string.len("NORMAL") + string.len("[No Name]") + 1 + (2 + 1) * 3 - 1
+        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 -1 ")
+
+        ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 3
+        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 -1 ")
+
+        ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 3 - 1
+        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 ")
+
+        ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 2 - 1
+        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# ~1 ")
+
+        ctx.width = 1 + (2 + 1) * 1 + 1
+        t.eq(bar:generate(ctx), " ~1 ")
       end)
     end)
   end)
