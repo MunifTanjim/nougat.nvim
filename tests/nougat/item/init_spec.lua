@@ -1,6 +1,7 @@
 pcall(require, "luacov")
 
 local Item = require("nougat.item")
+local sep = require("nougat.separator")
 
 local t = require("tests.util")
 
@@ -23,6 +24,139 @@ describe("NougatItem", function()
 
       t.eq(#init_params, 1)
       t.eq(item, init_params[1])
+    end)
+  end)
+
+  describe("breakpoints", function()
+    for _, name in ipairs({ "sep_left", "prefix", "suffix", "sep_right" }) do
+      it("o." .. name, function()
+        local breakpoints = { 0, 40, 80 }
+
+        local vmap = ({
+          sep_left = { sep.space(), sep.vertical() },
+          prefix = { "X", "Y" },
+          suffix = { "X", "Y" },
+          sep_right = { sep.space(), sep.vertical() },
+        })[name]
+
+        local value = vmap[1]
+        local item = Item({ [name] = value })
+
+        t.eq(item[name], { value })
+
+        value = { vmap[1] }
+        item = Item({ [name] = value })
+
+        t.ref(item[name], value)
+        t.eq(item[name][2], nil)
+        t.eq(item[name][3], nil)
+
+        item:_init_breakpoints(breakpoints)
+
+        t.eq(#item[name], #breakpoints)
+        t.ref(item[name], value)
+        t.eq(item[name][1], value[1])
+        t.eq(item[name][2], value[1])
+        t.eq(item[name][3], value[1])
+
+        value = { vmap[1], vmap[2] }
+        item = Item({ [name] = value })
+
+        t.ref(item[name], value)
+        t.eq(item[name][3], nil)
+
+        item:_init_breakpoints(breakpoints)
+
+        t.eq(#item[name], #breakpoints)
+        t.ref(item[name], value)
+        t.eq(item[name][1], value[1])
+        t.eq(item[name][2], value[2])
+        t.eq(item[name][3], value[2])
+      end)
+    end
+
+    it("config", function()
+      local breakpoints = { 0, 40, 80 }
+      local ctx = t.make_ctx(0)
+
+      local config = { a = 1 }
+      local item = Item({ config = config })
+      item:_init_breakpoints(breakpoints)
+
+      ctx.breakpoint = 1
+      t.eq(item:config(ctx), { a = 1 })
+      ctx.breakpoint = 2
+      t.eq(item:config(ctx), { a = 1 })
+      ctx.breakpoint = 3
+      t.eq(item:config(ctx), { a = 1 })
+
+      config = {
+        [1] = { a = 1 },
+      }
+      item = Item({ config = config })
+      item:_init_breakpoints(breakpoints)
+
+      ctx.breakpoint = 1
+      t.eq(item:config(ctx), { a = 1 })
+      ctx.breakpoint = 2
+      t.eq(item:config(ctx), { a = 1 })
+      ctx.breakpoint = 3
+      t.eq(item:config(ctx), { a = 1 })
+
+      config = {
+        a = 1,
+        [1] = { b = 2 },
+        [2] = { a = 1.1, c = 3 },
+      }
+      item = Item({ config = config })
+      item:_init_breakpoints(breakpoints)
+
+      ctx.breakpoint = 0
+      t.ref(item:config(ctx), config)
+      t.eq(#item:config(ctx), #breakpoints)
+
+      ctx.breakpoint = 1
+      t.ref(item:config(ctx), config[ctx.breakpoint])
+      t.eq(item:config(ctx), { a = 1, b = 2 })
+      ctx.breakpoint = 2
+      t.ref(item:config(ctx), config[ctx.breakpoint])
+      t.eq(item:config(ctx), { a = 1.1, b = 2, c = 3 })
+      ctx.breakpoint = 3
+      t.ref(item:config(ctx), config[ctx.breakpoint])
+      t.eq(item:config(ctx), { a = 1.1, b = 2, c = 3 })
+    end)
+
+    it("nested items", function()
+      local breakpoints = { 0, 40 }
+
+      local ctx = t.make_ctx(0)
+
+      local child_item = Item({
+        prefix = "X",
+        config = { a = 1 },
+      })
+
+      local item = Item({
+        prefix = " ",
+        content = { child_item },
+      })
+
+      item:_init_breakpoints(breakpoints)
+
+      t.eq(#item.prefix, #breakpoints)
+      t.eq(item.prefix[1], " ")
+      t.eq(item.prefix[2], " ")
+
+      ctx.breakpoint = 0
+      t.eq(#child_item.prefix, #breakpoints)
+      t.eq(#child_item:config(ctx), #breakpoints)
+
+      ctx.breakpoint = 1
+      t.eq(child_item.prefix[ctx.breakpoint], "X")
+      t.eq(child_item:config(ctx), { a = 1 })
+      ctx.breakpoint = 2
+      t.eq(child_item.prefix[ctx.breakpoint], "X")
+      t.eq(child_item:config(ctx), { a = 1 })
     end)
   end)
 
