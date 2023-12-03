@@ -26,7 +26,7 @@ local u = require("nougat.util")
 ---@class nougat_item_config__nil
 ---@field init? fun(self: NougatItem): nil
 ---@field prepare? fun(self: NougatItem, ctx: nougat_bar_ctx):nil
----@field hidden? nougat_item_hidden
+---@field hidden? nougat_item_hidden|NougatItem
 ---@field hl? nougat_item_hl
 ---@field content? string|string[]|NougatItem[]
 ---@field sep_left? nougat_separator|nougat_separator[]

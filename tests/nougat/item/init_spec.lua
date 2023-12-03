@@ -27,6 +27,59 @@ describe("NougatItem", function()
     end)
   end)
 
+  describe("o.hidden", function()
+    it("boolean", function()
+      local item = Item({ hidden = true })
+
+      t.eq(item.hidden, true)
+    end)
+
+    it("function", function()
+      local item = Item({
+        hidden = function(_, ctx)
+          return ctx.ctx._hidden
+        end,
+      })
+
+      local ctx = t.make_ctx(0, { ctx = {} })
+
+      ctx.ctx._hidden = true
+      t.eq(item:hidden(ctx), true)
+
+      ctx.ctx._hidden = false
+      t.eq(item:hidden(ctx), false)
+    end)
+
+    it("NougatItem", function()
+      local ctx = t.make_ctx(0, { ctx = {} })
+
+      local item
+
+      local bool = Item({ hidden = true })
+
+      item = Item({ hidden = bool })
+
+      t.eq(item:hidden(ctx), true)
+
+      bool.hidden = false
+      t.eq(item:hidden(ctx), false)
+
+      local fn = Item({
+        hidden = function(_, ctx)
+          return ctx.ctx._hidden
+        end,
+      })
+
+      item = Item({ hidden = fn })
+
+      ctx.ctx._hidden = true
+      t.eq(item:hidden(ctx), true)
+
+      ctx.ctx._hidden = false
+      t.eq(item:hidden(ctx), false)
+    end)
+  end)
+
   describe("breakpoints", function()
     for _, name in ipairs({ "sep_left", "prefix", "suffix", "sep_right" }) do
       it("o." .. name, function()
