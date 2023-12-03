@@ -80,6 +80,54 @@ describe("NougatItem", function()
     end)
   end)
 
+  describe("o.hl", function()
+    it("integer", function()
+      local item = Item({ hl = 1 })
+      t.eq(item.hl, 1)
+    end)
+
+    it("string", function()
+      local item = Item({ hl = "NougatTest" })
+      t.eq(item.hl, "NougatTest")
+    end)
+
+    it("nougat_hl_def", function()
+      local hl = { bg = "red" }
+      local item = Item({ hl = hl })
+      t.ref(item.hl, hl)
+    end)
+
+    it("function", function()
+      local hl = function()
+        return 1
+      end
+
+      local item = Item({ hl = hl })
+
+      t.ref(item:hl(t.make_ctx(0)), 1)
+    end)
+
+    it("NougatItem", function()
+      local item = Item({
+        hl = Item({ hl = "NougatTest" }),
+      })
+
+      local ctx = t.make_ctx(0)
+
+      t.eq(item:hl(ctx), "NougatTest")
+
+      item = Item({
+        hl = Item({
+          hl = function()
+            return 1
+          end,
+        }),
+      })
+
+      t.eq(item:hl(ctx), 1)
+    end)
+  end)
+
   describe("breakpoints", function()
     for _, name in ipairs({ "sep_left", "prefix", "suffix", "sep_right" }) do
       it("o." .. name, function()

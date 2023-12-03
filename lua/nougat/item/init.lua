@@ -27,7 +27,7 @@ local u = require("nougat.util")
 ---@field init? fun(self: NougatItem): nil
 ---@field prepare? fun(self: NougatItem, ctx: nougat_bar_ctx):nil
 ---@field hidden? nougat_item_hidden|NougatItem
----@field hl? nougat_item_hl
+---@field hl? nougat_item_hl|NougatItem
 ---@field content? string|string[]|NougatItem[]
 ---@field sep_left? nougat_separator|nougat_separator[]
 ---@field sep_right? nougat_separator|nougat_separator[]
@@ -121,7 +121,9 @@ local item_hidden_processor = {
   end,
 }
 
-local function item_function_processor(item, ctx)
+---@param item NougatItem
+---@param ctx nougat_bar_ctx
+local function item_hl_processor(item, ctx)
   return type(item._item_hl.hl) == "function" and item._item_hl:hl(ctx) or item._item_hl.hl
 end
 
@@ -138,9 +140,9 @@ local function init(class, config)
   self.ctx = config.ctx or {}
 
   self.hl = config.hl
-  if type(self.hl) == "table" and self.hl.id then
-    self._item_hl = self.hl --[[@as NougatItem]]
-    self.hl = item_function_processor
+  if type(config.hl) == "table" and config.hl.id then
+    self._item_hl = config.hl --[[@as NougatItem]]
+    self.hl = item_hl_processor
   end
 
   self.sep_left = iu.normalize_sep(-1, config.sep_left)
