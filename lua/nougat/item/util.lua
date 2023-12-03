@@ -26,7 +26,15 @@ end
 function mod.prepare_config_breakpoints(item, breakpoints)
   for i = 1, #breakpoints do
     local base_config = item._config[i - 1] or item._config
-    item._config[i] = vim.tbl_deep_extend("keep", item._config[i] or {}, base_config)
+    local config = item._config[i] or {}
+    for key, fallback in pairs(base_config) do
+      if type(key) ~= "number" then
+        if config[key] == nil then
+          config[key] = fallback
+        end
+      end
+    end
+    item._config[i] = config
   end
 end
 
