@@ -133,7 +133,7 @@ local Bar = setmetatable({}, {
   __name = "NougatBar",
 })
 
----@param item string|table|NougatItem
+---@param item string|nougat_item_config|NougatItem
 ---@return NougatItem
 function Bar:add_item(item)
   if type(item) == "string" then

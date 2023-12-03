@@ -32,6 +32,30 @@ describe("NougatBar", function()
     t.eq(bar.type, "statusline")
   end)
 
+  describe("o.breakpoints", function()
+    it("throws if [1] is not 0 or math.huge", function()
+      local err = t.error(function()
+        return Bar("statusline", { breakpoints = { 1 } })
+      end)
+      t.match(err, "breakpoints%[1%] must be 0 or math.huge")
+    end)
+
+    it("prepares NougatItem after adding", function()
+      local bar = Bar("statusline", { breakpoints = { 0, 40 } })
+
+      local a = bar:add_item({ prefix = "x", content = "a" })
+      t.eq(a.prefix[1], "x")
+      t.eq(a.prefix[2], "x")
+
+      local b1 = Item({ prefix = "y1", content = "b1" })
+      local b = bar:add_item({ prefix = "y", content = { b1 } })
+      t.eq(b.prefix[1], "y")
+      t.eq(b.prefix[2], "y")
+      t.eq(b1.prefix[1], "y1")
+      t.eq(b1.prefix[2], "y1")
+    end)
+  end)
+
   describe("o.hl", function()
     local hl
 
