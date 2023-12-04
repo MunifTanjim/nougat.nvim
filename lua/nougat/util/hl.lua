@@ -49,13 +49,13 @@ on_event("ColorScheme", function()
   end
 end)
 
-local nougat_hl_name_format = "nougat_hl_bg_%s_fg_%s_%s"
+local nougat_hl_name_format = "bg_%s_fg_%s_%s"
 local attr_bold_italic = "b.i"
 local attr_bold = "b"
 local attr_italic = "i"
 local attr_none = ""
 
--- format: `nougat_hl_bg_<bg>_fg_<fg>_<attr...>`
+-- format: `bg_<bg>_fg_<fg>_<attr...>`
 ---@param hl nougat_hl_def
 ---@return string
 local function make_nougat_hl_name(hl)

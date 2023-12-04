@@ -78,7 +78,7 @@ describe("NougatBar", function()
         content = "Content",
       }))
 
-      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+      t.eq(bar:generate(ctx), "%#bg_ffcd00_fg_663399_b#Content%#bg_ffcd00_fg_663399_#")
 
       t.eq(ctx.hl, hl)
     end)
@@ -93,7 +93,7 @@ describe("NougatBar", function()
         content = "Content",
       }))
 
-      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+      t.eq(bar:generate(ctx), "%#bg_ffcd00_fg_663399_b#Content%#bg_ffcd00_fg_663399_#")
 
       t.eq(ctx.hl, hl)
     end)
@@ -106,7 +106,7 @@ describe("NougatBar", function()
         content = "Content",
       }))
 
-      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+      t.eq(bar:generate(ctx), "%#bg_ffcd00_fg_663399_b#Content%#bg_ffcd00_fg_663399_#")
 
       t.eq(ctx.hl, hl)
     end)
@@ -128,7 +128,7 @@ describe("NougatBar", function()
         content = "Content",
       }))
 
-      t.eq(bar:generate(ctx), "%#nougat_hl_bg_ffcd00_fg_663399_b#Content%#nougat_hl_bg_ffcd00_fg_663399_#")
+      t.eq(bar:generate(ctx), "%#bg_ffcd00_fg_663399_b#Content%#bg_ffcd00_fg_663399_#")
 
       t.eq(ctx.hl, hl)
     end)
@@ -154,7 +154,7 @@ describe("NougatBar", function()
       bar:add_item(nut.mode.create())
       bar:add_item(nut.buf.filename.create({}))
 
-      t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_#[No Name]")
+      t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_#[No Name]")
     end)
   end)
 
@@ -270,19 +270,19 @@ describe("NougatBar", function()
       t.eq(
         bar:generate(ctx),
         table.concat({
-          "%#nougat_hl_bg_purple_fg_yellow_#",
+          "%#bg_purple_fg_yellow_#",
           "X",
-          "%#nougat_hl_bg_ffcd00_fg_663399_#",
-          "%#nougat_hl_bg_purple_fg_ffcd00_#",
+          "%#bg_ffcd00_fg_663399_#",
+          "%#bg_purple_fg_ffcd00_#",
           "",
-          "%#nougat_hl_bg_ffcd00_fg_cyan_#",
+          "%#bg_ffcd00_fg_cyan_#",
           ".X.",
-          "%#nougat_hl_bg_purple_fg_ffcd00_#",
+          "%#bg_purple_fg_ffcd00_#",
           "",
-          "%#nougat_hl_bg_ffcd00_fg_663399_#",
-          "%#nougat_hl_bg_purple_fg_yellow_#",
+          "%#bg_ffcd00_fg_663399_#",
+          "%#bg_purple_fg_yellow_#",
           "X",
-          "%#nougat_hl_bg_ffcd00_fg_663399_#",
+          "%#bg_ffcd00_fg_663399_#",
         }, "")
       )
     end)
@@ -352,22 +352,19 @@ describe("NougatBar", function()
         }))
 
         ctx.width = string.len("NORMAL") + string.len("[No Name]") + 1 + (2 + 1) * 3
-        t.eq(
-          bar:generate(ctx),
-          "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_#[No Name] +1 ~1 -1 "
-        )
+        t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_#[No Name] +1 ~1 -1 ")
 
         ctx.width = string.len("NORMAL") + string.len("[No Name]") + 1 + (2 + 1) * 3 - 1
-        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 -1 ")
+        t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_# +1 ~1 -1 ")
 
         ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 3
-        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 -1 ")
+        t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_# +1 ~1 -1 ")
 
         ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 3 - 1
-        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# +1 ~1 ")
+        t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_# +1 ~1 ")
 
         ctx.width = string.len("NORMAL") + 1 + (2 + 1) * 2 - 1
-        t.eq(bar:generate(ctx), "%#nougat_hl_bg_663399_fg_ffcd00_#NORMAL%#nougat_hl_bg_ffcd00_fg_663399_# ~1 ")
+        t.eq(bar:generate(ctx), "%#bg_663399_fg_ffcd00_#NORMAL%#bg_ffcd00_fg_663399_# ~1 ")
 
         ctx.width = 1 + (2 + 1) * 1 + 1
         t.eq(bar:generate(ctx), " ~1 ")
