@@ -45,9 +45,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Check Format
-        uses: JohnnyMorganz/stylua-action@1.0.0
+        uses: JohnnyMorganz/stylua-action@v3
         with:
-          version: 0.13.1
+          version: 0.19.1
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --color always --check lua/
 
