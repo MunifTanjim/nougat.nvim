@@ -261,6 +261,28 @@ describe("NougatItem", function()
     end)
   end)
 
+  describe("o.sep_left", function()
+    it("is adjusted if right separator is used", function()
+      local rcs = sep.right_chevron_solid(true)
+      local item = Item({
+        sep_left = sep.right_chevron_solid(true),
+      })
+      t.eq(item.sep_left[1].hl.bg, rcs.hl.fg)
+      t.eq(item.sep_left[1].hl.fg, -rcs.hl.bg)
+    end)
+  end)
+
+  describe("o.sep_right", function()
+    it("is adjusted if left separator is used", function()
+      local rcs = sep.left_half_circle_solid(true)
+      local item = Item({
+        sep_right = sep.left_half_circle_solid(true),
+      })
+      t.eq(item.sep_right[1].hl.bg, rcs.hl.fg)
+      t.eq(item.sep_right[1].hl.fg, -rcs.hl.bg)
+    end)
+  end)
+
   describe("o.type=code", function()
     it("n", function()
       t.eq(
