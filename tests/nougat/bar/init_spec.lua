@@ -2,6 +2,7 @@ pcall(require, "luacov")
 
 local Bar = require("nougat.bar")
 local Item = require("nougat.item")
+local sep = require("nougat.separator")
 local nut = {
   mode = require("nougat.nut.mode"),
   buf = {
@@ -17,7 +18,10 @@ describe("NougatBar", function()
   before_each(function()
     local bufnr = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_win_set_buf(0, bufnr)
-    ctx = t.make_ctx(0, { ctx = {} })
+    ctx = t.make_ctx(0, {
+      ctx = {},
+      width = vim.api.nvim_win_get_width(0),
+    })
   end)
 
   after_each(function()
@@ -243,6 +247,46 @@ describe("NougatBar", function()
   end)
 
   describe(":generate", function()
+    it("w/ fancy separator", function()
+      local bar = Bar("statusline")
+
+      bar:add_item({
+        hl = { bg = "purple", fg = "yellow" },
+        content = "X",
+      })
+      bar:add_item({
+        hl = { fg = "cyan" },
+        sep_left = sep.left_lower_triangle_solid(true),
+        prefix = ".",
+        content = "X",
+        suffix = ".",
+        sep_right = sep.right_lower_triangle_solid(true),
+      })
+      bar:add_item({
+        hl = { bg = "purple", fg = "yellow" },
+        content = "X",
+      })
+
+      t.eq(
+        bar:generate(ctx),
+        table.concat({
+          "%#nougat_hl_bg_purple_fg_yellow_#",
+          "X",
+          "%#nougat_hl_bg_ffcd00_fg_663399_#",
+          "%#nougat_hl_bg_purple_fg_ffcd00_#",
+          "",
+          "%#nougat_hl_bg_ffcd00_fg_cyan_#",
+          ".X.",
+          "%#nougat_hl_bg_purple_fg_ffcd00_#",
+          "",
+          "%#nougat_hl_bg_ffcd00_fg_663399_#",
+          "%#nougat_hl_bg_purple_fg_yellow_#",
+          "X",
+          "%#nougat_hl_bg_ffcd00_fg_663399_#",
+        }, "")
+      )
+    end)
+
     describe("w/ priority", function()
       local bar
 
