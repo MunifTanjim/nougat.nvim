@@ -1,6 +1,6 @@
 # NougatBar
 
-_Signature:_ `(type: 'statusline'|'tabline'|'winbar', options?: table) -> NougatBar`
+_Signature:_ `(type: 'statusline'|'tabline'|'winbar', config?: nougat_bar_config) -> NougatBar`
 
 The sweet `NougatBar` represents the `statusline` / `tabline` / `winbar`.
 
@@ -14,7 +14,7 @@ local Bar = require("nougat.bar")
 
 Type of the bar.
 
-## Parameter: `options`
+## Parameter: `config`
 
 ### `breakpoints`
 
@@ -45,7 +45,7 @@ local bar = Bar('statusline', { breakpoints = breakpoints })
 
 Specifies the highlight for the bar. Different types of `hl` are treated in the following ways:
 
-- `nil|0`: is treated as the default highlight according to bar `type` 
+- `nil|0`: is treated as the default highlight according to bar `type`
 - `1-9`: is treated as `hl-User1..9` (check `:help hl-User1..9`)
 - `string`: is used as highlight group name
 - `nougat_hl_def`: is used has highlight definition (must have both `bg` and `fg`)
@@ -54,7 +54,7 @@ Specifies the highlight for the bar. Different types of `hl` are treated in the 
 
 ### `bar:add_item`
 
-_Signature:_ `(item: string|table|NougatItem) -> NougatItem`
+_Signature:_ `(item: string|nougat_item_config|NougatItem) -> NougatItem`
 
 **Example**
 
@@ -63,7 +63,7 @@ local Item = require("nougat.item")
 
 -- string content
 bar:add_item("[nougat.nvim]")
--- or NougatItem options
+-- or NougatItem config
 bar:add_item({
   prefix = "[",
   content = "nougat.nvim",

@@ -4,7 +4,13 @@ local u = require("nougat.util")
 
 --luacheck: push no max line length
 
+---@alias nougat_bar_type 'statusline'|'tabline'|'winbar'
+
 ---@alias nougat_bar_hl integer|string|nougat_hl_def|(fun(self: NougatBar, ctx: nougat_core_expression_context): integer|string|nougat_hl_def)
+
+---@class nougat_bar_config
+---@field breakpoints? integer[]
+---@field hl? nougat_bar_hl
 
 --luacheck: pop
 
@@ -84,7 +90,7 @@ local function clone_item(item)
 end
 
 ---@param breakpoints integer[]
----@returns 'min'|'max'
+---@return 'min'|'max'
 local function get_breakpoint_type(breakpoints)
   if breakpoints[1] ~= 0 and breakpoints[1] ~= math.huge then
     error("breakpoints[1] must be 0 or math.huge")
@@ -99,9 +105,9 @@ end
 
 local get_next_id = u.create_id_generator()
 
----@param type 'statusline'|'tabline'|'winbar'
----@param opts? { breakpoints?: integer[], hl?: nougat_bar_hl }
-local function init(class, type, opts)
+---@param type nougat_bar_type
+---@param config? nougat_bar_config
+local function init(class, type, config)
   ---@class NougatBar
   local self = setmetatable({}, { __index = class })
 
@@ -109,14 +115,14 @@ local function init(class, type, opts)
   self.type = type
 
   self._hl_name = fallback_hl_name_by_type[self.type]
-  self.hl = opts and opts.hl or 0
+  self.hl = config and config.hl or 0
 
   --luacheck: push no max line length
   ---@type NougatItem[]|{ len: integer, next: (fun(self: NougatItem[]): table,integer), _overflow?: 'hide-all'|'hide-self' }
   self._items = { len = 0, next = u.get_next_list_item }
   --luacheck: pop
 
-  self._breakpoints = opts and opts.breakpoints or { 0 }
+  self._breakpoints = config and config.breakpoints or { 0 }
   self._get_breakpoint_index = get_breakpoint_index[get_breakpoint_type(self._breakpoints)]
 
   self._parts = { len = 0 }
@@ -127,6 +133,7 @@ local function init(class, type, opts)
 end
 
 ---@class NougatBar
+---@field type nougat_bar_type
 ---@field hl nougat_bar_hl
 local Bar = setmetatable({}, {
   __call = init,
@@ -139,8 +146,9 @@ function Bar:add_item(item)
   if type(item) == "string" then
     item = Item({ content = item })
   elseif not item.id then
-    item = Item(item)
+    item = Item(item --[[@as nougat_item_config]])
   end
+  ---@cast item NougatItem
 
   local priority = item.priority
 
@@ -211,12 +219,8 @@ function Bar:generate(ctx)
   return table.concat(o_parts, nil, 1, o_parts.len)
 end
 
---luacheck: push no max line length
-
----@alias NougatBar.constructor fun(type: 'statusline'|'tabline'|'winbar', opts?: { breakpoints?: integer[] }): NougatBar
+---@alias NougatBar.constructor fun(type: nougat_bar_type, config?: nougat_bar_config): NougatBar
 ---@type NougatBar|NougatBar.constructor
 local NougatBar = Bar
-
---luacheck: pop
 
 return NougatBar
