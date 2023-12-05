@@ -1,10 +1,19 @@
 local Item = require("nougat.item")
-
 local buf_cache = require("nougat.cache.buffer")
 
-buf_cache.enable("modified")
-buf_cache.enable("modifiable")
-buf_cache.enable("readonly")
+--luacheck: push no max line length
+
+---@class nougat.nut.buf.filestatus_config.config
+---@field modified? false|string
+---@field nomodifiable? false|string
+---@field readonly? false|string
+---@field sep? string
+
+---@class nougat.nut.buf.filestatus_config: nougat_item_config__function
+---@field config? nougat.nut.buf.filestatus_config.config|nougat.nut.buf.filestatus_config.config[]
+---@field content? nil
+
+--luacheck: pop
 
 -- re-used table
 local o_parts = { len = 0 }
@@ -41,24 +50,29 @@ end
 
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.buf.filestatus_config
+function mod.create(config)
+  buf_cache.enable("modified")
+  buf_cache.enable("modifiable")
+  buf_cache.enable("readonly")
+
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = get_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
     config = vim.tbl_extend("force", {
       modified = "+",
       nomodifiable = "-",
       readonly = "RO",
       sep = ",",
-    }, opts.config or {}),
-    on_click = opts.on_click,
-    context = opts.context,
+    }, config.config or {}),
+    on_click = config.on_click,
+    context = config.context,
   })
 
   return item
