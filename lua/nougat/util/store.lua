@@ -1,15 +1,14 @@
 local mod = {}
 
 local store_by_name = {}
-
-local k_clear = -1
+local clear_by_store = {}
 
 ---@param store string|table
 function mod.clear(store)
   if type(store) == "string" then
     store = store_by_name[store]
   end
-  store[k_clear](store)
+  clear_by_store[store](store)
 end
 
 function mod.clear_all()
@@ -21,11 +20,11 @@ end
 ---@generic S: table
 ---@param name string
 ---@param store S
----@param clear fun(store:table):nil
+---@param clear fun(store:S):nil
 ---@return S store
 function mod.register(name, store, clear)
-  store[k_clear] = clear
   store_by_name[name] = store
+  clear_by_store[store] = clear
   return store
 end
 
