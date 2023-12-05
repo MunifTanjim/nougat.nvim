@@ -1,21 +1,31 @@
 local Item = require("nougat.item")
 
+--luacheck: push no max line length
+
+---@class nougat.nut.buf.filetype_config: nougat_item_config__vim_expr
+---@field content? nil
+---@field expand? nil
+---@field type? nil
+
+--luacheck: pop
+
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.buf.filetype_config
+function mod.create(config)
   return Item({
-    priority = opts.priority,
+    priority = config.priority,
     type = "vim_expr",
     is_vimscript = true,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = "&filetype",
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
   })
 end
 
