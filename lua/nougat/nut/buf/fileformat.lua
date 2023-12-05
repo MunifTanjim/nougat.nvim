@@ -1,27 +1,42 @@
 local Item = require("nougat.item")
 
-local function get_content(item, ctx)
+--luacheck: push no max line length
+
+---@class nougat.nut.buf.fileformat_config.config
+---@field text? table<'dos'|'mac'|'unix', string?>
+
+---@class nougat.nut.buf.fileformat_config: nougat_item_config__function
+---@field cache? nil
+---@field config? nougat.nut.buf.fileformat_config.config|nougat.nut.buf.fileformat_config.config[]
+---@field content? nil
+
+--luacheck: pop
+
+---@param item NougatItem
+---@param ctx nougat_bar_ctx
+local function content(item, ctx)
   local fileformat = vim.api.nvim_buf_get_option(ctx.bufnr, "fileformat")
   return item:config(ctx).text[fileformat] or fileformat
 end
 
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.buf.fileformat_config
+function mod.create(config)
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    content = get_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
+    content = content,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
     config = vim.tbl_extend("force", {
       text = {},
-    }, opts.config or {}),
-    on_click = opts.on_click,
-    context = opts.context,
+    }, config.config or {}),
+    on_click = config.on_click,
+    context = config.context,
     cache = {
       scope = "buf",
       clear = "BufWritePost",
