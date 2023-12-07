@@ -3,7 +3,12 @@ local buf_cache = require("nougat.cache.buffer")
 
 local has_devicons, devicons = pcall(require, "nvim-web-devicons")
 
-buf_cache.enable("filetype")
+--luacheck: push no max line length
+
+---@class nougat.nut.tab.tablist.icon_config: nougat_item_config__function
+---@field config? nil
+
+--luacheck: pop
 
 local filetype_overide = {
   fugitive = "git",
@@ -31,19 +36,22 @@ local cache_initial_value = { c = nil, hl = {} }
 
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.tab.tablist.icon_config
+function mod.create(config)
+  buf_cache.enable("filetype")
+
   local item = Item({
-    priority = opts.priority,
-    prepare = prepare,
-    hidden = opts.hidden,
-    hl = hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    content = content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    priority = config.priority,
+    prepare = has_devicons and prepare or config.prepare,
+    hidden = config.hidden,
+    hl = has_devicons and hl or config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
+    content = has_devicons and content or config.content or "◌",
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
     cache = {
       name = "nut.tab.tablist.icon",
       scope = "buf",
@@ -54,10 +62,6 @@ function mod.create(opts)
       clear = "BufFilePost",
     },
   })
-
-  if not has_devicons then
-    item.hidden = true
-  end
 
   return item
 end
