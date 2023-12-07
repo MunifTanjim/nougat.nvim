@@ -53,7 +53,10 @@ local function on_event(event, callback)
         option_set_cb_store[pattern] = {}
       end
 
-      table.insert(option_set_cb_store[pattern], callback)
+      if not option_set_cb_store[pattern][callback] then
+        option_set_cb_store[pattern][callback] = true
+        table.insert(option_set_cb_store[pattern], callback)
+      end
 
       local autocmd_id = vim.api.nvim_create_autocmd(event_name, {
         group = augroup,
@@ -87,7 +90,10 @@ local function on_event(event, callback)
         })
       end
 
-      cb_store[ev][#cb_store[ev] + 1] = callback
+      if not cb_store[ev][callback] then
+        cb_store[ev][callback] = true
+        table.insert(cb_store[ev], callback)
+      end
     end
   end
 end
