@@ -108,4 +108,11 @@ function mod.get_click_fn(content, label)
   return _G[name], id
 end
 
+---@param fn fun():boolean
+---@param timeout integer
+function mod.wait_for(fn, timeout)
+  vim.wait(timeout, fn, math.floor(timeout / 5))
+  mod.eq(fn(), true)
+end
+
 return mod
