@@ -78,9 +78,7 @@ local function on_event(event, callback)
           group = augroup,
           pattern = pattern,
           callback = function(info)
-            local cbs = info.event == "User" and cb_store["User " .. info.match]
-              or info.event == "OptionSet" and cb_store["OptionSet " .. info.match]
-              or cb_store[info.event]
+            local cbs = info.event == "User" and cb_store["User " .. info.match] or cb_store[info.event]
 
             for _, cb in ipairs(cbs) do
               cb(info)
