@@ -9,6 +9,7 @@ end
 local o_label_opts = { tabnr = nil, close = false }
 local o_label_parts = {}
 
+---@param ctx nougat.nut.tab.tablist_ctx
 local function get_label_content(_, ctx)
   o_label_opts.tabnr = "x"
   local parts_len = core.add_label(vim.fn.fnamemodify(ctx.tab.filename, ":t"), o_label_opts, o_label_parts, 0)
@@ -56,13 +57,14 @@ local mod = {
   hl = hl,
 }
 
-function mod.create(opts)
+---@param config nougat_item_config__nil
+function mod.create(config)
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     -- NOTE: splitting label_tabnr and label because we don't have TabMoved autocmd event.
     -- Upstream PR: https://github.com/neovim/neovim/pull/24137
     content = {
@@ -73,6 +75,7 @@ function mod.create(opts)
         content = get_label_content,
         cache = {
           scope = "buf",
+          ---@param ctx nougat.nut.tab.tablist_ctx
           get = function(store, ctx)
             return store[ctx.tab.bufnr][ctx.breakpoint]
           end,
@@ -80,10 +83,10 @@ function mod.create(opts)
         },
       }),
     },
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
   })
 
   return item

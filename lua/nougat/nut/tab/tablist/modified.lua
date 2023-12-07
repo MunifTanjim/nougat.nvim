@@ -1,36 +1,55 @@
 local Item = require("nougat.item")
+local buf_cache = require("nougat.cache.buffer")
 
-local buffer_cache = require("nougat.cache.buffer")
+--luacheck: push no max line length
 
-buffer_cache.enable("modified")
+---@class nougat.nut.tab.tablist.modified_config.config
+---@field text string
 
-local buffer_cache_store = buffer_cache.store
+---@class nougat.nut.tab.tablist.modified_config: nougat_item_config__function
+---@field config? nougat.nut.tab.tablist.modified_config.config|nougat.nut.tab.tablist.modified_config.config[]
+---@field content? nil
+---@field hidden? nil
+---@field prepare? nil
+
+--luacheck: pop
 
 local function get_content(item, ctx)
   return item:config(ctx).text
 end
 
-local function hidden(_, ctx)
-  return not buffer_cache_store[ctx.tab.bufnr].modified
+local function hidden(item, ctx)
+  return not item:cache(ctx)
 end
 
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.tab.tablist.modified_config
+function mod.create(config)
+  buf_cache.enable("modified")
+
   local item = Item({
-    priority = opts.priority,
+    priority = config.priority,
     hidden = hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = get_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
     config = vim.tbl_deep_extend("force", {
       text = "+",
-    }, opts.config or {}),
-    on_click = opts.on_click,
-    context = opts.context,
+    }, config.config or {}),
+    on_click = config.on_click,
+    context = config.context,
+    cache = {
+      scope = "buf",
+      ---@param ctx nougat.nut.tab.tablist_ctx
+      get = function(store, ctx)
+        return store[ctx.tab.bufnr].modified
+      end,
+      store = buf_cache.store,
+    },
   })
 
   return item

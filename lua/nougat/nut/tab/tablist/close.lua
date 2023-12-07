@@ -1,6 +1,18 @@
 local core = require("nougat.core")
 local Item = require("nougat.item")
 
+--luacheck: push no max line length
+
+---@class nougat.nut.tab.tablist.close_config.config
+---@field text string
+
+---@class nougat.nut.tab.tablist.close_config: nougat_item_config__function
+---@field config? nougat.nut.tab.tablist.close_config.config|nougat.nut.tab.tablist.close_config.config[]
+---@field content? nil
+---@field prepare? nil
+
+--luacheck: pop
+
 -- re-used table
 local o_label_opts = { tabnr = nil, close = true }
 
@@ -12,21 +24,22 @@ end
 
 local mod = {}
 
-function mod.create(opts)
+---@param config nougat.nut.tab.tablist.close_config
+function mod.create(config)
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = get_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
     config = vim.tbl_deep_extend("force", {
       text = "X",
-    }, opts.config or {}),
-    on_click = opts.on_click,
-    context = opts.context,
+    }, config.config or {}),
+    on_click = config.on_click,
+    context = config.context,
   })
 
   return item
