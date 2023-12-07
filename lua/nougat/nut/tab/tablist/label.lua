@@ -17,41 +17,38 @@ end
 
 local hl = {}
 
-local diagnostic_cache_store, diagnostic_severity, diagnostic_hl_group_by_severity
+local diagnostic_cache = require("nougat.cache.diagnostic")
+local diagnostic_severity = diagnostic_cache.severity
+local diagnostic_cache_store = diagnostic_cache.store
+
+local diagnostic_hl_group_by_severity = {
+  [diagnostic_severity.ERROR] = "DiagnosticError",
+  [diagnostic_severity.WARN] = "DiagnosticWarn",
+  [diagnostic_severity.INFO] = "DiagnosticInfo",
+  [diagnostic_severity.HINT] = "DiagnosticHint",
+}
 
 local function hl_diagnostic(_, ctx)
   return diagnostic_hl_group_by_severity[diagnostic_cache_store[ctx.tab.bufnr].max]
 end
 
-function hl.diagnostic()
-  if not diagnostic_cache_store then
-    do
-      local ncd = require("nougat.cache.diagnostic")
-      ncd.on("update", function(cache)
-        if cache[diagnostic_severity.ERROR] > 0 then
-          cache.max = diagnostic_severity.ERROR
-        elseif cache[diagnostic_severity.WARN] > 0 then
-          cache.max = diagnostic_severity.WARN
-        elseif cache[diagnostic_severity.INFO] > 0 then
-          cache.max = diagnostic_severity.INFO
-        elseif cache[diagnostic_severity.HINT] > 0 then
-          cache.max = diagnostic_severity.HINT
-        else
-          cache.max = 0
-        end
-      end)
-
-      diagnostic_cache_store = ncd.store
-      diagnostic_severity = ncd.severity
-      diagnostic_hl_group_by_severity = {
-        [diagnostic_severity.ERROR] = "DiagnosticError",
-        [diagnostic_severity.WARN] = "DiagnosticWarn",
-        [diagnostic_severity.INFO] = "DiagnosticInfo",
-        [diagnostic_severity.HINT] = "DiagnosticHint",
-      }
-    end
+local function calculate_max_diagnostic_severity(cache)
+  if cache[diagnostic_severity.ERROR] > 0 then
+    cache.max = diagnostic_severity.ERROR
+  elseif cache[diagnostic_severity.WARN] > 0 then
+    cache.max = diagnostic_severity.WARN
+  elseif cache[diagnostic_severity.INFO] > 0 then
+    cache.max = diagnostic_severity.INFO
+  elseif cache[diagnostic_severity.HINT] > 0 then
+    cache.max = diagnostic_severity.HINT
+  else
+    cache.max = 0
   end
+end
 
+function hl.diagnostic()
+  diagnostic_cache.enable()
+  diagnostic_cache.on("change", calculate_max_diagnostic_severity)
   return hl_diagnostic
 end
 

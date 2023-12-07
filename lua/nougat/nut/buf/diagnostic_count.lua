@@ -7,12 +7,12 @@ local color = require("nougat.color").get()
 local diagnostic_cache = require("nougat.cache.diagnostic")
 local severity = diagnostic_cache.severity
 
-diagnostic_cache.on("update", function(cache)
+local function calculate_diagnostic_combined_content(cache)
   -- previous combined content
   cache.pcc = cache.cc
   -- invalidate combined content
   cache.cc = nil
-end)
+end
 
 local function default_hidden(item, ctx)
   return item:cache(ctx)[item:config(ctx).severity] == 0
@@ -120,10 +120,14 @@ local mod = {
 }
 
 function mod.create(opts)
+  diagnostic_cache.enable()
+
   local config
   if opts.config and opts.config.severity then
     config = { severity = opts.config.severity }
   else
+    diagnostic_cache.on("change", calculate_diagnostic_combined_content)
+
     config = vim.tbl_deep_extend("force", {
       error = { prefix = "E:", suffix = "", fg = get_hl_def("DiagnosticError").fg or color.red },
       warn = { prefix = "W:", suffix = "", fg = get_hl_def("DiagnosticWarn").fg or color.yellow },

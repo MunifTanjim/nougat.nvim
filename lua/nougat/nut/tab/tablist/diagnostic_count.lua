@@ -16,6 +16,8 @@ end
 local mod = {}
 
 function mod.create(opts)
+  diagnostic_cache.enable()
+
   local item = Item({
     priority = opts.priority,
     hidden = hidden,

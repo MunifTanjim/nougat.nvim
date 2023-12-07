@@ -117,7 +117,9 @@ end)
 local diagnostic_cache = require("nougat.cache.diagnostic")
 local severity = diagnostic_cache.severity
 
-diagnostic_cache.on("update", function(cache, bufnr)
+diagnostic_cache.enable()
+
+diagnostic_cache.on("change", function(cache, bufnr)
   print(
     cache[severity.ERROR],
     cache[severity.WARN],

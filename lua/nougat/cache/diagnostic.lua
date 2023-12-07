@@ -1,11 +1,23 @@
-local create_store = require("nougat.cache").create_store
+local create_cache_store = require("nougat.cache").create_store
+local register_store = require("nougat.util.store").register
 local on_event = require("nougat.util").on_event
 
 local severity = vim.deepcopy(vim.diagnostic.severity)
 ---@cast severity -nil|unknown
 severity.COMBINED = severity.ERROR + severity.WARN + severity.INFO + severity.HINT
 
-local store = create_store("buf", "nougat.cache.diagnostic", {
+local store = register_store("nougat.cache.diagnostic", {
+  ---@type (fun(cache: table, bufnr: integer):nil)[]
+  on_update_cbs = {},
+}, function(store)
+  for _, value in pairs(store) do
+    for key in pairs(value) do
+      value[key] = nil
+    end
+  end
+end)
+
+local cache_store = create_cache_store("buf", "nougat.cache.diagnostic", {
   [severity.ERROR] = 0,
   [severity.WARN] = 0,
   [severity.INFO] = 0,
@@ -13,11 +25,9 @@ local store = create_store("buf", "nougat.cache.diagnostic", {
   [severity.COMBINED] = 0,
 })
 
-local hooks = {
-  on_update = {},
-}
+local on_update_cbs = store.on_update_cbs
 
-on_event("DiagnosticChanged", function(params)
+local function handle_diagnostic_changed(params)
   local bufnr = params.buf
 
   vim.schedule(function()
@@ -42,7 +52,7 @@ on_event("DiagnosticChanged", function(params)
       end
     end
 
-    local cache = store[bufnr]
+    local cache = cache_store[bufnr]
 
     if cache[severity.ERROR] ~= error then
       cache[severity.ERROR] = error
@@ -58,22 +68,32 @@ on_event("DiagnosticChanged", function(params)
     end
     cache[severity.COMBINED] = error + warn + info + hint
 
-    for i = 1, #hooks.on_update do
-      hooks.on_update[i](cache, bufnr)
+    for i = 1, #on_update_cbs do
+      on_update_cbs[i](cache, bufnr)
     end
   end)
-end)
+end
 
 local mod = {
   severity = severity,
-  store = store,
+  store = cache_store,
 }
 
----@param event 'update'
+function mod.enable()
+  on_event("DiagnosticChanged", handle_diagnostic_changed)
+end
+
+---@param event 'change'
 ---@param callback fun(cache: table, bufnr: integer)
 function mod.on(event, callback)
   if event == "update" then
-    hooks.on_update[#hooks.on_update + 1] = callback
+    vim.deprecate("nougat.cache.diagnostic.on parameter event 'update'", "'change'", "0.5.0", "nougat.nvim")
+    event = "change"
+  end
+
+  if event == "change" and not on_update_cbs[callback] then
+    on_update_cbs[callback] = true
+    on_update_cbs[#on_update_cbs + 1] = callback
   end
 end
 
