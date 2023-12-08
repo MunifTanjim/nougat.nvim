@@ -82,6 +82,12 @@ function mod.tbl_omit(tbl, keys)
   return new_tbl
 end
 
+---@param keys string
+---@param mode string
+function mod.feedkeys(keys, mode)
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, false, true), mode or "", false)
+end
+
 function mod.make_ctx(winid, extra)
   if not winid or winid == 0 then
     winid = vim.api.nvim_get_current_win()
