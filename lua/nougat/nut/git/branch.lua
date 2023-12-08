@@ -1,5 +1,14 @@
 local Item = require("nougat.item")
 
+--luacheck: push no max line length
+
+---@class nougat.nut.git.branch_config: nougat_item_config__function
+---@field cache? nil
+---@field config? { provider: 'auto'|'fugitive'|'gitsigns' }
+---@field content? nil
+
+--luacheck: pop
+
 local get_content = {
   fugitive = function()
     return vim.fn.FugitiveHead(7)
@@ -7,43 +16,48 @@ local get_content = {
   gitsigns = function(_, ctx)
     return vim.fn.getbufvar(ctx.bufnr, "gitsigns_head", false)
   end,
-  [""] = function() end,
 }
 
 local mod = {}
 
-function mod.create(opts)
-  local config = vim.tbl_deep_extend("force", {
-    provider = "auto",
-  }, opts.config or {})
-  ---@cast config -nil
+---@param config? nougat.nut.git.branch_config
+function mod.create(config)
+  config = config or {}
 
-  if config.provider == "auto" then
+  local provider = config.config and config.config.provider or "auto"
+
+  if provider == "auto" then
     if vim.api.nvim_get_runtime_file("plugin/fugitive.vim", false)[1] then
-      config.provider = "fugitive"
+      provider = "fugitive"
     elseif pcall(require, "gitsigns") then
-      config.provider = "gitsigns"
+      provider = "gitsigns"
     else
-      config.provider = ""
+      provider = ""
     end
   end
 
+  local content = get_content[provider]
+
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    content = get_content[config.provider],
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
+    content = content,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
     cache = {
       scope = "buf",
       clear = "BufModifiedSet",
     },
   })
+
+  if type(content) == "nil" then
+    item.hidden = true
+  end
 
   return item
 end
