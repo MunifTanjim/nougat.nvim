@@ -44,12 +44,6 @@ end
 
 ---@param item NougatItem
 ---@param ctx nougat_bar_ctx
-local function default_hidden(item, ctx)
-  return item:cache(ctx)[item:config(ctx).severity] == 0
-end
-
----@param item NougatItem
----@param ctx nougat_bar_ctx
 local function get_count_content(item, ctx)
   local config = item:config(ctx)
   local count = item:cache(ctx)[config.severity]
@@ -82,11 +76,6 @@ local function get_combined_content(item, ctx)
     local sep_hl = config.sep and core.highlight(get_hl_name(item_hl, ctx_hl))
 
     if config.error and cache[severity.ERROR] > 0 then
-      if part_idx > 0 and config.sep then
-        parts[part_idx + 1] = sep_hl
-        parts[part_idx + 2] = config.sep
-        part_idx = part_idx + 2
-      end
       part_idx = core.add_highlight(get_hl_name(config.error, item_hl), nil, parts, part_idx)
       parts[part_idx + 1] = config.error.prefix
       parts[part_idx + 2] = cache[severity.ERROR]
@@ -184,7 +173,7 @@ function mod.create(config)
 
   local item = Item({
     priority = config.priority,
-    hidden = config.hidden == nil and default_hidden or config.hidden,
+    hidden = config.hidden == nil and hidden_if_zero or config.hidden,
     hl = config.hl,
     sep_left = config.sep_left,
     prefix = config.prefix,
