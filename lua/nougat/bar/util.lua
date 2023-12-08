@@ -6,6 +6,7 @@ end
 
 local core = require("nougat.core")
 local store = require("nougat.bar.store")
+local on_event = require("nougat.util.on_event")
 
 local statusline = store.statusline
 local tabline = store.tabline
@@ -95,23 +96,18 @@ local function set_statusline_for_filetype(filetype, bar)
   if not statusline.by_filetype then
     statusline.by_filetype = {}
 
-    local augroup = vim.api.nvim_create_augroup("nougat.wo.statusline.by_filetype", { clear = true })
-
-    vim.api.nvim_create_autocmd("FileType", {
-      group = augroup,
-      callback = function(info)
-        local bufnr, ft = info.buf, info.match
-        if statusline.by_filetype[ft] then
-          vim.schedule(function()
-            if vim.api.nvim_buf_is_valid(bufnr) then
-              vim.api.nvim_buf_call(bufnr, function()
-                vim.api.nvim_win_set_option(0, "statusline", statusline_by_filetype_generator)
-              end)
-            end
-          end)
-        end
-      end,
-    })
+    on_event("FileType", function(info)
+      local bufnr, ft = info.buf, info.match
+      if statusline.by_filetype[ft] then
+        vim.schedule(function()
+          if vim.api.nvim_buf_is_valid(bufnr) then
+            vim.api.nvim_buf_call(bufnr, function()
+              vim.api.nvim_win_set_option(0, "statusline", statusline_by_filetype_generator)
+            end)
+          end
+        end)
+      end
+    end)
   end
 
   statusline.by_filetype[filetype] = bar
@@ -121,18 +117,13 @@ end
 local function set_winbar_local(bar)
   winbar.select = bar
 
-  local augroup = vim.api.nvim_create_augroup("nougat.wo.winbar", { clear = true })
+  on_event("BufWinEnter", function()
+    if vim.fn.win_gettype(0) == "popup" then
+      return
+    end
 
-  vim.api.nvim_create_autocmd("BufWinEnter", {
-    group = augroup,
-    callback = function()
-      if vim.fn.win_gettype(0) == "popup" then
-        return
-      end
-
-      vim.api.nvim_win_set_option(0, "winbar", winbar_generator)
-    end,
-  })
+    vim.api.nvim_win_set_option(0, "winbar", winbar_generator)
+  end)
 end
 
 ---@param filetype string
@@ -141,23 +132,18 @@ local function set_winbar_for_filetype(filetype, bar)
   if not winbar.by_filetype then
     winbar.by_filetype = {}
 
-    local augroup = vim.api.nvim_create_augroup("nougat.wo.winbar.by_filetype", { clear = true })
-
-    vim.api.nvim_create_autocmd("FileType", {
-      group = augroup,
-      callback = function(info)
-        local bufnr, ft = info.buf, info.match
-        if winbar.by_filetype[ft] then
-          vim.schedule(function()
-            if vim.api.nvim_buf_is_valid(bufnr) then
-              vim.api.nvim_buf_call(bufnr, function()
-                vim.api.nvim_win_set_option(0, "winbar", winbar_by_filetype_generator)
-              end)
-            end
-          end)
-        end
-      end,
-    })
+    on_event("FileType", function(info)
+      local bufnr, ft = info.buf, info.match
+      if winbar.by_filetype[ft] then
+        vim.schedule(function()
+          if vim.api.nvim_buf_is_valid(bufnr) then
+            vim.api.nvim_buf_call(bufnr, function()
+              vim.api.nvim_win_set_option(0, "winbar", winbar_by_filetype_generator)
+            end)
+          end
+        end)
+      end
+    end)
   end
 
   winbar.by_filetype[filetype] = bar
