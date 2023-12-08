@@ -17,10 +17,14 @@ local winbar = store.winbar
 
 local option_value_global_opts = { scope = "global" }
 
-local statusline_generator = core.generator(function(ctx)
-  ctx.width = vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
+local function get_statusline_width(winid)
+  return vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
       and vim.api.nvim_get_option_value("columns", option_value_global_opts)
-    or vim.api.nvim_win_get_width(ctx.winid)
+    or vim.api.nvim_win_get_width(winid)
+end
+
+local statusline_generator = core.generator(function(ctx)
+  ctx.width = get_statusline_width(ctx.winid)
 
   local select = statusline.select
 
@@ -34,9 +38,7 @@ end, {
 })
 
 local statusline_by_filetype_generator = core.generator(function(ctx)
-  ctx.width = vim.api.nvim_get_option_value("laststatus", option_value_global_opts) == 3
-      and vim.api.nvim_get_option_value("columns", option_value_global_opts)
-    or vim.api.nvim_win_get_width(ctx.winid)
+  ctx.width = get_statusline_width(ctx.winid)
 
   local select = statusline.by_filetype[vim.api.nvim_buf_get_option(ctx.bufnr, "filetype")]
 
