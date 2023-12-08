@@ -4,18 +4,22 @@ local get_hl_name = require("nougat.util.hl").get_hl_name
 
 --luacheck: push no max line length
 
----@class nougat_nut_lsp_servers_config_config
+---@class nougat.nut.lsp.servers_config.config
 ---@field content? fun(client: lsp.Client, item: NougatItem, ctx: nougat_bar_ctx):nil|string|string[]|{content:string,hl?:nougat_hl_def}|{content:string,hl?:nougat_hl_def}[]
 ---@field sep? string
 
 ---@class nougat_nut_lsp_servers_config: nougat_item_config__function
+---@field cache?: nil
+---@field config? nougat.nut.lsp.servers_config.config|nougat.nut.lsp.servers_config.config[]
 ---@field content? nil
----@field config nougat_nut_lsp_servers_config_config|nougat_nut_lsp_servers_config_config[]
+---@field hl? nougat_hl_def
 
 --luacheck: pop
 
+---@param item NougatItem
+---@param ctx nougat_bar_ctx
 local function get_content(item, ctx)
-  ---@type nougat_nut_lsp_servers_config_config
+  ---@type nougat.nut.lsp.servers_config.config
   local config = item:config(ctx)
   local clients = vim.lsp.get_clients({ bufnr = ctx.bufnr })
   local part_idx, parts = 0, {}
@@ -34,15 +38,17 @@ local function get_content(item, ctx)
           part_idx = part_idx + 1
           parts[part_idx] = part.content
           if part.hl then
-            part_idx = core.add_highlight(get_hl_name(item.hl or ctx.hl, ctx.hl), nil, parts, part_idx)
+            local item_hl = item.hl or ctx.hl
+            ---@cast item_hl nougat_hl_def
+            part_idx = core.add_highlight(get_hl_name(item_hl --[[@as nougat_hl_def]], ctx.hl), nil, parts, part_idx)
           end
         else
           part_idx = part_idx + 1
           parts[part_idx] = part
         end
-        part_idx = part_idx + 1
-        parts[part_idx] = config.sep
       end
+      part_idx = part_idx + 1
+      parts[part_idx] = config.sep
     end
   end
   return table.concat(parts, nil, 1, part_idx - 1)
@@ -50,30 +56,29 @@ end
 
 local mod = {}
 
----@param opts nougat_nut_lsp_servers_config
-function mod.create(opts)
-  local config = vim.tbl_deep_extend("force", {
-    content = function(client)
-      return client.name
-    end,
-    sep = " ",
-  }, opts.config or {})
-  ---@cast config nougat_nut_lsp_servers_config_config|nougat_nut_lsp_servers_config_config[]
+---@param config nougat_nut_lsp_servers_config
+function mod.create(config)
+  config = config or {}
 
   local item = Item({
-    init = opts.init,
-    priority = opts.priority,
-    hidden = opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    init = config.init,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = get_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    config = config,
-    on_click = opts.on_click,
-    context = opts.context,
-    ctx = opts.ctx,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    config = vim.tbl_deep_extend("force", {
+      content = function(client)
+        return client.name
+      end,
+      sep = " ",
+    }, config.config or {}),
+    on_click = config.on_click,
+    context = config.context,
+    ctx = config.ctx,
     cache = {
       scope = "buf",
       clear = {
