@@ -5,6 +5,7 @@ end
 --luacov: enable
 
 local core = require("nougat.core")
+local create_cache_store = require("nougat.cache").create_store
 local store = require("nougat.bar.store")
 local on_event = require("nougat.util.on_event")
 
@@ -90,6 +91,20 @@ end, {
   context = {},
 })
 
+local winbar_by_winid_generator = core.generator(function(ctx)
+  ctx.width = vim.api.nvim_win_get_width(ctx.winid)
+
+  local select = winbar.by_winid[ctx.winid].select
+
+  return vim.api.nvim_win_call(ctx.winid, function()
+    local wbr = type(select) == "function" and select(ctx) or select
+    return wbr and wbr:generate(ctx) or ""
+  end)
+end, {
+  id = "nougat.wo.winbar.by_winid",
+  context = {},
+})
+
 ---@param filetype string
 ---@param bar NougatBar|nougat_bar_selector
 local function set_statusline_for_filetype(filetype, bar)
@@ -149,6 +164,22 @@ local function set_winbar_for_filetype(filetype, bar)
   winbar.by_filetype[filetype] = bar
 end
 
+---@param winid integer
+---@param bar NougatBar|nougat_bar_selector
+local function set_winbar_for_winid(winid, bar)
+  if not winbar.by_winid then
+    winbar.by_winid = create_cache_store("win", "nougat.wo.winbar.by_winid")
+  end
+
+  if winid == 0 then
+    winid = vim.api.nvim_get_current_win()
+  end
+
+  winbar.by_winid[winid].select = bar
+
+  vim.api.nvim_set_option_value("winbar", winbar_by_winid_generator, { win = winid, scope = "local" })
+end
+
 local mod = {}
 
 ---@param bar NougatBar|nougat_bar_selector
@@ -187,11 +218,13 @@ function mod.refresh_tabline()
 end
 
 ---@param bar NougatBar|nougat_bar_selector
----@param opts? { filetype?: string, global?: boolean }
+---@param opts? { filetype?: string, global?: boolean, winid?: integer }
 function mod.set_winbar(bar, opts)
   opts = opts or {}
 
-  if opts.filetype then
+  if opts.winid then
+    set_winbar_for_winid(opts.winid, bar)
+  elseif opts.filetype then
     set_winbar_for_filetype(opts.filetype, bar)
   elseif opts.global then
     winbar.select = bar
