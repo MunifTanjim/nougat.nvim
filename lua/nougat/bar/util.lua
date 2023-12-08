@@ -1,9 +1,17 @@
+--luacov: disable
+if not _G.__nougat_bar_util_deprecation_notice_disabled then
+  vim.deprecate("'nougat.bar.util' module", "'nougat' module", "0.5.0", "nougat.nvim")
+end
+--luacov: enable
+
 local core = require("nougat.core")
 local store = require("nougat.bar.store")
 
 local statusline = store.statusline
 local tabline = store.tabline
 local winbar = store.winbar
+
+---@alias nougat_bar_selector (fun(ctx:nougat_core_expression_context):NougatBar)
 
 local option_value_global_opts = { scope = "global" }
 
@@ -82,7 +90,7 @@ end, {
 })
 
 ---@param filetype string
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 local function set_statusline_for_filetype(filetype, bar)
   if not statusline.by_filetype then
     statusline.by_filetype = {}
@@ -109,7 +117,7 @@ local function set_statusline_for_filetype(filetype, bar)
   statusline.by_filetype[filetype] = bar
 end
 
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 local function set_winbar_local(bar)
   winbar.select = bar
 
@@ -128,7 +136,7 @@ local function set_winbar_local(bar)
 end
 
 ---@param filetype string
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 local function set_winbar_for_filetype(filetype, bar)
   if not winbar.by_filetype then
     winbar.by_filetype = {}
@@ -157,7 +165,7 @@ end
 
 local mod = {}
 
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 ---@param opts? { filetype?: string }
 function mod.set_statusline(bar, opts)
   opts = opts or {}
@@ -181,7 +189,7 @@ function mod.refresh_statusline(force_all)
   vim.cmd("redrawstatus")
 end
 
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 function mod.set_tabline(bar)
   tabline.select = bar
 
@@ -192,7 +200,7 @@ function mod.refresh_tabline()
   vim.cmd("redrawtabline")
 end
 
----@param bar NougatBar|(fun(ctx:nougat_core_expression_context):NougatBar)
+---@param bar NougatBar|nougat_bar_selector
 ---@param opts? { filetype?: string, global?: boolean }
 function mod.set_winbar(bar, opts)
   opts = opts or {}

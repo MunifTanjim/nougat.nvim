@@ -86,6 +86,83 @@ Source: [slanty.lua](examples/slanty.lua)
 
 ---
 
+## Nougat
+
+```lua
+local nougat = require("nougat")
+```
+
+### `set_statusline`
+
+_Signature:_ `(bar: NougatBar | nougat_bar_selector, opts?: { filetype?: string }) -> nil`
+
+`bar` can be a `NougatBar` instance:
+
+```lua
+local stl = Bar("statusline")
+
+nougat.set_statusline(stl)
+```
+
+Or a `nougat_bar_selector` function `(ctx: nougat_core_expression_context) -> NougatBar`.
+
+```lua
+local stl = Bar("statusline")
+local stl_inactive = Bar("statusline")
+
+-- use separate statusline focused/unfocused window
+nougat.set_statusline(function(ctx)
+  return ctx.is_focused and stl or stl_inactive
+end)
+```
+
+`opts` is a `table` with the shape ` { filetype?: string }`.
+
+If `filetype` is given, the bar will only be used for that filetype.
+
+```lua
+local stl_fugitive = Bar("statusline")
+local stl_help = Bar("statusline")
+
+-- set filetype specific statusline
+for ft, stl_ft in pairs({
+  fugitive = stl_fugitive,
+  help = stl_help,
+}) do
+  nougat.set_statusline(stl_ft, { filetype = ft })
+end
+```
+
+### `refresh_statusline`
+
+_Signature:_ `(force_all? boolean) -> nil`
+
+### `set_tabline`
+
+_Signature:_ `(bar: NougatBar | nougat_bar_selector) -> nil`
+
+`bar` can be a `NougatBar` instance or a `nougat_bar_selector` function.
+
+### `refresh_tabline`
+
+_Signature:_ `() -> nil`
+
+### `set_winbar`
+
+_Signature:_ `(bar: NougatBar | nougat_bar_selector, opts?: { filetype?: string, global?: boolean }) -> nil`
+
+`bar` can be a `NougatBar` instance or a `nougat_bar_selector` function.
+
+`opts` is a `table` with the shape ` { filetype?: string, global?: boolean }`.
+
+If `filetype` is given, the bar will only be used for that filetype.
+
+If `global` is `true`, the bar will be used for global winbar, otherwise only local winbar is set.
+
+### `refresh_winbar`
+
+_Signature:_ `(force_all?: boolean) -> nil`
+
 ## :gear: NougatBar
 
 The sweet `NougatBar` represents the `statusline` / `tabline` / `winbar`.

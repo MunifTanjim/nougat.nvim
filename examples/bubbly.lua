@@ -1,6 +1,6 @@
+local nougat = require("nougat")
 local core = require("nougat.core")
 local Bar = require("nougat.bar")
-local bar_util = require("nougat.bar.util")
 local Item = require("nougat.item")
 local sep = require("nougat.separator")
 
@@ -209,7 +209,7 @@ stl_inactive:add_item(nut.spacer())
 stl_inactive:add_item(ruler)
 stl_inactive:add_item(sep.space())
 
-bar_util.set_statusline(function(ctx)
+nougat.set_statusline(function(ctx)
   return ctx.is_focused and stl or stl_inactive
 end)
 
@@ -244,4 +244,4 @@ tal:add_item(nut.tab.tablist.tabs({
   },
 }))
 
-bar_util.set_tabline(tal)
+nougat.set_tabline(tal)
