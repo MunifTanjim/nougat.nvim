@@ -1,19 +1,29 @@
 local core = require("nougat.core")
 local Item = require("nougat.item")
 
+--luacheck: push no max line length
+
+---@class nougat.nut.ruler_config: nougat_item_config__nil
+---@field content? nil
+
+--luacheck: pop
+
 local mod = {}
 
-function mod.create(opts)
+---@param config? nougat.nut.ruler_config
+function mod.create(config)
+  config = config or {}
   return Item({
-    priority = opts.priority,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    priority = config.priority,
+    hidden = config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = core.ruler(),
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
   })
 end
 
