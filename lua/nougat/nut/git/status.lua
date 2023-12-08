@@ -1,13 +1,21 @@
 local Item = require("nougat.item")
+local buf_cache = require("nougat.cache.buffer")
 
-local buffer_cache = require("nougat.cache.buffer")
-buffer_cache.enable("gitstatus")
-buffer_cache.on("gitstatus.change", function(cache)
-  cache.added_str = tostring(cache.added)
-  cache.changed_str = tostring(cache.changed)
-  cache.removed_str = tostring(cache.removed)
-end)
+--luacheck: push no max line length
 
+---@class nougat.nut.git.status.count_config: nougat_item_config__function
+---@field content? nil
+---@field config? nil
+
+---@class nougat.nut.git.status_config: nougat_item_config__nil
+---@field cache? nil
+---@field content? NougatItem[]
+---@field hidden? nil
+---@field prepare? nil
+
+--luacheck: pop
+
+---@param item NougatItem
 local function get_prepare(item, ctx)
   ctx.gitstatus = item:cache(ctx).gitstatus
 end
@@ -23,6 +31,7 @@ end
 local hidden = {}
 
 function hidden.if_zero_count()
+  ---@param item NougatItem
   return function(item, ctx)
     return ctx.gitstatus[item._num_key] == 0
   end
@@ -33,18 +42,19 @@ local mod = {
 }
 
 ---@param type 'added'|'changed'|'removed'
-function mod.count(type, opts)
+---@param config nougat.nut.git.status.count_config
+function mod.count(type, config)
   local item = Item({
-    priority = opts.priority,
-    hidden = opts.hidden == nil and hidden.if_zero_count() or opts.hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
+    priority = config.priority,
+    hidden = config.hidden == nil and hidden.if_zero_count() or config.hidden,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
     content = get_count_content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
   })
 
   item._num_key = type
@@ -53,24 +63,34 @@ function mod.count(type, opts)
   return item
 end
 
-function mod.create(opts)
+local function on_gitstatus_change(cache)
+  cache.added_str = tostring(cache.added)
+  cache.changed_str = tostring(cache.changed)
+  cache.removed_str = tostring(cache.removed)
+end
+
+---@param config nougat.nut.git.status_config
+function mod.create(config)
+  buf_cache.enable("gitstatus")
+  buf_cache.on("gitstatus.change", on_gitstatus_change)
+
   local item = Item({
-    priority = opts.priority,
+    priority = config.priority,
     prepare = get_prepare,
     hidden = get_hidden,
-    hl = opts.hl,
-    sep_left = opts.sep_left,
-    prefix = opts.prefix,
-    content = opts.content,
-    suffix = opts.suffix,
-    sep_right = opts.sep_right,
-    on_click = opts.on_click,
-    context = opts.context,
+    hl = config.hl,
+    sep_left = config.sep_left,
+    prefix = config.prefix,
+    content = config.content,
+    suffix = config.suffix,
+    sep_right = config.sep_right,
+    on_click = config.on_click,
+    context = config.context,
     cache = {
       get = function(store, ctx)
         return store[ctx.bufnr]
       end,
-      store = buffer_cache.store,
+      store = buf_cache.store,
     },
   })
 
