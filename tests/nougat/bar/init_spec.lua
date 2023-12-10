@@ -132,6 +132,15 @@ describe("NougatBar", function()
 
       t.eq(ctx.hl, hl)
     end)
+
+    it("throws for unknown", function()
+      local bar = Bar("statusline", {
+        hl = true,
+      })
+
+      local err = t.error(bar.generate, bar, ctx)
+      t.match(err, "missing bar highlight")
+    end)
   end)
 
   describe(":generate basic", function()
