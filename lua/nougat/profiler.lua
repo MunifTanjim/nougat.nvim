@@ -1,5 +1,4 @@
 local Bar = require("nougat.bar")
-local util = require("nougat.util")
 
 local bar_by_id = {}
 
@@ -39,9 +38,11 @@ local function instrument_bar_generate(result_store)
 end
 
 local function instrument_prepare(name, result_store)
-  local prepare = util[name]
+  local fn_name = "__" .. name
 
-  util[name] = function(items, ctx)
+  local prepare = Bar[fn_name]
+
+  Bar[fn_name] = function(items, ctx)
     if not result_store[current_bar_type][current_bar_id].item then
       result_store[current_bar_type][current_bar_id].item = {}
     end
@@ -66,7 +67,7 @@ local function instrument_prepare(name, result_store)
   end
 
   return function()
-    util[name] = prepare
+    Bar[fn_name] = prepare
   end
 end
 
