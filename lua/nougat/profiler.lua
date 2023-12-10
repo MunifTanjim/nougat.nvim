@@ -105,8 +105,12 @@ end
 
 local function display_result(type, result, bar_type, bar_id)
   --luacheck: push no max line length
+
+  local lines = {}
+
   local data = crunch_result(result[bar_type][bar_id])
-  print(
+  table.insert(
+    lines,
     string.format(
       "%s(%10s: %2s) redraw(total: %5s per_ms: %12.6f) time(total: %12.6f min: %8.6f med: %8.6f max: %8.6f per_redraw: %8.6f)",
       type,
@@ -123,7 +127,8 @@ local function display_result(type, result, bar_type, bar_id)
   )
   for item_id, item_result in pairs(result[bar_type][bar_id].item) do
     local item_data = crunch_result(item_result)
-    print(
+    table.insert(
+      lines,
       string.format(
         "  %s(%8s: %2s) redraw(%12s per_ms: %12.6f) time(total: %12.6f min: %8.6f med: %8.6f max: %8.6f per_redraw: %8.6f)",
         type,
@@ -139,6 +144,8 @@ local function display_result(type, result, bar_type, bar_id)
       )
     )
   end
+
+  print(table.concat(lines, "\n"))
   --luacheck: pop
 end
 
