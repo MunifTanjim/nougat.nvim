@@ -59,4 +59,34 @@ describe("nut.git.status", function()
 
     t.eq(bar:generate(ctx), " ~2 -3 ")
   end)
+
+  it("can handle missing gitstatus", function()
+    package.loaded["gitsigns"] = {}
+
+    bar:add_item(nut.create({
+      prefix = " ",
+      content = {
+        nut.count("added", { prefix = "+", suffix = " " }),
+      },
+    }))
+
+    package.loaded["gitsigns"] = nil
+
+    vim.b[ctx.bufnr].gitsigns_status_dict = nil
+    vim.api.nvim_exec_autocmds("User", { pattern = "GitSignsUpdate" })
+    vim.wait(0)
+
+    t.eq(bar:generate(ctx), "")
+  end)
+
+  it("can handle missing provider", function()
+    bar:add_item(nut.create({
+      prefix = " ",
+      content = {
+        nut.count("added", { prefix = "+", suffix = " " }),
+      },
+    }))
+
+    t.eq(bar:generate(ctx), "")
+  end)
 end)
