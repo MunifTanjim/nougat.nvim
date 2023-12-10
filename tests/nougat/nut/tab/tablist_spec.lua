@@ -300,6 +300,58 @@ describe("nut.tab.tablist", function()
         })
       )
     end)
+
+    it("handles filename change", function()
+      vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
+      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
+
+      bar:add_item(tablist.tabs({
+        active_tab = {
+          content = {
+            tablist.label({}),
+          },
+        },
+        inactive_tab = {
+          content = {
+            tablist.label({}),
+          },
+        },
+      }))
+
+      t.eq(
+        bar:generate(ctx),
+        table.concat({
+          "%#bg_0a0b10_fg_c4c6cd_b#",
+          "%1T",
+          "_A_",
+          "%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%2T",
+          "_B_",
+          "%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+        })
+      )
+
+      vim.cmd.file("__B__")
+
+      t.eq(
+        bar:generate(ctx),
+        table.concat({
+          "%#bg_0a0b10_fg_c4c6cd_b#",
+          "%1T",
+          "_A_",
+          "%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%2T",
+          "__B__",
+          "%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+        })
+      )
+    end)
   end)
 
   it("diagnostic_count", function()
