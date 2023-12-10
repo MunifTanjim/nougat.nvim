@@ -156,7 +156,7 @@ local bench_result = {
 }
 
 function mod.bench()
-  local redraw_count = 10000
+  local redraw_count = vim.g._nougat_profiler_bench_count or 10000
 
   for _, bar_type in ipairs({ "statusline", "tabline", "winbar" }) do
     bench_result[bar_type] = {}

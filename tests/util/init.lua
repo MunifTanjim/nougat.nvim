@@ -1,4 +1,5 @@
 local spy = require("luassert.spy")
+local stub = require("luassert.stub")
 
 local mod = {}
 
@@ -42,6 +43,11 @@ function mod.spy(...)
   elseif #args == 2 then
     return spy.on(args[1], args[2])
   end
+end
+
+function mod.stub(...)
+  local args = { ... }
+  return stub.new(unpack(args))
 end
 
 function mod.type(v, t)
