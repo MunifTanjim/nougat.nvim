@@ -19,6 +19,59 @@ local function clear_store(store, id)
   end
 end
 
+---@param type 'buf'|'win'|'tab'
+---@param id integer
+local function clear_cache(type, id)
+  for _, storage in pairs(registry[type]) do
+    storage[id] = nil
+  end
+end
+
+local function on_buf_wipeout(info)
+  local bufnr = info.buf
+  vim.schedule(function()
+    clear_cache("buf", bufnr)
+  end)
+end
+
+local function on_win_closed(info)
+  local winid = tonumber(info.match)
+  if winid then
+    vim.schedule(function()
+      clear_cache("win", winid)
+    end)
+  end
+end
+
+local function on_tab_closed()
+  vim.schedule(function()
+    local active_tabid = {}
+    for _, tabid in ipairs(vim.api.nvim_list_tabpages()) do
+      active_tabid[tabid] = true
+    end
+
+    for _, storage in pairs(registry.tab) do
+      for tabid in pairs(storage) do
+        if not active_tabid[tabid] then
+          storage[tabid] = nil
+        end
+      end
+    end
+  end)
+end
+
+local setup_cleanup = {
+  buf = function()
+    on_event("BufWipeout", on_buf_wipeout)
+  end,
+  win = function()
+    on_event("WinClosed", on_win_closed)
+  end,
+  tab = function()
+    on_event("TabClosed", on_tab_closed)
+  end,
+}
+
 local default_initial_value = {}
 
 ---@param cache_type 'buf'|'win'|'tab'
@@ -26,6 +79,8 @@ local default_initial_value = {}
 ---@param initial_value? table
 ---@return NougatCacheStore cache_store
 function mod.create_store(cache_type, name, initial_value)
+  setup_cleanup[cache_type]()
+
   initial_value = initial_value or default_initial_value
 
   if registry[cache_type][name] then
@@ -73,46 +128,5 @@ end
 function mod.get(type, name, id)
   return registry[type][name][id]
 end
-
----@param type 'buf'|'win'|'tab'
----@param id integer
-local function clear_cache(type, id)
-  for _, storage in pairs(registry[type]) do
-    storage[id] = nil
-  end
-end
-
-on_event("BufWipeout", function(info)
-  local bufnr = info.buf
-  vim.schedule(function()
-    clear_cache("buf", bufnr)
-  end)
-end)
-
-on_event("WinClosed", function(info)
-  local winid = tonumber(info.match)
-  if winid then
-    vim.schedule(function()
-      clear_cache("win", winid)
-    end)
-  end
-end)
-
-on_event("TabClosed", function()
-  vim.schedule(function()
-    local active_tabid = {}
-    for _, tabid in ipairs(vim.api.nvim_list_tabpages()) do
-      active_tabid[tabid] = true
-    end
-
-    for _, storage in pairs(registry.tab) do
-      for tabid in pairs(storage) do
-        if not active_tabid[tabid] then
-          storage[tabid] = nil
-        end
-      end
-    end
-  end)
-end)
 
 return mod
