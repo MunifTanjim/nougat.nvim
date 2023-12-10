@@ -86,10 +86,12 @@ end
 ---@param event 'change'
 ---@param callback fun(cache: table, bufnr: integer)
 function mod.on(event, callback)
+  --luacov: disable
   if event == "update" then
     vim.deprecate("nougat.cache.diagnostic.on parameter event 'update'", "'change'", "0.5.0", "nougat.nvim")
     event = "change"
   end
+  --luacov: enable
 
   if event == "change" and not on_update_cbs[callback] then
     on_update_cbs[callback] = true
