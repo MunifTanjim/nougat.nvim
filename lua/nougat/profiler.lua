@@ -1,6 +1,8 @@
 local Bar = require("nougat.bar")
 
-local bar_by_id = {}
+local object_by_id = { bar = {}, item = {} }
+local bar_by_id = object_by_id.bar
+local item_by_id = object_by_id.item
 
 local mod = {}
 
@@ -60,6 +62,9 @@ local function instrument_prepare(name, result_store)
       start_time = vim.loop.hrtime()
       local item = next(self)
       item_id = item and item.id
+      if item_id then
+        item_by_id[item_id] = item
+      end
       return item
     end
     prepare(items, ctx)
@@ -211,34 +216,17 @@ function mod.stop()
   end
 end
 
-local get_object = {
-  bar = function(id)
-    return bar_by_id[id]
-  end,
-  item = function(id)
-    for _, bar in pairs(bar_by_id) do
-      local item = bar._items:next()
-      while item do
-        if item.id == id then
-          return item
-        end
-        item = bar._items:next()
-      end
-    end
-  end,
-}
-
 ---@param type 'bar'|'item'
 ---@param id integer
 ---@return nil|NougatBar|NougatItem
 function mod.inspect(type, id)
-  if not get_object[type] then
+  if not object_by_id[type] then
     error("invalid type: " .. type)
   end
   if not id then
     error("missing id")
   end
-  return get_object[type](id)
+  return object_by_id[type][id]
 end
 
 return mod
