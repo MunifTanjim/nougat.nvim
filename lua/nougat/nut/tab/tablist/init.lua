@@ -1,6 +1,6 @@
 local buf_cache = require("nougat.cache.buffer")
 local Item = require("nougat.item")
-local get_hl_def = require("nougat.util.hl").get_hl_def
+local get_hl_def = require("nougat.color").get_hl_def
 
 --luacheck: push no max line length
 

@@ -13,6 +13,7 @@ Hyperextensible plugin for Neovim's `'statusline'`, `'tabline'` and `'winbar'`.
 - :package: Modular design, only use what you need.
 - :crystal_ball: Dynamic `statusline` / `tabline` / `winbar`.
 - :page_with_curl: Filetype specific `statusline` / `winbar`.
+- :art: Color palette.
 - :nail_care: Fancy separators.
 - :computer_mouse: Mouse-click.
 - :briefcase: Caching out-of-the-box.

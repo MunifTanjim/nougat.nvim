@@ -53,6 +53,9 @@ color.fg3
 color.fg4
 ```
 
+If you use the `color` table to highlight your `NougatItem`, it will always match
+the currently active color scheme.
+
 ## `nougat.color.<colorscheme>`
 
 For defining `nougat.nvim` color palette for a colorscheme, say `gruvbox`,
@@ -74,3 +77,11 @@ return mod
 
 If the returned `color` table is missing any expected fields, `nougat.nvim`
 will fill them with the fallback values.
+
+## `get_hl_def`
+
+_Signature:_ `(hl_name: string) -> nougat_hl_def`
+
+## `get_hl_name`
+
+_Signature:_ `(hl: nougat_hl_def, fallback_hl: nougat_hl_def) -> string`

@@ -1,8 +1,8 @@
 local Item = require("nougat.item")
 local core = require("nougat.core")
 local diagnostic_cache = require("nougat.cache.diagnostic")
-local get_hl_def = require("nougat.util.hl").get_hl_def
-local get_hl_name = require("nougat.util.hl").get_hl_name
+local get_hl_def = require("nougat.color").get_hl_def
+local get_hl_name = require("nougat.color").get_hl_name
 local color = require("nougat.color").get()
 
 --luacheck: push no max line length

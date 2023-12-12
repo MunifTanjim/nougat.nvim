@@ -1,6 +1,6 @@
 local core = require("nougat.core")
-local get_hl_def = require("nougat.util.hl").get_hl_def
-local get_hl_name = require("nougat.util.hl").get_hl_name
+local get_hl_def = require("nougat.color").get_hl_def
+local get_hl_name = require("nougat.color").get_hl_name
 
 ---@class nougat_lazy_item_hl
 ---@field c? false|nougat_hl_def content (`false` means `content` w/o hl)

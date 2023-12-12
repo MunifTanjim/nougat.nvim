@@ -1,6 +1,6 @@
 local core = require("nougat.core")
 local Item = require("nougat.item")
-local get_hl_name = require("nougat.util.hl").get_hl_name
+local get_hl_name = require("nougat.color").get_hl_name
 local u = require("nougat.util")
 local hl_u = require("nougat.bar.hl")
 
