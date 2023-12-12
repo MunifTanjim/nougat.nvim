@@ -76,9 +76,9 @@ setup_environment
 luacov_start
 
 if [[ -d "./tests/${test_scope}/" ]]; then
-  nvim --headless --noplugin -u tests/init.lua -c "lua require('plenary.test_harness').test_directory('./tests/${test_scope}/', { minimal_init = 'tests/init.lua', sequential = true })"
+  nvim --clean --headless --noplugin -u tests/init.lua -c "lua require('plenary.test_harness').test_directory('./tests/${test_scope}/', { minimal_init = 'tests/init.lua', sequential = true })"
 elif [[ -f "./tests/${test_scope}_spec.lua" ]]; then
-  nvim --headless --noplugin -u tests/init.lua -c "lua require('plenary.busted').run('./tests/${test_scope}_spec.lua')"
+  nvim --clean --headless --noplugin -u tests/init.lua -c "lua require('plenary.test_harness').test_directory('./tests/${test_scope}_spec.lua', {  minimal_init = 'tests/init.lua', sequential = true })"
 fi
 
 luacov_end
