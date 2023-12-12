@@ -254,29 +254,6 @@ local function init(class, config)
     if cache.clear then
       ic.process_item_cache_clear(cache.clear, self._cache_store, cache.scope)
     end
-
-    --luacov: disable
-    ---@diagnostic disable: undefined-field
-    ---@deprecated
-    if cache.invalidate then
-      vim.deprecate("NougatItem option cache.invalidate", "cache.clear", "0.4.0", "nougat.nvim")
-
-      if type(cache.invalidate) == "string" then
-        local get_id = ic.get_invalidation_id_getter(cache.invalidate, cache.scope)
-        u.on_event(cache.invalidate, function(info)
-          self._cache_store:clear(get_id(info))
-        end)
-      elseif type(cache.invalidate) == "table" then
-        assert(type(cache.invalidate[1]) == "string", "unexpected cache.invalidate[1], expected string")
-        local get_id = cache.invalidate[2]
-        assert(type(get_id) == "function", "unexpected cache.invalidate[2], expected function")
-        u.on_event(cache.invalidate[1], function(info)
-          self._cache_store:clear(get_id(info))
-        end)
-      end
-    end
-    ---@diagnostic enable: undefined-field
-    --luacov: enable
   end
 
   if type(self.content) == "table" then
