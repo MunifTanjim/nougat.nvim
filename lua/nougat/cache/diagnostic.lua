@@ -1,23 +1,17 @@
-local create_cache_store = require("nougat.cache").create_store
-local register_store = require("nougat.util.store").register
+local BufStore = require("nougat.store").BufStore
+local Store = require("nougat.store").Store
 local on_event = require("nougat.util").on_event
 
 local severity = vim.deepcopy(vim.diagnostic.severity)
 ---@cast severity -nil|unknown
 severity.COMBINED = severity.ERROR + severity.WARN + severity.INFO + severity.HINT
 
-local store = register_store("nougat.cache.diagnostic", {
+local store = Store("nougat.cache.diagnostic", {
   ---@type (fun(cache: table, bufnr: integer):nil)[]
   on_update_cbs = {},
-}, function(store)
-  for _, value in pairs(store) do
-    for key in pairs(value) do
-      value[key] = nil
-    end
-  end
-end)
+})
 
-local cache_store = create_cache_store("buf", "nougat.cache.diagnostic", {
+local buf_store = BufStore("nougat.cache.diagnostic", {
   [severity.ERROR] = 0,
   [severity.WARN] = 0,
   [severity.INFO] = 0,
@@ -52,7 +46,7 @@ local function handle_diagnostic_changed(params)
       end
     end
 
-    local cache = cache_store[bufnr]
+    local cache = buf_store[bufnr]
 
     if cache[severity.ERROR] ~= error then
       cache[severity.ERROR] = error
@@ -76,7 +70,7 @@ end
 
 local mod = {
   severity = severity,
-  store = cache_store,
+  store = buf_store,
 }
 
 function mod.enable()

@@ -1,3 +1,4 @@
+local s = require("nougat.store")
 local on_event = require("nougat.util.on_event")
 
 local cache_getter = {
@@ -15,8 +16,15 @@ local cache_getter = {
   end,
 }
 
+local create_store = {
+  buf = s.BufStore,
+  win = s.WinStore,
+  tab = s.TabStore,
+}
+
 local mod = {
   cache_getter = cache_getter,
+  create_store = create_store,
 }
 
 function mod.cached_fn_content_processor(item, ctx)
@@ -56,7 +64,7 @@ function mod.get_invalidation_id_getter(event, scope)
 end
 
 ---@param clear nougat_item_config.cache.clear
----@param store NougatCacheStore
+---@param store NougatBufStore|NougatWinStore|NougatTabStore
 ---@param scope? 'buf'|'win'|'tab'
 local function process_item_cache_clear(clear, store, scope)
   if type(clear) == "string" then

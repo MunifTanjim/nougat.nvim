@@ -164,6 +164,10 @@ Source: [slanty.lua](examples/slanty.lua)
 
 ---
 
+## :art: Color Palette
+
+**[Check Detailed Documentation for `nougat.color`](lua/nougat/color)**
+
 ## :gear: NougatBar
 
 The sweet `NougatBar` represents the `statusline` / `tabline` / `winbar`.
@@ -186,9 +190,9 @@ Separator that goes between two `NougatItem`s.
 
 **[Check Detailed Documentation for `nougat.cache`](lua/nougat/cache)**
 
-## :art: Color Palette
+## :gear: Store
 
-**[Check Detailed Documentation for `nougat.color`](lua/nougat/color)**
+**[Check Detailed Documentation for `nougat.store`](lua/nougat/store)**
 
 ## :peanuts: Nuts
 

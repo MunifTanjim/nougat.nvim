@@ -8,7 +8,7 @@ describe("cache.diagnostic", function()
   local ns
 
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     ns = vim.api.nvim_create_namespace("test:cache.diagnostic")
   end)

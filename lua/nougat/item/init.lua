@@ -1,7 +1,6 @@
 local core = require("nougat.core")
-local iu = require("nougat.item.util")
 local ic = require("nougat.item.cache")
-local create_store = require("nougat.cache").create_store
+local iu = require("nougat.item.util")
 local u = require("nougat.util")
 
 --luacheck: push no max line length
@@ -233,7 +232,7 @@ local function init(class, config)
     if cache.store then
       self._cache_store = cache.store
     elseif cache.scope then
-      self._cache_store = create_store(cache.scope, cache.name or self.id .. "_cache_store", cache.initial_value)
+      self._cache_store = ic.create_store[cache.scope](cache.name or self.id .. "_cache_store", cache.initial_value)
     end
     assert(type(self._cache_store) == "table", "one of cache.scope or cache.store is required")
 

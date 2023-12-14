@@ -5,7 +5,7 @@ end
 --luacov: enable
 
 local core = require("nougat.core")
-local create_cache_store = require("nougat.cache").create_store
+local WinStore = require("nougat.store").WinStore
 local store = require("nougat.bar.store")
 local on_event = require("nougat.util.on_event")
 
@@ -170,7 +170,7 @@ end
 ---@param bar NougatBar|nougat_bar_selector
 local function set_winbar_for_winid(winid, bar)
   if not winbar.by_winid then
-    winbar.by_winid = create_cache_store("win", "nougat.wo.winbar.by_winid")
+    winbar.by_winid = WinStore("nougat.wo.winbar.by_winid")
   end
 
   if winid == 0 then

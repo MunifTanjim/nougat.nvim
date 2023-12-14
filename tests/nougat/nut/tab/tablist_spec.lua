@@ -23,7 +23,7 @@ describe("nut.tab.tablist", function()
   end
 
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     tablist = {
       tabs = require("nougat.nut.tab.tablist").create,

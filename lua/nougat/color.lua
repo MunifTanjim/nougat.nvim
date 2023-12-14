@@ -1,6 +1,5 @@
 local on_event = require("nougat.util.on_event")
-local register_store = require("nougat.util.store").register
-local clear_store = require("nougat.util.store").clear
+local Store = require("nougat.store").Store
 
 ---@alias nougat_hl_def { bg?: string, fg?: string, bold?: boolean, italic?: boolean }
 
@@ -9,19 +8,12 @@ local color = { accent = {} }
 ---@type nougat.color
 local theme = { accent = {} }
 
-local store = register_store("nougat.color", {
+local store = Store("nougat.color", {
   ---@type table<string, nougat_hl_def>
   get_hl_def = {},
   ---@type table<string, boolean>
   get_hl_name = {},
-}, function(store)
-  for name in pairs(store.get_hl_def) do
-    store.get_hl_def[name] = nil
-  end
-  for name in pairs(store.get_hl_name) do
-    store.get_hl_name[name] = nil
-  end
-end)
+})
 
 local get_hl_def_cache = store.get_hl_def
 
@@ -193,7 +185,7 @@ local mod = {
 }
 
 local function on_colorscheme()
-  clear_store(store)
+  store:clear()
   if vim.go.background ~= mod.background then
     mod.colorscheme = nil
   end

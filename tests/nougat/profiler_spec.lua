@@ -6,7 +6,7 @@ local t = require("tests.util")
 
 describe("nougat.profiler", function()
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     vim.go.laststatus = 2
     vim.go.statusline = ""

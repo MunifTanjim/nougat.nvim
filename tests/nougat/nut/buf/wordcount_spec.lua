@@ -13,7 +13,7 @@ describe("nut.buf.wordcount", function()
     local bufnr = vim.api.nvim_create_buf(false, false)
     vim.api.nvim_win_set_buf(0, bufnr)
 
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     bar = Bar("statusline")
     ctx = t.make_ctx(0, {

@@ -33,7 +33,7 @@ describe("nougat.color", function()
   end
 
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     vim.g.colors_name = ""
     vim.go.background = "dark"

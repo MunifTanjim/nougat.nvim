@@ -1,15 +1,17 @@
-local register_store = require("nougat.util.store").register
+local Store = require("nougat.store").Store
 
-local store = register_store("nougat.bar.store", {
+local store = Store("nougat.bar.store", {
   statusline = {},
   tabline = {},
   winbar = {},
-}, function(store)
-  for _, value in pairs(store) do
-    for key in pairs(value) do
-      value[key] = nil
+}, {
+  clear = function(store)
+    for _, val in pairs(store) do
+      for k in pairs(val) do
+        val[k] = nil
+      end
     end
-  end
-end)
+  end,
+})
 
 return store

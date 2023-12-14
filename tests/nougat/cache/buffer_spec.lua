@@ -6,7 +6,7 @@ local t = require("tests.util")
 
 describe("cache.buffer", function()
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
   end)
 
   describe("enable", function()

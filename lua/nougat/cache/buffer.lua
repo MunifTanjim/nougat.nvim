@@ -1,25 +1,19 @@
-local create_store = require("nougat.cache").create_store
-local register_store = require("nougat.util.store").register
+local BufStore = require("nougat.store").BufStore
+local Store = require("nougat.store").Store
 local on_event = require("nougat.util").on_event
 
-local store = register_store("nougat.cache.buffer", {
+local store = Store("nougat.cache.buffer", {
   ---@type table<string, any>
   default_value = {},
   ---@type table<string, boolean>
   enabled_key = {},
   ---@type table<string, (fun(value: string, cache: table, bufnr: integer):nil)[]>
   hooks = {},
-}, function(store)
-  for _, value in pairs(store) do
-    for key in pairs(value) do
-      value[key] = nil
-    end
-  end
-end)
+})
 
 local default_value = store.default_value
 
-local cache_store = create_store("buf", "nougat.cache.buffer", default_value)
+local buf_store = BufStore("nougat.cache.buffer", default_value)
 
 local hooks = store.hooks
 
@@ -31,10 +25,10 @@ end
 
 local function get_option_getter(name)
   return function(bufnr)
-    local value = cache_store[bufnr][name]
+    local value = buf_store[bufnr][name]
     if value == nil then
       value = vim.bo[bufnr][name]
-      cache_store[bufnr][name] = value
+      buf_store[bufnr][name] = value
     end
     return value
   end
@@ -42,18 +36,18 @@ end
 
 local get = {
   filename = function(bufnr)
-    local filename = cache_store[bufnr].filename
+    local filename = buf_store[bufnr].filename
     if not filename then
       filename = vim.api.nvim_buf_get_name(bufnr)
-      cache_store[bufnr].filename = filename
+      buf_store[bufnr].filename = filename
     end
     return filename
   end,
   filetype = function(bufnr)
-    local filetype = cache_store[bufnr].filetype
+    local filetype = buf_store[bufnr].filetype
     if not filetype then
       filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
-      cache_store[bufnr].filetype = filetype
+      buf_store[bufnr].filetype = filetype
     end
     return filetype
   end,
@@ -68,7 +62,7 @@ local subscribe = {
 
     on_event({ "BufReadPost", "BufFilePost" }, function(params)
       local bufnr, filename = params.buf, params.match
-      local cache = cache_store[bufnr]
+      local cache = buf_store[bufnr]
 
       cache.filename = filename
 
@@ -80,7 +74,7 @@ local subscribe = {
 
     on_event("FileType", function(params)
       local bufnr, filetype = params.buf, params.match
-      local cache = cache_store[bufnr]
+      local cache = buf_store[bufnr]
 
       cache.filetype = filetype
 
@@ -92,7 +86,7 @@ local subscribe = {
 
     on_event("OptionSet modifiable", function()
       local bufnr, modifiable = vim.api.nvim_get_current_buf(), vim.v.option_new
-      local cache = cache_store[bufnr]
+      local cache = buf_store[bufnr]
 
       cache.modifiable = modifiable
 
@@ -106,7 +100,7 @@ local subscribe = {
 
     on_event("BufModifiedSet", function(params)
       local bufnr = params.buf
-      local cache = cache_store[bufnr]
+      local cache = buf_store[bufnr]
 
       cache.modified = vim.api.nvim_buf_get_option(bufnr, "modified")
 
@@ -118,7 +112,7 @@ local subscribe = {
 
     on_event("OptionSet readonly", function()
       local bufnr, readonly = vim.api.nvim_get_current_buf(), vim.v.option_new
-      local cache = cache_store[bufnr]
+      local cache = buf_store[bufnr]
 
       cache.readonly = readonly
 
@@ -140,7 +134,7 @@ local subscribe = {
     if provider == "gitsigns" then
       on_event("User GitSignsUpdate", function(params)
         local bufnr = params.buf
-        local cache = cache_store[bufnr]
+        local cache = buf_store[bufnr]
 
         vim.schedule(function()
           local status = vim.fn.getbufvar(bufnr, "gitsigns_status_dict", false)
@@ -168,7 +162,7 @@ local subscribe = {
 }
 
 local mod = {
-  store = cache_store,
+  store = buf_store,
 }
 
 local enabled_key = store.enabled_key

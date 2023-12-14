@@ -696,7 +696,7 @@ describe("NougatItem", function()
     end)
 
     it("sets default cache getter for .scope", function()
-      local store = require("nougat.cache").create_store("win", "tests.item.default_cache_getter")
+      local store = require("nougat.store").WinStore("tests.item.default_cache_getter")
 
       local item = Item({
         content = function()
@@ -732,7 +732,7 @@ describe("NougatItem", function()
       end
 
       before_each(function()
-        require("nougat.util.store").clear_all()
+        require("nougat.store")._clear()
       end)
 
       it("event", function()

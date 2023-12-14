@@ -10,7 +10,7 @@ describe("nut.lsp.servers", function()
   local nut
 
   before_each(function()
-    require("nougat.util.store").clear_all()
+    require("nougat.store")._clear()
 
     bar = Bar("statusline")
     ctx = t.make_ctx(0, {

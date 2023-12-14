@@ -1,24 +1,26 @@
-local register_store = require("nougat.util.store").register
+local Store = require("nougat.store").Store
 
-local augroup = vim.api.nvim_create_augroup("nougat.on_event", { clear = true })
+local augroup = vim.api.nvim_create_augroup("nougat.util.on_event", { clear = true })
 
-local store = register_store("on_event", {
+local store = Store("nougat.util.on_event", {
   ---@type table<string, (fun(info:table):nil)[]>
   cb_store = {},
   ---@type table<string, (fun(info:table):nil)[]>
   option_set_cb_store = {},
   ---@type integer
   option_set_autocmd_id = nil,
-}, function(store)
-  vim.api.nvim_clear_autocmds({ group = augroup })
-  for key in pairs(store.cb_store) do
-    store.cb_store[key] = nil
-  end
-  for key in pairs(store.option_set_cb_store) do
-    store.option_set_cb_store[key] = nil
-  end
-  store.option_set_autocmd_id = nil
-end)
+}, {
+  clear = function(store)
+    vim.api.nvim_clear_autocmds({ group = augroup })
+    for key in pairs(store.cb_store) do
+      store.cb_store[key] = nil
+    end
+    for key in pairs(store.option_set_cb_store) do
+      store.option_set_cb_store[key] = nil
+    end
+    store.option_set_autocmd_id = nil
+  end,
+})
 
 local cb_store = store.cb_store
 local option_set_cb_store = store.option_set_cb_store
