@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.4.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.3.0...0.4.0) (2023-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* **item:** deprecated config `.cache.invalidate` is removed, use `.cache.clear` instead.
+
+### Features
+
+* add entrypoint functions ([50393ad](https://github.com/MunifTanjim/nougat.nvim/commit/50393adfe375daef1f9891236fff24ca2d739471))
+* **bar:** add ctx.breakpoint ([6e19fa4](https://github.com/MunifTanjim/nougat.nvim/commit/6e19fa495277bc5c8df54274f9f2e60b62d2b9cb))
+* **cache:** use clearable store for buffer cache ([0807486](https://github.com/MunifTanjim/nougat.nvim/commit/0807486bd9a4ef0bfc7e8a5f84b2ad9d5b5725e0))
+* **cache:** use clearable store for diagnostic cache ([56b8ff2](https://github.com/MunifTanjim/nougat.nvim/commit/56b8ff2d9ff278b3cd2f8aeb4d449d5e23736585))
+* **color:** auto adjust with color scheme ([e0e7808](https://github.com/MunifTanjim/nougat.nvim/commit/e0e78084b8c88e9e733ac4e2e5cf391545c33909))
+* **item:** remove deprecated config .cache.invalidate ([ced08cd](https://github.com/MunifTanjim/nougat.nvim/commit/ced08cd3c9cbd3701464d5c4aca9323f37869a6a))
+* **item:** remove duplicate refs inside item config ([beeee91](https://github.com/MunifTanjim/nougat.nvim/commit/beeee91291ccf3e406de27ae24adacffe16d1aa8))
+* **nut:** tweak buf.filestatus ([1a8a6d6](https://github.com/MunifTanjim/nougat.nvim/commit/1a8a6d66d2589d3adaf299b8e458449d9b1429d0))
+* **store:** introduce nougat store ([3f23d3e](https://github.com/MunifTanjim/nougat.nvim/commit/3f23d3e01f7ecb254312f9ac0e32bee1e6e6b488))
+* support winid for set_winbar ([375c2fb](https://github.com/MunifTanjim/nougat.nvim/commit/375c2fb805f20a03168d7c097a3eebf26a19ddcd))
+* use clearable store for bars ([2d992a7](https://github.com/MunifTanjim/nougat.nvim/commit/2d992a7273bb904ebb4fb99e70350889b121be7d))
+* **util:** do not add same callback twice for on_event ([da79bae](https://github.com/MunifTanjim/nougat.nvim/commit/da79bae1f80c2e915c9e86512909fcc124fbd9ec))
+* **util:** use clearable store for on_event ([a4276c2](https://github.com/MunifTanjim/nougat.nvim/commit/a4276c24585357280f7974740bdbb85e4cf638ed))
+
+
+### Bug Fixes
+
+* **bar:** allow nested string[] for item w/ priority ([7801e77](https://github.com/MunifTanjim/nougat.nvim/commit/7801e77938850073c081874fd0567e8ae0dc31e1))
+* **bar:** check item.content type properly ([c17e7b6](https://github.com/MunifTanjim/nougat.nvim/commit/c17e7b6ba2cd61ae1dd0447e4f022d6c57508a20))
+* **bar:** missing slot.len for an edge case ([d9129e1](https://github.com/MunifTanjim/nougat.nvim/commit/d9129e1bd81f8f939700cb9e7fd76da6de9e693c))
+* **bar:** missing slot.len for another edge case ([53f8fea](https://github.com/MunifTanjim/nougat.nvim/commit/53f8fea17cff165f91c32de8d083fce07652de8f))
+* **bar:** priority item linking ([cd34b41](https://github.com/MunifTanjim/nougat.nvim/commit/cd34b41152cfbd59cf7faf2b523841db944098bb))
+* **cache:** play nice with clearable store of on_event ([7fa5660](https://github.com/MunifTanjim/nougat.nvim/commit/7fa5660abb52216b5c49ee0f7743cec9564b5ee5))
+* **color:** flakiness ([a555441](https://github.com/MunifTanjim/nougat.nvim/commit/a55544170b0faa92ae04cb9050817bda56896ccd))
+* **item:** .cache.clear with single event ([d833dd7](https://github.com/MunifTanjim/nougat.nvim/commit/d833dd72dfbd092b4bff8562926bd0453b426ebd))
+* **item:** nested items priority evaluation ([035dead](https://github.com/MunifTanjim/nougat.nvim/commit/035dead5c8d41f3bb7acd7ae1e3cc2b847bc4216))
+* **item:** on_click for function content w/ parts ([4da137d](https://github.com/MunifTanjim/nougat.nvim/commit/4da137d636f1291aa87eddc0317311f36f088b70))
+* **nut:** buf.diagnostic_count flicker ([1f0f65a](https://github.com/MunifTanjim/nougat.nvim/commit/1f0f65aebbf7490fceef7dde75f00f75cdb9629f))
+* **nut:** handle missing devicons for tab.tablist.icon ([eebfb3d](https://github.com/MunifTanjim/nougat.nvim/commit/eebfb3d44ea7860e908f11890f5bd5b7779774da))
+* **nut:** lsp.servers .config.sep position ([1268060](https://github.com/MunifTanjim/nougat.nvim/commit/12680601bc9b46884dce4b1963f91077904242f7))
+* **profiler:** missing item for dynamic children ([e2ec089](https://github.com/MunifTanjim/nougat.nvim/commit/e2ec089b9b03ed0e3c9a546588678daa71b6869b))
+* **separator:** none separator handling ([658dd2f](https://github.com/MunifTanjim/nougat.nvim/commit/658dd2fb337c4687b2565d173dcaf1a9ce66b6a2))
+
+
+### Performance Improvements
+
+* make hl name shorter ([6ca3170](https://github.com/MunifTanjim/nougat.nvim/commit/6ca31705277db02aa19574a38365dc8781436872))
+
 ## [0.3.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.2.0...0.3.0) (2023-11-25)
 
 
