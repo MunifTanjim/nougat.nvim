@@ -138,11 +138,12 @@ describe("nut.tab.tablist", function()
 
   describe("icon", function()
     before_each(function()
-      require("nougat.store")._cleanup("buf", "nut.tab.tablist.icon")
+      require("nougat.store")._cleanup("buf", "nut.buf.filetype_icon")
     end)
 
     it("works", function()
       package.loaded["nougat.nut.tab.tablist.icon"] = nil
+      package.loaded["nougat.nut.buf.filetype_icon"] = nil
 
       package.loaded["nvim-web-devicons"] = {
         get_icon_color_by_filetype = function()
