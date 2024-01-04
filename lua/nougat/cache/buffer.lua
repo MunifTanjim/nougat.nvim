@@ -125,6 +125,8 @@ local subscribe = {
     local provider
     if pcall(require, "gitsigns") then
       provider = "gitsigns"
+    elseif vim.fn.exists("*GitGutterGetHunkSummary") > 0 then
+      provider = "vim-gitgutter"
     end
 
     if not provider then
@@ -152,6 +154,32 @@ local subscribe = {
           gitstatus.added = status.added or 0
           gitstatus.changed = status.changed or 0
           gitstatus.removed = status.removed or 0
+          gitstatus.total = gitstatus.added + gitstatus.changed + gitstatus.removed
+
+          run_hook("gitstatus.change", gitstatus, cache, bufnr)
+        end)
+      end)
+    elseif provider == "vim-gitgutter" then
+      on_event("User GitGutter", function(_)
+        local bufnr = vim.g.gitgutter_hook_context.bufnr
+        local cache = buf_store[bufnr]
+
+        vim.schedule(function()
+          local status = vim.fn.GitGutterGetHunkSummary()
+          if type(status) ~= "table" then
+            cache.gitstatus = nil
+            return
+          end
+
+          local gitstatus = cache.gitstatus
+          if not gitstatus then
+            gitstatus = {}
+            cache.gitstatus = gitstatus
+          end
+
+          gitstatus.added = status[1] or 0
+          gitstatus.changed = status[2] or 0
+          gitstatus.removed = status[3] or 0
           gitstatus.total = gitstatus.added + gitstatus.changed + gitstatus.removed
 
           run_hook("gitstatus.change", gitstatus, cache, bufnr)
