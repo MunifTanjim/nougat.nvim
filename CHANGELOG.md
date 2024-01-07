@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.5.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.4.0...0.5.0) (2024-01-07)
+
+
+### Features
+
+* **core:** use nougat.store ([29d824d](https://github.com/MunifTanjim/nougat.nvim/commit/29d824d2dbdd71f9f5b984350025c16432771bc2))
+* **nut:** add 'vim-gitgutter' provider for git.status ([f2ffb36](https://github.com/MunifTanjim/nougat.nvim/commit/f2ffb36f080ee2428a9cbbb603f8c27c1af4a6e0))
+* **nut:** add buf.filetype_icon ([700708b](https://github.com/MunifTanjim/nougat.nvim/commit/700708b73c037e7800cbb27209247fdd1b6a122f))
+* **nut:** add tab.tablist.number ([abaed7e](https://github.com/MunifTanjim/nougat.nvim/commit/abaed7e4934d84d2b81ffefa94ac3f760b5c99a8))
+* **nut:** add tab.tablist.win_count ([1401b52](https://github.com/MunifTanjim/nougat.nvim/commit/1401b528d92c90ab0d63fd7655d8ab69235cfbf4))
+* **nut:** add tab.winlist ([bf76777](https://github.com/MunifTanjim/nougat.nvim/commit/bf76777d624f46a099a176517a37437e2b8f3f5e))
+
+
+### Bug Fixes
+
+* **color:** do not remove extra colors ([6c7f542](https://github.com/MunifTanjim/nougat.nvim/commit/6c7f5428226ed1f8e4f40595c3babacecb77d436))
+* **store:** iterations for clearing bound store ([f2cfd55](https://github.com/MunifTanjim/nougat.nvim/commit/f2cfd55072f6578cd4be319fff5b01e0e23c0b22))
+
+
+### Performance Improvements
+
+* **nut:** remove unnecessary list and loop ([a7ac83d](https://github.com/MunifTanjim/nougat.nvim/commit/a7ac83de0089924630a6cf34b2313b884d01d5da))
+
 ## [0.4.0](https://github.com/MunifTanjim/nougat.nvim/compare/0.3.0...0.4.0) (2023-12-15)
 
 
