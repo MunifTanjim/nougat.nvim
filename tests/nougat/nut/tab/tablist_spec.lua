@@ -7,20 +7,8 @@ local t = require("tests.util")
 describe("nut.tab.tablist", function()
   local tablist
 
-  ---@type { bufnr: integer, winid: integer, tabid: integer }[]
-  local tabs = {}
+  local tabs = t.make_tabs()
   local bar, ctx, ns
-
-  local function add_tab()
-    vim.cmd.tabnew()
-    local tab = {
-      bufnr = vim.api.nvim_get_current_buf(),
-      winid = vim.api.nvim_get_current_win(),
-      tabid = vim.api.nvim_get_current_tabpage(),
-    }
-    table.insert(tabs, tab)
-    return tab
-  end
 
   before_each(function()
     require("nougat.store")._clear()
@@ -37,8 +25,6 @@ describe("nut.tab.tablist", function()
       number_hl = require("nougat.nut.tab.tablist.number").hl,
     }
 
-    tabs = {}
-
     ns = vim.api.nvim_create_namespace("test:nut.tab.tablist")
 
     local bufnr = vim.api.nvim_create_buf(false, false)
@@ -50,20 +36,16 @@ describe("nut.tab.tablist", function()
       width = vim.api.nvim_win_get_width(0),
     })
 
-    table.insert(tabs, { bufnr = ctx.bufnr, winid = ctx.winid, tabid = ctx.tabid })
+    tabs.init()
   end)
 
   after_each(function()
-    vim.cmd.tabonly({ bang = true })
-
-    for _, tab in ipairs(tabs) do
-      vim.api.nvim_buf_delete(tab.bufnr, { force = true })
-    end
+    tabs.cleanup()
   end)
 
   it("works", function()
     vim.api.nvim_buf_set_name(tabs[1].bufnr, "TAB:A")
-    vim.api.nvim_buf_set_name(add_tab().bufnr, "TAB:B")
+    vim.api.nvim_buf_set_name(tabs.add().bufnr, "TAB:B")
 
     bar:add_item(tablist.tabs({
       active_tab = {
@@ -181,8 +163,8 @@ describe("nut.tab.tablist", function()
   describe("label", function()
     it("handles tab move", function()
       vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_C_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_B_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_C_")
 
       bar:add_item(tablist.tabs({}))
 
@@ -246,7 +228,7 @@ describe("nut.tab.tablist", function()
 
     it(".hl.diagnostic()", function()
       vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_B_")
 
       bar:add_item(tablist.tabs({
         active_tab = {
@@ -345,7 +327,7 @@ describe("nut.tab.tablist", function()
 
     it("handles filename change", function()
       vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_B_")
 
       bar:add_item(tablist.tabs({
         active_tab = {
@@ -399,8 +381,8 @@ describe("nut.tab.tablist", function()
   describe("number", function()
     it("handles tab move", function()
       vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
-      vim.api.nvim_buf_set_name(add_tab().bufnr, "_C_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_B_")
+      vim.api.nvim_buf_set_name(tabs.add().bufnr, "_C_")
 
       bar:add_item(tablist.tabs({
         active_tab = {
@@ -456,9 +438,9 @@ describe("nut.tab.tablist", function()
 
   it("diagnostic_count", function()
     vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
-    vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
-    vim.api.nvim_buf_set_name(add_tab().bufnr, "_C_")
-    vim.api.nvim_buf_set_name(add_tab().bufnr, "_D_")
+    vim.api.nvim_buf_set_name(tabs.add().bufnr, "_B_")
+    vim.api.nvim_buf_set_name(tabs.add().bufnr, "_C_")
+    vim.api.nvim_buf_set_name(tabs.add().bufnr, "_D_")
 
     bar:add_item(tablist.tabs({
       active_tab = {

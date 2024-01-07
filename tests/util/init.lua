@@ -98,7 +98,7 @@ function mod.tbl_omit(tbl, keys)
 end
 
 ---@param keys string
----@param mode string
+---@param mode? string
 function mod.feedkeys(keys, mode)
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(keys, true, false, true), mode or "", false)
 end
@@ -124,7 +124,7 @@ function mod.assert_ctx(ctx)
 end
 
 function mod.get_click_fn(content, label)
-  local id, name = mod.match(content, "%%(.+)@v:lua%.(nougat_.+)@" .. label .. "%%T")
+  local id, name = mod.match(content, "%%(%d+)@v:lua%.(nougat_[^@]+)@" .. label .. "%%T")
   id = tonumber(id)
   return _G[name], id
 end
@@ -134,6 +134,90 @@ end
 function mod.wait_for(fn, timeout)
   vim.wait(timeout, fn, math.floor(timeout / 5))
   mod.eq(fn(), true)
+end
+
+function mod.make_wins()
+  ---@class _nougat.t.wins
+  ---@field [integer] { bufnr: integer, winid: integer }
+  local wins = {}
+
+  function wins.init()
+    local item = {
+      bufnr = vim.api.nvim_get_current_buf(),
+      winid = vim.api.nvim_get_current_win(),
+    }
+    table.insert(wins, item)
+    return wins
+  end
+
+  function wins.new()
+    vim.cmd.new()
+    local item = {
+      bufnr = vim.api.nvim_get_current_buf(),
+      winid = vim.api.nvim_get_current_win(),
+    }
+    table.insert(wins, item)
+    return item
+  end
+
+  function wins.cleanup()
+    for idx, item in ipairs(wins) do
+      if vim.api.nvim_win_is_valid(item.winid) then
+        vim.api.nvim_win_close(item.winid, true)
+      end
+      if vim.api.nvim_buf_is_valid(item.bufnr) then
+        vim.api.nvim_buf_delete(item.bufnr, { force = true })
+      end
+      wins[idx] = nil
+    end
+  end
+
+  return wins
+end
+
+function mod.make_tabs()
+  ---@class _nougat.t.tabs
+  ---@field [integer] { bufnr: integer, winid: integer, tabid: integer, wins: _nougat.t.wins }
+  local tabs = {}
+
+  function tabs.init()
+    local item = {
+      bufnr = vim.api.nvim_get_current_buf(),
+      winid = vim.api.nvim_get_current_win(),
+      tabid = vim.api.nvim_get_current_tabpage(),
+      wins = mod.make_wins().init(),
+    }
+    table.insert(tabs, item)
+    return tabs
+  end
+
+  function tabs.add()
+    vim.cmd.tabnew()
+    local item = {
+      bufnr = vim.api.nvim_get_current_buf(),
+      winid = vim.api.nvim_get_current_win(),
+      tabid = vim.api.nvim_get_current_tabpage(),
+      wins = mod.make_wins().init(),
+    }
+    table.insert(tabs, item)
+    return item
+  end
+
+  function tabs.cleanup()
+    if #tabs > 1 then
+      vim.cmd.tabonly({ bang = true })
+    end
+    if #vim.api.nvim_tabpage_list_wins(0) > 1 then
+      vim.cmd.only()
+    end
+
+    for idx, item in ipairs(tabs) do
+      vim.api.nvim_buf_delete(item.bufnr, { force = true })
+      tabs[idx] = nil
+    end
+  end
+
+  return tabs
 end
 
 return mod
