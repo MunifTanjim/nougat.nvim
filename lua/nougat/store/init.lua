@@ -62,10 +62,10 @@ local function on_tab_closed()
       active_tabid[tabid] = true
     end
 
-    for _, storage in pairs(registry.tab) do
-      for tabid in pairs(storage) do
-        if not active_tabid[tabid] then
-          storage[tabid] = nil
+    for _, store in pairs(registry.tab) do
+      for tabid in pairs(store) do
+        if type(tabid) == "number" and not active_tabid[tabid] then
+          store[tabid] = nil
         end
       end
     end
@@ -170,7 +170,7 @@ function mod._clear(target_type, target_name)
             ---@cast store NougatStore
             store:clear()
           else
-            for id in ipairs(store) do
+            for id in pairs(store) do
               if type(id) == "number" then
                 store[id] = nil
               end
