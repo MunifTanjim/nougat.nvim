@@ -1,3 +1,5 @@
+local Store = require("nougat.store").Store
+
 local mod = {}
 
 --luacheck: push no max line length
@@ -14,7 +16,7 @@ local mod = {}
 
 --luacheck: pop
 
-local fn_storage = {
+local fn_storage = Store("nougat.core.fn", {
   _next_id = 1,
   ---@type table<function, integer>
   id_by_ref = {},
@@ -24,7 +26,7 @@ local fn_storage = {
   ctx_by_id = {},
   ---@type table<string, integer>
   id_by_external_id = {},
-}
+})
 
 ---@param external_id? string
 ---@return integer fn_id
@@ -33,7 +35,7 @@ local function get_next_fn_id(external_id)
   if fn_storage.id_by_external_id[external_id] then
     return fn_storage.id_by_external_id[external_id], false
   end
-  local fn_id = fn_storage._next_id
+  local fn_id = fn_storage._next_id or 1
   fn_storage._next_id = fn_id + 1
   if external_id then
     fn_storage.id_by_external_id[external_id] = fn_id

@@ -1,15 +1,13 @@
 pcall(require, "luacov")
 
+local core = require("nougat.core")
 local t = require("tests.util")
 
 describe("core", function()
-  ---@module 'nougat.core'
-  local core
   local ctx
 
   before_each(function()
-    package.loaded["nougat.core"] = nil
-    core = require("nougat.core")
+    require("nougat.store")._clear()
 
     ctx = t.make_ctx(0)
   end)
