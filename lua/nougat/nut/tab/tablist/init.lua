@@ -23,23 +23,10 @@ local get_hl_def = require("nougat.color").get_hl_def
 ---@param item nougat.nut.tab.tablist
 ---@param ctx nougat_bar_ctx
 local function get_content(item, ctx)
-  local active_tabid = ctx.tabid
   local tabids = vim.api.nvim_list_tabpages()
 
-  local items = item.tabs.items
-  local item_idx = 0
-
-  for tidx = 1, #tabids do
-    local tabid = tabids[tidx]
-
-    local tab = tabid == active_tabid and item.active_tab or item.inactive_tab
-
-    item_idx = item_idx + 1
-    items[item_idx] = tab
-  end
-
   item.tabs.ctx = ctx --[[@as nougat.nut.tab.tablist_ctx]]
-  item.tabs.len = item_idx
+  item.tabs.len = #tabids
   item.tabs.tabids = tabids
 
   return item.tabs
@@ -70,7 +57,7 @@ local function get_next_tab_item(tabs)
 
   ctx.tab = tab_ctx
 
-  return tabs.items[idx], idx
+  return tab_ctx.is_focused and tabs.active_item or tabs.inactive_item, idx
 end
 
 local function get_default_tab()
@@ -88,17 +75,26 @@ end
 
 local mod = {}
 
+---@param config nougat.nut.tab.tablist_config
 function mod.create(config)
   buf_cache.enable("filename")
 
-  local active_tab = config.active_tab or get_default_tab()
-  if not active_tab.hl then
-    active_tab.hl = get_hl_def("TabLineSel")
+  local active_item = config.active_tab or get_default_tab()
+  if not active_item.hl then
+    active_item.hl = get_hl_def("TabLineSel")
+  end
+  if not active_item.id then
+    active_item = Item(active_item --[[@as nougat_item_config]])
+    ---@cast active_item NougatItem
   end
 
-  local inactive_tab = config.inactive_tab or get_default_tab()
-  if not inactive_tab.hl then
-    inactive_tab.hl = get_hl_def("TabLine")
+  local inactive_item = config.inactive_tab or get_default_tab()
+  if not inactive_item.hl then
+    inactive_item.hl = get_hl_def("TabLine")
+  end
+  if not inactive_item.id then
+    inactive_item = Item(inactive_item --[[@as nougat_item_config]])
+    ---@cast inactive_item NougatItem
   end
 
   ---@class nougat.nut.tab.tablist: NougatItem
@@ -112,22 +108,23 @@ function mod.create(config)
     sep_right = config.sep_right,
   })
 
-  item.active_tab = active_tab.id and active_tab or Item(active_tab --[[@as nougat_item_config]])
-  item.inactive_tab = inactive_tab.id and inactive_tab or Item(inactive_tab --[[@as nougat_item_config]])
-
   ---@class nougat.nut.tab.tablist.tabs
+  ---@field active_item NougatItem
+  ---@field inactive_item NougatItem
   ---@field ctx? nougat.nut.tab.tablist_ctx
   ---@field tab_ctx nougat.nut.tab.tablist_ctx.tab
   ---@field len integer
   ---@field _idx integer
   ---@field tabids integer[]
   item.tabs = {
+    active_item = active_item,
+    inactive_item = inactive_item,
+
     ctx = nil,
     tab_ctx = {},
 
     _idx = 0,
     len = 0,
-    items = {},
     tabids = {},
 
     next = get_next_tab_item,
