@@ -33,6 +33,8 @@ describe("nut.tab.tablist", function()
       label = require("nougat.nut.tab.tablist.label").create,
       label_hl = require("nougat.nut.tab.tablist.label").hl,
       modified = require("nougat.nut.tab.tablist.modified").create,
+      number = require("nougat.nut.tab.tablist.number").create,
+      number_hl = require("nougat.nut.tab.tablist.number").hl,
     }
 
     tabs = {}
@@ -391,6 +393,64 @@ describe("nut.tab.tablist", function()
           "%#bg_0a0b10_fg_c4c6cd_#",
         })
       )
+    end)
+  end)
+
+  describe("number", function()
+    it("handles tab move", function()
+      vim.api.nvim_buf_set_name(tabs[1].bufnr, "_A_")
+      vim.api.nvim_buf_set_name(add_tab().bufnr, "_B_")
+      vim.api.nvim_buf_set_name(add_tab().bufnr, "_C_")
+
+      bar:add_item(tablist.tabs({
+        active_tab = {
+          content = {
+            tablist.number({}),
+          },
+        },
+        inactive_tab = {
+          content = {
+            tablist.number({}),
+          },
+        },
+      }))
+
+      t.eq(
+        bar:generate(ctx),
+        table.concat({
+          "%#bg_0a0b10_fg_c4c6cd_b#",
+          "%1T1%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%2T2%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%3T3%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+        })
+      )
+
+      vim.api.nvim_set_current_tabpage(tabs[1].tabid)
+      vim.cmd.tabmove(2)
+
+      t.eq(
+        bar:generate(ctx),
+        table.concat({
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%1T1%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_b#",
+          "%2T2%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+          "%3T3%T",
+          "%#bg_0a0b10_fg_c4c6cd_#",
+        })
+      )
+    end)
+
+    it(".hl.diagnostic()", function()
+      t.ref(tablist.number_hl.diagnostic(), tablist.label_hl.diagnostic())
     end)
   end)
 
