@@ -45,6 +45,9 @@ local id_getter_by_key = {
 local buf_id_getter_by_event = {
   lspattach = id_getter_by_key.buf,
   lspdetach = id_getter_by_key.buf,
+  optionset = function()
+    return vim.api.nvim_get_current_buf()
+  end,
 }
 
 ---@param event string
@@ -55,6 +58,8 @@ local function get_store_clear_id_getter(event, scope)
   end
   if string.sub(event, 1, 3):lower() == "buf" then
     return id_getter_by_key.buf
+  elseif string.sub(event, 1, 10) == "OptionSet " then
+    return buf_id_getter_by_event.optionset
   end
   local get_id = buf_id_getter_by_event[event:lower()]
   if get_id then

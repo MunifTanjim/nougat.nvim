@@ -55,7 +55,7 @@ function mod.create(config)
     context = config.context,
     cache = {
       scope = "buf",
-      clear = "BufModifiedSet",
+      clear = "OptionSet modified",
     },
   })
 

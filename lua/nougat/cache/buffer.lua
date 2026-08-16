@@ -98,8 +98,8 @@ local subscribe = {
 
     default_value.modified = false
 
-    on_event("BufModifiedSet", function(params)
-      local bufnr = params.buf
+    on_event("OptionSet modified", function()
+      local bufnr = vim.api.nvim_get_current_buf()
       local cache = buf_store[bufnr]
 
       cache.modified = vim.api.nvim_buf_get_option(bufnr, "modified")
